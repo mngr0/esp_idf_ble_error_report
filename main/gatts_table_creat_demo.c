@@ -30,7 +30,10 @@
 #include "gatts_table_creat_demo.h"
 #include "esp_gatt_common_api.h"
 #include "driver/gpio.h"
+#include "driver/uart.h"
 
+#include "air_ref/air_ref.h"
+#include "air_ref/serial_logger.h"
 #define GATTS_TABLE_TAG "GATTS_TABLE_DEMO"
 
 #define PROFILE_NUM 1
@@ -46,7 +49,7 @@
 #define PREPARE_BUF_MAX_SIZE 1024
 #define CHAR_DECLARATION_SIZE (sizeof(uint8_t))
 
-#define ECHO_TASK_STACK_SIZE 1024
+#define ECHO_TASK_STACK_SIZE 8096
 
 #define ADV_CONFIG_FLAG (1 << 0)
 #define SCAN_RSP_CONFIG_FLAG (1 << 1)
@@ -625,22 +628,70 @@ static void configure_led(void)
 }
 
 //status
+#define BUF_SIZE 1024
+#define ECHO_TEST_TXD (GPIO_NUM_17)
+#define ECHO_TEST_RXD (GPIO_NUM_16)
+#define ECHO_TEST_RTS (UART_PIN_NO_CHANGE)
+#define ECHO_TEST_CTS (UART_PIN_NO_CHANGE)
 
 
 static void  bridge_task(void *arg)
 {
-    //init
-    uint8_t last_btn_state = gpio_get_level(BTN_GPIO);
+    uint8_t data[BUF_SIZE*4];
+    const uart_port_t uart_num = UART_NUM_2;
+    int intr_alloc_flags = 0;
+    uart_config_t uart_config = {
+        .baud_rate = 9600,
+        .data_bits = UART_DATA_8_BITS,
+        .parity = UART_PARITY_DISABLE,
+        .stop_bits = UART_STOP_BITS_1,
+        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
+        .source_clk = UART_SCLK_APB,
+    };
+
+
+    ESP_ERROR_CHECK(uart_driver_install(uart_num, BUF_SIZE*2 , 0, 0, NULL, intr_alloc_flags));
+    ESP_ERROR_CHECK(uart_param_config(uart_num, &uart_config));
+    ESP_ERROR_CHECK(uart_set_pin(uart_num, ECHO_TEST_TXD, ECHO_TEST_RXD, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
+
+
+    
+        //init
+    //uint8_t last_btn_state = gpio_get_level(BTN_GPIO);
+    logger_reply_t reply;
+    machine_state_t m_state;
+    int length = 50;
     while (1){
-        //update status
-        uint8_t new_btn_state = gpio_get_level(BTN_GPIO);
-        if(new_btn_state != last_btn_state){
-            esp_ble_gatts_send_indicate(gatts_if, param->write.conn_id, heart_rate_handle_table[IDX_CHAR_VAL_A], sizeof(notify_data), notify_data, false);
-            last_btn_state = new_btn_state;
+       
+        length = uart_read_bytes(uart_num, data, BUF_SIZE, 20 / portTICK_RATE_MS);
+        if (receive_reply(&reply,data,length)){
+            memcpy(&m_state, reply.buffer, sizeof(machine_state_t));
+            ESP_LOGI("RECVED:","HP=%d\tLP=%d\tTGS=%d\tTritorno=%d\tTenv=%d\tTc=%d\tExtC=%d\n",
+                m_state.condensation_pressure,
+                m_state.evaporation_pressure,
+                m_state.temperature_gas_scarico,
+                m_state.temperature_gas_ritorno,
+                m_state.temperature_environment,
+                m_state.temperature_extra,
+                m_state.pin_enable);
         }
+        // ESP_LOGI("BRIDGE TASK", "READ DATA: %d\t",length);
+        // for (int i=0;i<length;i++){
+        //     ESP_LOGI("BRIDGE TASK", "%d\t",data[i]);
+        // }
+
+
+        //update status
+        //uint8_t new_btn_state = gpio_get_level(BTN_GPIO);
+        // if(new_btn_state != last_btn_state){
+        //     esp_ble_gatts_send_indicate(gatts_if, param->write.conn_id, heart_rate_handle_table[IDX_CHAR_VAL_A], sizeof(notify_data), notify_data, false);
+        //     last_btn_state = new_btn_state;
+        // }
         //consider if save on SD card
         //maybe check if data needs to be calncelled for being too old
         //os sleep
+        vTaskDelay(500 / portTICK_PERIOD_MS);
+        //os_sleep(500);
     }
 }
 
@@ -717,5 +768,5 @@ void app_main(void)
         ESP_LOGE(GATTS_TABLE_TAG, "set local  MTU failed, error code = %x", local_mtu_ret);
     }
 
-    //xTaskCreate(button_task, "btn_task", ECHO_TASK_STACK_SIZE, NULL, 10, NULL);
+    xTaskCreate(bridge_task, "bridge_task", ECHO_TASK_STACK_SIZE, NULL, 10, NULL);
 }
