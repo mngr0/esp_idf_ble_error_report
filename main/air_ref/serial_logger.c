@@ -3,6 +3,14 @@
 
 #include "esp_log.h"
 
+
+machine_state_t m_state;
+air_ref_conf_t ar_conf;
+air_ref_state_t ar_state;
+
+
+
+
 uint16_t logger_checksum(uint8_t* data, uint16_t length){
 	uint16_t chk_sum=0;
 	for (int i=0;i <length;i=i+2){
@@ -54,16 +62,37 @@ void send_request(logger_request_t *request){
     //busy wait for receive
 }
 
-void do_request_machine_state(){
+void do_request_m_state(){
     logger_request_t  req;
     req.protocol_version = PROTOCOL_VERSION;
     req.request_code = read_machine_state;
     req.frame_size = 0;
 }
 
-machine_state_t m_state;
-air_ref_conf_t ar_conf;
-air_ref_state_t ar_state;
+void do_request_ar_state(){
+    logger_request_t  req;
+    req.protocol_version = PROTOCOL_VERSION;
+    req.request_code = read_routine_state;
+    req.frame_size = 0;
+}
+
+void do_request_ar_conf(){
+    logger_request_t  req;
+    req.protocol_version = PROTOCOL_VERSION;
+    req.request_code = read_routine_conf;
+    req.frame_size = 0;
+}
+
+void do_overwrite_ar_conf(ar_conf* new_ar_conf){
+    logger_request_t  req;
+    req.protocol_version = PROTOCOL_VERSION;
+    req.request_code = write_routine_conf;
+    req.frame_size = sizeof(ar_conf);
+    memcpy(req.buffer, (uint8_t*)new_ar_conf, sizeof(ar_conf));
+
+}
+
+
 
 machine_state_t* get_m_state(){
     return &m_state;
@@ -86,13 +115,18 @@ air_ref_state_t* get_ar_state(){
 
 static void  logger_task(void *arg)
 {
+    uint32_t timestamp_last_update_m_state;
+    uint32_t timestamp_last_update_ar_state;
     //TODO list of things to check: M_STATE AR_STATE 
-    // initialize AR_CONF
+    
 
     while (1){
-        
-    // check for command request in Q
+        request_command_t req;
 
+    // check for command request in Q
+    if (Q not empty){
+        memcpy((uint8_t*)&req, Q.pop(), sizeof(request_command_t))
+    }
     // if no command request, update state
 
         
