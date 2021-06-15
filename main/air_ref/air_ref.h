@@ -14,10 +14,8 @@
 #include "infineonlib.h"
 #include "error.h"
 
-#define FAN_DIRECTION -1
-#define COMPRESSOR_SPEED_N 3
 
-#define FLASH_MEMORY_START 0x0010000 //TODO GO TO LASTPAGE
+#define COMPRESSOR_SPEED_N 3 //TODO in firmware configure 16 slots, partial use
 
 typedef struct { //public
 	int32_t serial_control;
@@ -36,8 +34,7 @@ typedef struct { //public
 	
 	int32_t period_log;
 	int32_t LP_low_pressure_limit;
-	//HP_MOP
-	
+		
 }air_ref_conf_t;
 
 typedef enum {

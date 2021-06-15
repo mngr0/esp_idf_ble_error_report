@@ -36,13 +36,15 @@
 #include "air_ref/serial_logger.h"
 #define GATTS_TABLE_TAG "GATTS_TABLE_DEMO"
 
+
+//TODO in future, add profile for wifi connection
 typedef enum {
     PROFILE_APP_IDX=0,
     PROFILE_NUM
 } PROFILE_NUMBERS;
 
 #define ESP_APP_ID 0x55
-#define SAMPLE_DEVICE_NAME "ESP_GATTS_DEMO"
+#define SAMPLE_DEVICE_NAME "AIR_REF_CONF"
 #define SVC_INST_ID 0
 
 /* The max length of characteristic value. When the GATT client performs a write or prepare write operation,
@@ -186,6 +188,9 @@ static const uint16_t GATTS_CHAR_UUID_TEST_A = 0xFF01;
 static const uint16_t GATTS_CHAR_UUID_TEST_B = 0xFF02;
 static const uint16_t GATTS_CHAR_UUID_TEST_C = 0xFF03;
 static const uint16_t GATTS_CHAR_UUID_TEST_D = 0xFF04;
+static const uint16_t GATTS_CHAR_UUID_M_STATE = 0xFF05;
+static const uint16_t GATTS_CHAR_UUID_AR_STATE = 0xFF06;
+static const uint16_t GATTS_CHAR_UUID_AR_CONF = 0xFF07;
 
 static const uint16_t primary_service_uuid = ESP_GATT_UUID_PRI_SERVICE;
 static const uint16_t character_declaration_uuid = ESP_GATT_UUID_CHAR_DECLARE;
@@ -238,7 +243,17 @@ static const esp_gatts_attr_db_t gatt_db[HRS_IDX_NB] =
         /* Characteristic Value */
         [IDX_CHAR_VAL_D] =
             {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&GATTS_CHAR_UUID_TEST_D, ESP_GATT_PERM_READ, GATTS_DEMO_CHAR_VAL_LEN_MAX, sizeof(char_value), (uint8_t *)char_value}},
+        //TODO test this
+        [IDX_M_STATE] = 
+            {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&GATTS_CHAR_UUID_M_STATE, ESP_GATT_PERM_READ, GATTS_DEMO_CHAR_VAL_LEN_MAX, sizeof(machine_state_t), (uint8_t *)&get_m_state()}},
+        
+        [IDX_AR_STATE] = 
+            {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&GATTS_CHAR_UUID_AR_STATE, ESP_GATT_PERM_READ, GATTS_DEMO_CHAR_VAL_LEN_MAX, sizeof(air_ref_state_t), (uint8_t *)&get_ar_state()}},
 
+        [IDX_AR_CONF] = 
+            {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&GATTS_CHAR_UUID_AR_CONF, ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE, GATTS_DEMO_CHAR_VAL_LEN_MAX, sizeof(air_ref_conf_t), (uint8_t *)&get_ar_conf()}},
+       
+        
 };
 
 static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param)

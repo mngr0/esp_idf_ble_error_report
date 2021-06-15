@@ -15,7 +15,7 @@ uint16_t logger_checksum(uint8_t* data, uint16_t length){
 	return chk_sum;
 }
 
-//TODO ACCEPT ALL REPLYIES
+//TODO ACCEPT ALL REPLIES
 
 void parse_reply(logger_reply_t* reply, uint8_t* logger_buffer){
 	reply->protocol_version=logger_buffer[0];
@@ -61,4 +61,49 @@ void do_request_machine_state(){
     req.frame_size = 0;
 }
 
-//serial query task
+machine_state_t m_state;
+air_ref_conf_t ar_conf;
+air_ref_state_t ar_state;
+
+machine_state_t* get_m_state(){
+    return &m_state;
+}
+
+air_ref_conf_t* get_ar_conf(){
+    return &ar_conf;
+}
+
+
+air_ref_state_t* get_ar_state(){
+    return &ar_state;
+}
+
+
+//commands:
+// send new ar_conf
+// update ar_conf
+
+
+static void  logger_task(void *arg)
+{
+    //TODO list of things to check: M_STATE AR_STATE 
+    // initialize AR_CONF
+
+    while (1){
+        
+    // check for command request in Q
+
+    // if no command request, update state
+
+        
+
+        vTaskDelay(500 / portTICK_PERIOD_MS);
+
+    }
+}
+
+
+void logger_init(){
+    xTaskCreate(logger_task, "logger_task", ECHO_TASK_STACK_SIZE, NULL, 10, NULL); 
+    //TODO pass task object
+}
