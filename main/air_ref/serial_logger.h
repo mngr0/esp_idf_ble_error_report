@@ -5,6 +5,9 @@
 #include "stdint.h"
 #include "air_ref.h"
 
+#define LOGGER_TASK_STACK_SIZE  (512 / sizeof(portSTACK_TYPE))
+//#define TASK_PERIODIC_LOG_STACK_PRIORITY (tskIDLE_PRIORITY + 1)
+
 #define PROTOCOL_VERSION 1
 
 #define max(a,b) (a>b ? a :b)
@@ -63,5 +66,12 @@ typedef struct {
 void parse_reply(logger_reply_t* reply, uint8_t* logger_buffer);
 
 int8_t receive_reply(logger_reply_t* reply, uint8_t* data,int length);
+
+
+void logger_init();
+
+// const machine_state_t* get_m_state();
+// const air_ref_conf_t* get_ar_conf();
+// const air_ref_state_t* get_ar_state();
 
 #endif /* SERIAL_LOGGER_H_ */

@@ -16,6 +16,8 @@
 *
 ****************************************************************************/
 
+#include "string.h"
+
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/event_groups.h"
@@ -27,14 +29,31 @@
 #include "esp_gap_ble_api.h"
 #include "esp_gatts_api.h"
 #include "esp_bt_main.h"
-#include "gatts_table_creat_demo.h"
+
 #include "esp_gatt_common_api.h"
 #include "driver/gpio.h"
 #include "driver/uart.h"
 
 #include "air_ref/air_ref.h"
 #include "air_ref/serial_logger.h"
+#include "ble/ble.h"
 #define GATTS_TABLE_TAG "GATTS_TABLE_DEMO"
+
+#define BRIDGE_TASK_STACK_SIZE  (512 / sizeof(portSTACK_TYPE))
+
+const uart_port_t uart_num = UART_NUM_2;
+//status
+#define BUF_SIZE 1024
+#define ECHO_TEST_TXD (GPIO_NUM_17)
+#define ECHO_TEST_RXD (GPIO_NUM_16)
+#define ECHO_TEST_RTS (UART_PIN_NO_CHANGE)
+#define ECHO_TEST_CTS (UART_PIN_NO_CHANGE)
+
+#define BLINK_GPIO1 2
+#define BLINK_GPIO2 15
+#define BLINK_GPIO3 13
+#define BTN_GPIO 3
+
 
 static void configure_led(void)
 {
@@ -50,18 +69,9 @@ static void configure_led(void)
     gpio_set_direction(BTN_GPIO, GPIO_MODE_INPUT);
 }
 
-//status
-#define BUF_SIZE 1024
-#define ECHO_TEST_TXD (GPIO_NUM_17)
-#define ECHO_TEST_RXD (GPIO_NUM_16)
-#define ECHO_TEST_RTS (UART_PIN_NO_CHANGE)
-#define ECHO_TEST_CTS (UART_PIN_NO_CHANGE)
 
-
-static void  bridge_task(void *arg)
-{
-    uint8_t data[BUF_SIZE*4];
-    const uart_port_t uart_num = UART_NUM_2;
+static void configure_serial(){
+    
     int intr_alloc_flags = 0;
     uart_config_t uart_config = {
         .baud_rate = 9600,
@@ -77,6 +87,15 @@ static void  bridge_task(void *arg)
     ESP_ERROR_CHECK(uart_param_config(uart_num, &uart_config));
     ESP_ERROR_CHECK(uart_set_pin(uart_num, ECHO_TEST_TXD, ECHO_TEST_RXD, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
 
+
+
+}
+
+
+
+static void  bridge_task(void *arg)
+{
+    uint8_t data[BUF_SIZE*4];
 
     
         //init
@@ -138,5 +157,5 @@ void app_main(void)
 
     BLE_init();
     logger_init();
-    xTaskCreate(bridge_task, "bridge_task", ECHO_TASK_STACK_SIZE, NULL, 10, NULL);
+    xTaskCreate(bridge_task, "bridge_task", BRIDGE_TASK_STACK_SIZE, NULL, 10, NULL);
 }

@@ -37,6 +37,11 @@
 #define GATTS_TABLE_TAG "GATTS_TABLE_DEMO"
 
 
+
+extern machine_state_t m_state;
+extern air_ref_conf_t ar_conf;
+extern air_ref_state_t ar_state;
+
 //TODO in future, add profile for wifi connection
 typedef enum {
     PROFILE_APP_IDX=0,
@@ -61,8 +66,7 @@ static uint8_t adv_config_done = 0;
 
 uint16_t heart_rate_handle_table[HRS_IDX_NB];
 
-typedef struct
-{
+typedef struct{
     uint8_t *prepare_buf;
     int prepare_len;
 } prepare_type_env_t;
@@ -245,13 +249,13 @@ static const esp_gatts_attr_db_t gatt_db[HRS_IDX_NB] =
             {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&GATTS_CHAR_UUID_TEST_D, ESP_GATT_PERM_READ, GATTS_DEMO_CHAR_VAL_LEN_MAX, sizeof(char_value), (uint8_t *)char_value}},
         //TODO test this
         [IDX_M_STATE] = 
-            {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&GATTS_CHAR_UUID_M_STATE, ESP_GATT_PERM_READ, GATTS_DEMO_CHAR_VAL_LEN_MAX, sizeof(machine_state_t), (uint8_t *)&get_m_state()}},
+            {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&GATTS_CHAR_UUID_M_STATE, ESP_GATT_PERM_READ, GATTS_DEMO_CHAR_VAL_LEN_MAX, sizeof(machine_state_t), (uint8_t *)&ar_conf}},
         
         [IDX_AR_STATE] = 
-            {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&GATTS_CHAR_UUID_AR_STATE, ESP_GATT_PERM_READ, GATTS_DEMO_CHAR_VAL_LEN_MAX, sizeof(air_ref_state_t), (uint8_t *)&get_ar_state()}},
+            {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&GATTS_CHAR_UUID_AR_STATE, ESP_GATT_PERM_READ, GATTS_DEMO_CHAR_VAL_LEN_MAX, sizeof(air_ref_state_t), (uint8_t *)&ar_state}},
 
         [IDX_AR_CONF] = 
-            {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&GATTS_CHAR_UUID_AR_CONF, ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE, GATTS_DEMO_CHAR_VAL_LEN_MAX, sizeof(air_ref_conf_t), (uint8_t *)&get_ar_conf()}},
+            {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&GATTS_CHAR_UUID_AR_CONF, ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE, GATTS_DEMO_CHAR_VAL_LEN_MAX, sizeof(air_ref_conf_t), (uint8_t *)&ar_conf}},
        
         
 };
@@ -486,6 +490,11 @@ static void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_
             esp_ble_gatts_send_indicate(gatts_if, param->write.conn_id, heart_rate_handle_table[IDX_CHAR_VAL_D],
                                         sizeof(notify_data), notify_data, false);
             
+            // possibile actions: 
+            // - read state.
+            // - send new conf
+            // - read conf again
+
 
                 // if (heart_rate_handle_table[IDX_CHAR_CFG_A] == param->write.handle && param->write.len == 2){
                 //     uint16_t descr_value = param->write.value[1]<<8 | param->write.value[0];
