@@ -9,10 +9,14 @@
 
 machine_state_t m_state;
 air_ref_conf_t ar_conf;
+air_ref_conf_t ar_conf_old;
 air_ref_state_t ar_state;
 
 QueueHandle_t command_queue;
 TaskHandle_t xLoggerTask;
+uint32_t timestamp_last_update_m_state;
+uint32_t timestamp_last_update_ar_state;
+uint32_t timestamp_last_update_ar_conf;
 
 uint16_t logger_checksum(uint8_t *data, uint16_t length)
 {
@@ -70,7 +74,8 @@ void send_request(logger_request_t *request)
     tmp_buffer_out[2] = (request->frame_size >> 8) & 0xff;
     tmp_buffer_out[3] = request->request_code;
     //send
-    xQueueSend(command_queue, tmp_buffer_out, 10); //TODO check size
+    //uart_send
+
     //busy wait for receive
 }
 
@@ -105,6 +110,36 @@ void do_overwrite_ar_conf(logger_request_t *req, air_ref_conf_t *new_ar_conf)
     memcpy(req->buffer, (uint8_t *)new_ar_conf, sizeof(ar_conf));
 }
 
+typedef enum
+{
+    upload_result_nothing_to_do = 0,
+    upload_result_correct,
+    upload_result_timeout
+} upload_result_t;
+
+upload_result_t upload_configuration(air_ref_conf_t *new_ar_conf)
+{
+    upload_result_t result = upload_result_nothing_to_do;
+    request_command_t req_upload;
+    request_command_t req_reload;
+    do_overwrite_ar_conf(&req_upload, new_ar_conf);
+    do_request_ar_conf(&req_reload);
+
+    while (memcmp(ar_conf_old, new_ar_conf, sizeof(air_ref_conf_t)) != 0)
+    {
+        result = upload_result_correct;
+        uint32_t prev_time = timestamp_last_update_ar_conf;
+        xQueueSend(command_queue, &req_upload, sizeof(request_command_t));
+        xQueueSend(command_queue, &req_reload, sizeof(request_command_t));
+
+        while (timestamp_last_update_ar_conf == prev_time)
+        {
+            vTaskDelay(50 / portTICK_PERIOD_MS);
+        }
+    }
+    //end while
+}
+
 //commands:
 // send new ar_conf
 // update ar_conf
@@ -112,8 +147,9 @@ void do_overwrite_ar_conf(logger_request_t *req, air_ref_conf_t *new_ar_conf)
 static void logger_task(void *arg)
 {
     BaseType_t is_command = 0;
-    uint32_t timestamp_last_update_m_state = xTaskGetTickCount();
-    uint32_t timestamp_last_update_ar_state = xTaskGetTickCount();
+    timestamp_last_update_m_state = xTaskGetTickCount();
+    timestamp_last_update_ar_state = xTaskGetTickCount();
+    timestamp_last_update_ar_conf = xTaskGetTickCount();
     //TODO list of things to check: M_STATE AR_STATE
 
     while (1)
@@ -125,18 +161,33 @@ static void logger_task(void *arg)
         if (is_command == pdFALSE)
         {
             //TODO load command
-            // memcpy((uint8_t*)&req, Q.pop(), sizeof(request_command_t))
             if (timestamp_last_update_m_state + 3000 < xTaskGetTickCount())
             {
+                timestamp_last_update_m_state = xTaskGetTickCount();
                 do_request_m_state(&req);
             }
             else if (timestamp_last_update_ar_state + 3000 < xTaskGetTickCount())
             {
+                (timestamp_last_update_ar_state = xTaskGetTickCount());
                 do_request_ar_state(&req);
             }
-            else{
+            // else if (timestamp_last_update_ar_conf + 10000 < xTaskGetTickCount())
+            // {
+            //    timestamp_last_update_ar_conf = xTaskGetTickCount();
+            //     do_request_ar_state(&req);
+            // }
+            else
+            {
                 vTaskDelay(500 / portTICK_PERIOD_MS);
                 continue;
+            }
+        }
+        else
+        {
+            if (req.request_code == read_routine_conf)
+            {
+                timestamp_last_update_ar_conf = xTaskGetTickCount();
+                // memcpy ar_conf_old <- ar_conf
             }
         }
         // if no command request, update state

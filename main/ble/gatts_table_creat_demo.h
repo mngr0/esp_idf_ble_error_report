@@ -31,6 +31,7 @@ enum
     IDX_M_STATE,
     IDX_AR_STATE,
     IDX_AR_CONF,
+    IDX_AR_CONF_STATE,
     HRS_IDX_NB,
 };
 

@@ -195,6 +195,7 @@ static const uint16_t GATTS_CHAR_UUID_TEST_D = 0xFF04;
 static const uint16_t GATTS_CHAR_UUID_M_STATE = 0xFF05;
 static const uint16_t GATTS_CHAR_UUID_AR_STATE = 0xFF06;
 static const uint16_t GATTS_CHAR_UUID_AR_CONF = 0xFF07;
+static const uint16_t GATTS_CHAR_UUID_AR_CONF_STATE = 0xFF08;
 
 static const uint16_t primary_service_uuid = ESP_GATT_UUID_PRI_SERVICE;
 static const uint16_t character_declaration_uuid = ESP_GATT_UUID_CHAR_DECLARE;
@@ -247,7 +248,7 @@ static const esp_gatts_attr_db_t gatt_db[HRS_IDX_NB] =
         /* Characteristic Value */
         [IDX_CHAR_VAL_D] =
             {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&GATTS_CHAR_UUID_TEST_D, ESP_GATT_PERM_READ, GATTS_DEMO_CHAR_VAL_LEN_MAX, sizeof(char_value), (uint8_t *)char_value}},
-        //TODO test this
+        //TODO test this, is the last part sensata?
         [IDX_M_STATE] = 
             {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&GATTS_CHAR_UUID_M_STATE, ESP_GATT_PERM_READ, GATTS_DEMO_CHAR_VAL_LEN_MAX, sizeof(machine_state_t), (uint8_t *)&ar_conf}},
         
@@ -256,8 +257,10 @@ static const esp_gatts_attr_db_t gatt_db[HRS_IDX_NB] =
 
         [IDX_AR_CONF] = 
             {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&GATTS_CHAR_UUID_AR_CONF, ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE, GATTS_DEMO_CHAR_VAL_LEN_MAX, sizeof(air_ref_conf_t), (uint8_t *)&ar_conf}},
-       
-        
+
+        [IDX_AR_CONF_STATE] = 
+            {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&GATTS_CHAR_UUID_AR_CONF_STATE, ESP_GATT_PERM_READ , GATTS_DEMO_CHAR_VAL_LEN_MAX, CHAR_DECLARATION_SIZE, (uint8_t *)&char_prop_read_write_notify}},
+
 };
 
 static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param)
@@ -490,11 +493,9 @@ static void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_
             esp_ble_gatts_send_indicate(gatts_if, param->write.conn_id, heart_rate_handle_table[IDX_CHAR_VAL_D],
                                         sizeof(notify_data), notify_data, false);
             
-            // possibile actions: 
-            // - read state.
-            // - send new conf
-            // - read conf again
-
+            //upload_configuration();
+            //reply with actual conf.
+            //
 
                 // if (heart_rate_handle_table[IDX_CHAR_CFG_A] == param->write.handle && param->write.len == 2){
                 //     uint16_t descr_value = param->write.value[1]<<8 | param->write.value[0];
