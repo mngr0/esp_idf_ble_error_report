@@ -39,7 +39,7 @@
 #include "ble/ble.h"
 #define GATTS_TABLE_TAG "GATTS_TABLE_DEMO"
 
-#define BRIDGE_TASK_STACK_SIZE  (512 / sizeof(portSTACK_TYPE))
+#define BRIDGE_TASK_STACK_SIZE  (16384 / sizeof(portSTACK_TYPE))
 
 const uart_port_t uart_num = UART_NUM_2;
 //status
@@ -149,8 +149,6 @@ void app_main(void)
         ret = nvs_flash_init();
     }
     ESP_ERROR_CHECK(ret);
-
-    ESP_ERROR_CHECK(esp_bt_controller_mem_release(ESP_BT_MODE_CLASSIC_BT));
 
     configure_led();
     configure_serial();

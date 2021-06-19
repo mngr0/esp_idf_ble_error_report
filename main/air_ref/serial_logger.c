@@ -125,7 +125,7 @@ upload_result_t upload_configuration(air_ref_conf_t *new_ar_conf)
     do_overwrite_ar_conf(&req_upload, new_ar_conf);
     do_request_ar_conf(&req_reload);
 
-    while (memcmp(ar_conf_old, new_ar_conf, sizeof(air_ref_conf_t)) != 0)
+    while (0)//memcmp((uint8_t*)&ar_conf_old, (uint8_t*)&new_ar_conf, sizeof(air_ref_conf_t)) != 0)
     {
         result = upload_result_correct;
         uint32_t prev_time = timestamp_last_update_ar_conf;
@@ -138,6 +138,7 @@ upload_result_t upload_configuration(air_ref_conf_t *new_ar_conf)
         }
     }
     //end while
+    return result;
 }
 
 //commands:

@@ -5,7 +5,7 @@
 #include "stdint.h"
 #include "air_ref.h"
 
-#define LOGGER_TASK_STACK_SIZE  (512 / sizeof(portSTACK_TYPE))
+#define LOGGER_TASK_STACK_SIZE  (16384 / sizeof(portSTACK_TYPE))
 //#define TASK_PERIODIC_LOG_STACK_PRIORITY (tskIDLE_PRIORITY + 1)
 
 #define PROTOCOL_VERSION 1
