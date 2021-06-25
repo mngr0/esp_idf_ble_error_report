@@ -15,7 +15,7 @@ typedef enum
 
 uint16_t bluefi_handle_table[GATT_BLUEFI_NB];
 
-extern const uint16_t uuid_BLUEFI_SERV;
-extern const esp_gatts_attr_db_t bluefi_serv_gatt_db[GATT_BLUEFI_NB];
+extern const uint16_t GATT_BLUEFI_UUID_SERVICE;
+extern const esp_gatts_attr_db_t gatt_bluefi_db[GATT_BLUEFI_NB];
 
 #endif /* DEVINFO_SERVICE_H_ */

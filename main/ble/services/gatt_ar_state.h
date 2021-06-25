@@ -16,7 +16,7 @@ typedef enum
 
 uint16_t ar_state_handle_table[GATT_AR_STATE_NB];
 
-extern const uint16_t uuid_GATT_AR_STATE;
-extern const esp_gatts_attr_db_t ar_state_serv_gatt_db[GATT_AR_STATE_NB];
+extern const uint16_t GATT_AR_STATE_UUID_SERVICE;
+extern const esp_gatts_attr_db_t gatt_ar_state_db[GATT_AR_STATE_NB];
 
 #endif /* DEVINFO_SERVICE_H_ */

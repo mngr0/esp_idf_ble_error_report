@@ -37,11 +37,10 @@
 #include "air_ref/air_ref.h"
 #include "air_ref/serial_logger.h"
 
-#include  "services/gatt_ar_conf.h"
-#include  "services/gatt_ar_state.h"
-#include  "services/gatt_bluefi.h"
-#include  "services/gatt_m_state.h"
-
+#include "services/gatt_ar_conf.h"
+#include "services/gatt_ar_state.h"
+#include "services/gatt_bluefi.h"
+#include "services/gatt_m_state.h"
 
 #define GATTS_TABLE_TAG "GATTS_TABLE_DEMO"
 
@@ -54,12 +53,7 @@ extern machine_state_t m_state;
 extern air_ref_conf_t ar_conf;
 extern air_ref_state_t ar_state;
 
-// extern const esp_gatts_attr_db_t ar_conf_serv_gatt_db[GATT_AR_STATE_NB];
-// extern const esp_gatts_attr_db_t ar_conf_serv_gatt_db[GATT_AR_CONF_NB];
-// extern const esp_gatts_attr_db_t gatt_m_state_db[GATT_M_STATE_NB];
-/* The max length of characteristic value. When the GATT client performs a write or prepare write operation,
-*  the data length must be less than GATTS_DEMO_CHAR_VAL_LEN_MAX.
-*/
+void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param);
 
 static uint8_t adv_config_done = 0;
 
@@ -433,7 +427,22 @@ void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts
         // {
         //     ESP_LOGE(GATTS_TABLE_TAG, "create attr table failed, error code = %x", create_attr_ret);
         // }
-        esp_err_t create_attr_ret = esp_ble_gatts_create_attr_tab(ar_conf_serv_gatt_db, gatts_if, GATT_AR_STATE_NB, 0);
+        esp_err_t create_attr_ret = esp_ble_gatts_create_attr_tab(gatt_ar_conf_db, gatts_if, GATT_AR_CONF_NB, 0);
+        if (create_attr_ret)
+        {
+            ESP_LOGE(GATTS_TABLE_TAG, "create attr table failed, error code = %x", create_attr_ret);
+        }
+        create_attr_ret = esp_ble_gatts_create_attr_tab(gatt_ar_state_db, gatts_if, GATT_AR_CONF_NB, 0);
+        if (create_attr_ret)
+        {
+            ESP_LOGE(GATTS_TABLE_TAG, "create attr table failed, error code = %x", create_attr_ret);
+        }
+        create_attr_ret = esp_ble_gatts_create_attr_tab(gatt_m_state_db, gatts_if, GATT_AR_CONF_NB, 0);
+        if (create_attr_ret)
+        {
+            ESP_LOGE(GATTS_TABLE_TAG, "create attr table failed, error code = %x", create_attr_ret);
+        }
+        create_attr_ret = esp_ble_gatts_create_attr_tab(gatt_bluefi_db, gatts_if, GATT_AR_CONF_NB, 0);
         if (create_attr_ret)
         {
             ESP_LOGE(GATTS_TABLE_TAG, "create attr table failed, error code = %x", create_attr_ret);
@@ -557,12 +566,12 @@ void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts
         break;
     case ESP_GATTS_CREAT_ATTR_TAB_EVT:
     {
-         if (param->add_attr_tab.status != ESP_GATT_OK)
-         {
-             ESP_LOGE(GATTS_TABLE_TAG, "create attribute table failed, error code=0x%x", param->add_attr_tab.status);
-         }
+        if (param->add_attr_tab.status != ESP_GATT_OK)
+        {
+            ESP_LOGE(GATTS_TABLE_TAG, "create attribute table failed, error code=0x%x", param->add_attr_tab.status);
+        }
 
-        else if (param->add_attr_tab.svc_uuid.uuid.uuid16 == uuid_AR_CONF_SERV)
+        else if (param->add_attr_tab.svc_uuid.uuid.uuid16 == GATT_AR_CONF_UUID_SERVICE)
         {
             if (param->add_attr_tab.num_handle != GATT_AR_CONF_NB)
             {
@@ -575,40 +584,49 @@ void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts
                 esp_ble_gatts_start_service(ar_conf_handle_table[GATT_AR_CONF_IDX_SERVICE]);
             }
         }
-        // else if (param->add_attr_tab.num_handle != DEVINFO_SERV_NUM_ATTR)
-        // {
-        //     ESP_LOGE(TAG, "create attribute table abnormally, num_handle (%d) isn't equal to INFO_NB(%d)", param->add_attr_tab.num_handle, DEVINFO_SERV_NUM_ATTR);
-        // }
-        // else
-        // {
-        //     ESP_LOGI(TAG, "create attribute table successfully, the number handle = %d\n", param->add_attr_tab.num_handle);
-        //     memcpy(devinfo_handle_table, param->add_attr_tab.handles, sizeof(devinfo_handle_table));
-        //     esp_ble_gatts_start_service(devinfo_handle_table[DEVINFO_SERV]);
-        // }
 
-        // else if (param->add_attr_tab.svc_uuid.uuid.uuid16 == uuid_DEVINFO_SERV)
-        // {
-        //     else if (param->add_attr_tab.num_handle != HRS_IDX_NB)
-        //     {
-        //         ESP_LOGE(GATTS_TABLE_TAG, "create attribute table abnormally, num_handle (%d) doesn't equal to HRS_IDX_NB(%d)",
-        //                  param->add_attr_tab.num_handle, HRS_IDX_NB);
-        //     }
-        // }
+        else if (param->add_attr_tab.svc_uuid.uuid.uuid16 == GATT_AR_STATE_UUID_SERVICE)
+        {
+            if (param->add_attr_tab.num_handle != GATT_AR_STATE_NB)
+            {
+                ESP_LOGE(GATTS_TABLE_TAG, "create attribute table abnormally, num_handle (%d) isn't equal to INFO_NB(%d)", param->add_attr_tab.num_handle, GATT_AR_STATE_NB);
+            }
+            else
+            {
+                ESP_LOGI(GATTS_TABLE_TAG, "create attribute table successfully, the number handle = %d\n", param->add_attr_tab.num_handle);
+                memcpy(ar_state_handle_table, param->add_attr_tab.handles, sizeof(ar_state_handle_table));
+                esp_ble_gatts_start_service(ar_state_handle_table[GATT_AR_STATE_IDX_SERVICE]);
+            }
+        }
 
+        else if (param->add_attr_tab.svc_uuid.uuid.uuid16 == GATT_M_STATE_UUID_SERVICE)
+        {
+            if (param->add_attr_tab.num_handle != GATT_M_STATE_NB)
+            {
+                ESP_LOGE(GATTS_TABLE_TAG, "create attribute table abnormally, num_handle (%d) isn't equal to INFO_NB(%d)", param->add_attr_tab.num_handle, GATT_M_STATE_NB);
+            }
+            else
+            {
+                ESP_LOGI(GATTS_TABLE_TAG, "create attribute table successfully, the number handle = %d\n", param->add_attr_tab.num_handle);
+                memcpy(m_state_handle_table, param->add_attr_tab.handles, sizeof(m_state_handle_table));
+                esp_ble_gatts_start_service(m_state_handle_table[GATT_M_STATE_IDX_SERVICE]);
+            }
+        }
 
+        else if (param->add_attr_tab.svc_uuid.uuid.uuid16 == GATT_BLUEFI_UUID_SERVICE)
+        {
+            if (param->add_attr_tab.num_handle != GATT_AR_CONF_NB)
+            {
+                ESP_LOGE(GATTS_TABLE_TAG, "create attribute table abnormally, num_handle (%d) isn't equal to INFO_NB(%d)", param->add_attr_tab.num_handle, GATT_BLUEFI_NB);
+            }
+            else
+            {
+                ESP_LOGI(GATTS_TABLE_TAG, "create attribute table successfully, the number handle = %d\n", param->add_attr_tab.num_handle);
+                memcpy(bluefi_handle_table, param->add_attr_tab.handles, sizeof(bluefi_handle_table));
+                esp_ble_gatts_start_service(bluefi_handle_table[GATT_BLUEFI_IDX_SERVICE]);
+            }
+        }
 
-
-
-
-        // else
-        // {
-        //     ESP_LOGI(GATTS_TABLE_TAG, "create attribute table successfully, the number handle = %d\n", param->add_attr_tab.num_handle);
-        //     memcpy(heart_rate_handle_table, param->add_attr_tab.handles, sizeof(heart_rate_handle_table));
-        //     esp_ble_gatts_start_service(heart_rate_handle_table[IDX_SVC]);
-        //     // esp_ble_gatts_start_service(heart_rate_handle_table[IDX_SVC]);
-        //     // esp_ble_gatts_start_service(heart_rate_handle_table[IDX_SVC]);
-        //     // esp_ble_gatts_start_service(heart_rate_handle_table[IDX_SVC]);
-        // }
         break;
     }
     case ESP_GATTS_STOP_EVT:
