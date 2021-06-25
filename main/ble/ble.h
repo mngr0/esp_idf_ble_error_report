@@ -23,10 +23,6 @@
 typedef enum
 {
     PROFILE_APP_IDX = 0,
-    PROFILE_M_STATE,
-    PROFILE_AR_STATE,
-    PROFILE_AR_CONF,
-    PROFILE_BLUEFI,
     PROFILE_NUM
 } PROFILE_NUMBERS;
 
@@ -63,20 +59,20 @@ void BLE_init(void);
 
 
 
-void gatts_profile_event_handler(esp_gatts_cb_event_t event,
-                                        esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param);
+// void gatts_profile_event_handler(esp_gatts_cb_event_t event,
+//                                         esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param);
 
-void m_state_event_handler(esp_gatts_cb_event_t event,
-                                  esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param);
+// void m_state_event_handler(esp_gatts_cb_event_t event,
+//                                   esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param);
 
-void ar_state_event_handler(esp_gatts_cb_event_t event,
-                                   esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param);
+// void ar_state_event_handler(esp_gatts_cb_event_t event,
+//                                    esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param);
 
-void ar_conf_event_handler(esp_gatts_cb_event_t event,
-                                  esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param);
+// void ar_conf_event_handler(esp_gatts_cb_event_t event,
+//                                   esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param);
 
-void bluefi_event_handler(esp_gatts_cb_event_t event,
-                                 esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param);
+// void bluefi_event_handler(esp_gatts_cb_event_t event,
+//                                  esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param);
 
 
 #endif
