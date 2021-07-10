@@ -3,9 +3,12 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
 #include "esp_log.h"
+#include "driver/uart.h"
 
 #include "serial_logger.h"
 //#include "esp_log.h"
+
+#define LOGGER_TAG "LOGGER"
 
 machine_state_t m_state;
 air_ref_conf_t ar_conf;
@@ -17,19 +20,24 @@ TaskHandle_t xLoggerTask;
 uint32_t timestamp_last_update_m_state;
 uint32_t timestamp_last_update_ar_state;
 uint32_t timestamp_last_update_ar_conf;
+extern const uart_port_t uart_num;
+
+#define LOGGER_BUF_SIZE 1024
 
 uint16_t logger_checksum(uint8_t *data, uint16_t length)
 {
     uint16_t chk_sum = 0;
-    for (int i = 0; i < length; i = i + 2)
+    for (int i = 0; i < length - 1; i = i + 2)
     {
-        chk_sum -= ((uint16_t *)data)[i / 2];
+        chk_sum -= (data[i] & 0xFFFF) | ((data[i + 1] << 8) & 0xFFFF);
+        //ESP_LOGI("CHKSUM", "chk_sum: %4x", chk_sum);
+        //ESP_LOGI("CHKSUM", "combined: %4x (made of %4x and %4x)",(data[i] & 0xFFFF) | ( (data[i + 1] << 8) & 0xFFFF ),   (data[i] & 0xFFFF) , ( (data[i + 1] << 8) & 0xFFFF ));
     }
     if (length % 2 == 1)
     {
         chk_sum -= ((data[length - 1] << 8)) & 0xFFFF;
     }
-    return chk_sum;
+    return chk_sum & 0xFFFF;
 }
 
 //TODO ACCEPT ALL REPLIES
@@ -49,14 +57,19 @@ void parse_reply(logger_reply_t *reply, uint8_t *logger_buffer)
 
 int8_t receive_reply(logger_reply_t *reply, uint8_t *data, int length)
 {
+    ESP_LOGI("LENGTH", "LEN:%d", length);
     if (length >= HEADER_SIZE + CHECKSUM_SIZE)
     {
         parse_reply(reply, data);
-        ESP_LOGI("LENGTH", "LEN:%d, frame size: %d", length, reply->frame_size);
+        ESP_LOGI("LENGTH", " frame size: %d", reply->frame_size);
         int16_t chksum = logger_checksum((uint8_t *)data, reply->frame_size + HEADER_SIZE);
-        if (chksum != reply->checksum)
+        if ((0xFFFF & chksum) != (0xFFFF & reply->checksum))
         {
             ESP_LOGI("receive", "wrong chksum, expected: %2X, but found: %2X", chksum, reply->checksum);
+        }
+        else
+        {
+            ESP_LOGI("receive", "correct chksum: %2X", chksum);
         }
         //TODO check protocol version
         //TODO check length coerent with dataframe
@@ -73,8 +86,13 @@ void send_request(logger_request_t *request)
     tmp_buffer_out[1] = request->frame_size & 0xff;
     tmp_buffer_out[2] = (request->frame_size >> 8) & 0xff;
     tmp_buffer_out[3] = request->request_code;
+    uint16_t chksum = logger_checksum(tmp_buffer_out, 4);
+    tmp_buffer_out[4] = chksum & 0xff;
+    tmp_buffer_out[5] = (chksum >> 8) & 0xff;
     //send
+    ESP_LOGI(LOGGER_TAG, "sending %2x %2x %2x %2x %2x %2x ", tmp_buffer_out[0], tmp_buffer_out[1], tmp_buffer_out[2], tmp_buffer_out[3], tmp_buffer_out[4], tmp_buffer_out[5]);
     //uart_send
+    uart_write_bytes(uart_num, (const char *)tmp_buffer_out, 6);
 
     //busy wait for receive
 }
@@ -120,12 +138,12 @@ typedef enum
 upload_result_t upload_configuration(air_ref_conf_t *new_ar_conf)
 {
     upload_result_t result = upload_result_nothing_to_do;
-    request_command_t req_upload;
-    request_command_t req_reload;
+    logger_request_t req_upload;
+    logger_request_t req_reload;
     do_overwrite_ar_conf(&req_upload, new_ar_conf);
     do_request_ar_conf(&req_reload);
 
-    while (0)//memcmp((uint8_t*)&ar_conf_old, (uint8_t*)&new_ar_conf, sizeof(air_ref_conf_t)) != 0)
+    while (0) //memcmp((uint8_t*)&ar_conf_old, (uint8_t*)&new_ar_conf, sizeof(air_ref_conf_t)) != 0)
     {
         result = upload_result_correct;
         uint32_t prev_time = timestamp_last_update_ar_conf;
@@ -152,47 +170,107 @@ static void logger_task(void *arg)
     timestamp_last_update_ar_state = xTaskGetTickCount();
     timestamp_last_update_ar_conf = xTaskGetTickCount();
     //TODO list of things to check: M_STATE AR_STATE
-
+    uint16_t expected_reply_size = 0;
+    request_command_t current_request;
     while (1)
     {
         logger_request_t req;
-
+        ESP_LOGI(LOGGER_TAG, "logging .... ");
         // check for command request in Q
         is_command = xQueueReceive(command_queue, (uint8_t *)&req, 0);
         if (is_command == pdFALSE)
         {
             //TODO load command
-            if (timestamp_last_update_m_state + 3000 < xTaskGetTickCount())
+            if (timestamp_last_update_m_state + 10000 / portTICK_PERIOD_MS < xTaskGetTickCount())
             {
+                ESP_LOGI(LOGGER_TAG, "asking for m_state");
                 timestamp_last_update_m_state = xTaskGetTickCount();
                 do_request_m_state(&req);
+                current_request = req.request_code;
+                expected_reply_size = 118; //sizeof(machine_state_t);
             }
-            else if (timestamp_last_update_ar_state + 3000 < xTaskGetTickCount())
-            {
-                (timestamp_last_update_ar_state = xTaskGetTickCount());
-                do_request_ar_state(&req);
-            }
-            // else if (timestamp_last_update_ar_conf + 10000 < xTaskGetTickCount())
+            // else if (timestamp_last_update_ar_state + 30000 / portTICK_PERIOD_MS < xTaskGetTickCount())
             // {
-            //    timestamp_last_update_ar_conf = xTaskGetTickCount();
+            //     ESP_LOGI(LOGGER_TAG, "asking for ar_state state");
+            //     (timestamp_last_update_ar_state = xTaskGetTickCount());
             //     do_request_ar_state(&req);
+            //current_request = req.request_code;
+            //     //expected_reply_size = sizeof(air_ref_state_t);
+            // }
+
+            // else if (timestamp_last_update_ar_conf + 50000 / portTICK_PERIOD_MS < xTaskGetTickCount())
+            // {
+            //     ESP_LOGI(LOGGER_TAG, "asking for ar_conf");
+            //     timestamp_last_update_ar_conf = xTaskGetTickCount();
+            //     do_request_ar_state(&req);
+            //current_request = req.request_code;
+            //     //expected_reply_size =
             // }
             else
             {
-                vTaskDelay(500 / portTICK_PERIOD_MS);
+                ESP_LOGI(LOGGER_TAG, "delay .... ");
+                vTaskDelay(5000 / portTICK_PERIOD_MS);
+
                 continue;
             }
         }
         else
         {
+            ESP_LOGI(LOGGER_TAG, "cmd received");
+            current_request = req.request_code;
             if (req.request_code == read_routine_conf)
             {
                 timestamp_last_update_ar_conf = xTaskGetTickCount();
                 // memcpy ar_conf_old <- ar_conf
             }
         }
+        ESP_LOGI(LOGGER_TAG, "communication tansaction");
         // if no command request, update state
         send_request(&req);
+        bool done = false;
+        int length;
+        int tot_length = 0;
+        logger_reply_t reply;
+        uint8_t data[LOGGER_BUF_SIZE * 4];
+        do
+        {
+            //TODO manage buffer
+            length = uart_read_bytes(uart_num, data, LOGGER_BUF_SIZE, 20 / portTICK_RATE_MS);
+            if (length > 0)
+            {
+                tot_length += length;
+                ESP_LOGI(LOGGER_TAG, "received len = %d (expected %d )", length, expected_reply_size);
+                if (tot_length == expected_reply_size)
+                {
+
+                    ESP_LOG_BUFFER_HEX("RECVED:", data, tot_length);
+                    if (receive_reply(&reply, data, length))
+                    {
+                        ESP_LOGI(LOGGER_TAG, "receive success");
+                    }
+                    else
+                    {
+                        ESP_LOGI(LOGGER_TAG, "receive error");
+                    }
+                    done = true;
+                }
+                else
+                {
+                    ESP_LOGI(LOGGER_TAG, "wrong size error");
+                    vTaskDelay(50 / portTICK_PERIOD_MS);
+                }
+            }
+        } while (done == false);
+
+        if(current_request == read_machine_state) {
+            ESP_LOGI(LOGGER_TAG, "correctly received %d bytes. size is %d" ,expected_reply_size, sizeof(machine_state_t) );
+            ESP_LOGI(LOGGER_TAG, "sizeof error_report_t is %d" ,sizeof(error_report_t) );
+            ESP_LOGI(LOGGER_TAG, "sizeof air_ref_status_t is %d" ,sizeof(air_ref_status_t) );
+
+        }
+
+        
+
     }
 }
 
@@ -201,6 +279,5 @@ void logger_init()
     //TODO prepare buffers
 
     xTaskCreate(logger_task, "logger_task", LOGGER_TASK_STACK_SIZE, NULL, 10, &(xLoggerTask));
-    //TODO pass task object
     command_queue = xQueueCreate(5, 8);
 }
