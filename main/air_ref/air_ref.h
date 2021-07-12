@@ -1,11 +1,5 @@
 #ifndef __AIR_REF_H__
 #define __AIR_REF_H__
-/*
-* AIR_REF.h
-*
-* Created: 28/04/2021 13:50:53
-*  Author: marco
-*/
 
 
 #ifndef AIR_REF_H_
@@ -13,7 +7,7 @@
 
 #include "infineonlib.h"
 #include "error.h"
-
+#include "airref_builder.h"
 
 #define COMPRESSOR_SPEED_N 3 //TODO in firmware configure 16 slots, partial use
 
@@ -103,6 +97,10 @@ typedef struct{//public
 	air_ref_status_t ar_status;
 }machine_state_t;
 
+
+
+void send_m_state(flatcc_builder_t *B, machine_state_t *m_state);
+int access_message_buffer(const void *buffer);
 
 #endif /* AIR_REF_H_ */
 #endif

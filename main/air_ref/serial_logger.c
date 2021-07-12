@@ -6,7 +6,10 @@
 #include "driver/uart.h"
 
 #include "serial_logger.h"
-//#include "esp_log.h"
+
+
+#include "air_ref.h"
+#include "airref_builder.h"
 
 #define LOGGER_TAG "LOGGER"
 
@@ -172,14 +175,68 @@ static void logger_task(void *arg)
     //TODO list of things to check: M_STATE AR_STATE
     uint16_t expected_reply_size = 0;
     request_command_t current_request;
+
+    bool done = false;
+    int length;
+    int tot_length = 0;
+    logger_reply_t reply;
+    uint8_t data[LOGGER_BUF_SIZE * 4];
+
+    int expected_len;
+
     while (1)
     {
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        length = uart_read_bytes(uart_num, data, LOGGER_BUF_SIZE, 20 / portTICK_RATE_MS);
+        if (length > 0)
+        {
+            ESP_LOGI(LOGGER_TAG, "something received");
+            ESP_LOG_BUFFER_HEX(LOGGER_TAG,data,length);
+            if (receive_reply(&reply, data, length)){
+                 ESP_LOGI(LOGGER_TAG, "parse ok");
+                    access_message_buffer(reply.buffer);
+
+            }
+            else{
+                ESP_LOGI(LOGGER_TAG, "parse nok");
+            }
+        }
+        else{
+            ESP_LOGI(LOGGER_TAG, "nothing received");
+        }
+    }
+
+    while (1)
+    {
+
         logger_request_t req;
         ESP_LOGI(LOGGER_TAG, "logging .... ");
         // check for command request in Q
         is_command = xQueueReceive(command_queue, (uint8_t *)&req, 0);
         if (is_command == pdFALSE)
         {
+
+            flatcc_builder_t builder;
+            void *buf;
+            size_t size;
+
+            flatcc_builder_init(&builder);
+            send_m_state(&builder, &m_state);
+            buf = flatcc_builder_finalize_buffer(&builder, &size);
+
+            logger_request_t request;
+            request.protocol_version = PROTOCOL_VERSION;
+            request.request_code = read_machine_state;
+
+            memcpy(request.buffer, buf, size);
+            request.frame_size = size;
+            uint16_t chk_sum = logger_checksum((uint8_t *)&request, HEADER_SIZE + size);
+            request.checksum = chk_sum;
+            //serialize(&reply,(uint8_t*)m_state,sizeof(machine_state_t));
+            //reply.checksum = logger_checksum((uint8_t*)(&reply),HEADER_SIZE+sizeof(machine_state_t));
+            send_request(&request);
+
+            flatcc_builder_aligned_free(buf);
             //TODO load command
             if (timestamp_last_update_m_state + 10000 / portTICK_PERIOD_MS < xTaskGetTickCount())
             {
@@ -227,17 +284,14 @@ static void logger_task(void *arg)
         ESP_LOGI(LOGGER_TAG, "communication tansaction");
         // if no command request, update state
         send_request(&req);
-        bool done = false;
-        int length;
-        int tot_length = 0;
-        logger_reply_t reply;
-        uint8_t data[LOGGER_BUF_SIZE * 4];
+
         do
         {
             //TODO manage buffer
             length = uart_read_bytes(uart_num, data, LOGGER_BUF_SIZE, 20 / portTICK_RATE_MS);
             if (length > 0)
             {
+                access_message_buffer(data);
                 tot_length += length;
                 ESP_LOGI(LOGGER_TAG, "received len = %d (expected %d )", length, expected_reply_size);
                 if (tot_length == expected_reply_size)
@@ -262,15 +316,12 @@ static void logger_task(void *arg)
             }
         } while (done == false);
 
-        if(current_request == read_machine_state) {
-            ESP_LOGI(LOGGER_TAG, "correctly received %d bytes. size is %d" ,expected_reply_size, sizeof(machine_state_t) );
-            ESP_LOGI(LOGGER_TAG, "sizeof error_report_t is %d" ,sizeof(error_report_t) );
-            ESP_LOGI(LOGGER_TAG, "sizeof air_ref_status_t is %d" ,sizeof(air_ref_status_t) );
-
+        if (current_request == read_machine_state)
+        {
+            ESP_LOGI(LOGGER_TAG, "correctly received %d bytes. size is %d", expected_reply_size, sizeof(machine_state_t));
+            ESP_LOGI(LOGGER_TAG, "sizeof error_report_t is %d", sizeof(error_report_t));
+            ESP_LOGI(LOGGER_TAG, "sizeof air_ref_status_t is %d", sizeof(air_ref_status_t));
         }
-
-        
-
     }
 }
 

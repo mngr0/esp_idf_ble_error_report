@@ -3,7 +3,9 @@
         "serial_logger.h": "c",
         "gatts_table_creat_demo.h": "c",
         "gatt_ar_state.h": "c",
-        "string.h": "c"
+        "string.h": "c",
+        "air_ref.h": "c",
+        "airref_builder.h": "c"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }
