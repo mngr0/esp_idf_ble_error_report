@@ -5,7 +5,8 @@
         "gatt_ar_state.h": "c",
         "string.h": "c",
         "air_ref.h": "c",
-        "airref_builder.h": "c"
+        "airref_builder.h": "c",
+        "logger_frame.h": "c"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }

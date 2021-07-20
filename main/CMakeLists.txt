@@ -1,5 +1,7 @@
 idf_component_register(SRCS "gatts_table_creat_demo.c" 
-                            "air_ref/serial_logger.c" 
+                            "air_ref/serial_logger/logger_air_ref.c"
+                            "air_ref/serial_logger/logger_frame.c" 
+                            "air_ref/serial_logger/logger_hw_ESP32.c" 
                             "ble/ble.c" 
                             "ble/services/gatt_ar_state.c" 
                             "ble/services/gatt_m_state.c" 

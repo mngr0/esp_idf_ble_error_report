@@ -10,11 +10,8 @@
 
 #define PROTOCOL_VERSION 1
 
-#define max(a,b) (a>b ? a :b)
-#define LOGGER_PACKET_SIZE max(max(sizeof(air_ref_conf_t),sizeof(air_ref_state_t)),sizeof(machine_state_t))
-
+#define LOGGER_PACKET_SIZE 300
 #define LOGGER_BUFFER_SIZE 348
-#define LOGGER_SUM_MOD(a,b) ((a+LOGGER_BUFFER_SIZE+b)%LOGGER_BUFFER_SIZE)
 
 typedef enum{
 	logger_idle=0,
@@ -28,50 +25,46 @@ typedef struct {
 	volatile uint16_t cnt_in_end;
 } logger_device_t;
 
-typedef enum{
-	read_routine_conf=1,
-	read_machine_state,
-	read_routine_state,
-	write_routine_conf,
-	
-}request_command_t;
-
-typedef enum{
-	command_done=0,
-	unsupported_protocol,
-	periodic_update
-} reply_code_t;
-
 typedef struct {
+	uint8_t start_of_frame[2];
 	uint8_t protocol_version;
 	uint16_t frame_size;
-	reply_code_t reply_code;
 	uint8_t buffer[LOGGER_PACKET_SIZE];
 	uint16_t checksum;
-}logger_reply_t; //TX
+	uint8_t end_of_frame[2];
+}logger_frame_t;
 
-typedef struct {
-	uint8_t protocol_version;
-	uint16_t frame_size;
-	request_command_t request_code;
-	uint8_t buffer[LOGGER_PACKET_SIZE];
-	uint16_t checksum;
-}logger_request_t; //RX
+#define START_OF_REQUEST 0xa2
+#define END_OF_REQUEST 0xdc
+#define START_OF_REPLY 0x2a
+#define END_OF_REPLY 0xcd
 
-#define HEADER_SIZE 4//(sizeof(uint8_t)+sizeof(uint16_t)+sizeof(request_command_t))
-#define CHECKSUM_SIZE (sizeof(uint16_t))
-//#define LOGGER_I(i) LOGGER_SUM_MOD(i,io_logger.cnt_in_begin)
+typedef enum
+{
+    upload_result_nothing_to_do = 0,
+    upload_result_correct,
+    upload_result_timeout
+} upload_result_t;
 
+#define FRAME_AS_REQUEST(f) \
+	f->start_of_frame[0]=START_OF_REQUEST; \
+	f->start_of_frame[0]=START_OF_REQUEST; \
+	f->end_of_frame[0]=END_OF_REQUEST; \
+	f->end_of_frame[0]=END_OF_REQUEST; \
 
-void parse_reply(logger_reply_t* reply, uint8_t* logger_buffer);
-
-int8_t receive_reply(logger_reply_t* reply, uint8_t* data,int length);
+#define FRAME_AS_REPLY(f) \
+	f->start_of_frame[0]=START_OF_REPLY; \
+	f->start_of_frame[0]=START_OF_REPLY; \
+	f->end_of_frame[0]=END_OF_REPLY; \
+	f->end_of_frame[0]=END_OF_REPLY; \
 
 
 void logger_init();
+void init_usart_logger();
+void routine_send_state();
 
-// const machine_state_t* get_m_state();
-// const air_ref_conf_t* get_ar_conf();
-// const air_ref_state_t* get_ar_state();
+extern air_ref_conf_t ar_conf;
+extern air_ref_state_t ar_state;
+extern machine_state_t m_state;
 
 #endif /* SERIAL_LOGGER_H_ */
