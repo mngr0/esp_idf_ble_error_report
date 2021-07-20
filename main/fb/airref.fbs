@@ -1,0 +1,128 @@
+// Example IDL file for our monster's schema.
+
+namespace AirRef;
+
+
+enum ErrorState:int{
+	error_state_none=0,
+	error_state_warning,
+	error_state_critical
+}
+
+enum AirRefIndexError:int{
+	index_error_pressure_evap=0,
+	index_error_pressure_cond,
+	
+	index_error_temperature_gas_scarico,
+	index_error_temperature_environment,
+	index_error_temperature_gas_ritorno,
+	index_error_temperature_extra,
+	index_error_imm101_motor,
+	index_error_imm101_communication,
+	index_error_imc102_motor,
+	index_error_imc102_communication,
+	
+	index_error_overtemperature_gas_scarico,
+	index_low_pressure_protection,
+	index_error_size
+}
+
+enum AirRefStatus :int{
+	status_idle=0,
+	status_running,
+	status_critical_error
+}
+
+
+struct ErrorReport{
+	error_state:ErrorState;
+	error_code:int;  
+}
+
+
+struct CompressorSpeed{
+  speed:[int:10];
+}
+
+struct ErrorList{
+  speed:[ErrorReport:10];
+}
+
+struct MotorStatus{
+  state:[int:10];
+}
+
+table AirRefConf{
+	serial_control:int =-1;
+	fan_target_pressure:int =-1;
+	fan_coeff_offset:int =-1;
+	fan_min_pressure:int =-1; //(milliBar)
+	fan_max_pressure:int =-1; //(milliBar)
+	
+	compressor_target_pressure:int =-1; //millibar
+	compressor_activation_offset:int =-1; //millbar
+	compressor_action_delay:int =-1; // milliseconds
+	compressor_speed:CompressorSpeed;
+	compressor_start_interval:int =-1;
+}
+
+table AirRefState{
+	compressor_actual_speed_index:int=-1;
+	compressor_last_speed_change_time:int=-1;
+	compressor_speed_to_command:int=-1;
+	compressor_last_stop:int=-1;
+	compressor_is_blocked:int=-1;
+	compressor_is_running:int=-1;
+
+	fan_speed_to_command:int=-1;
+	fan_time_last_command:int=-1;
+}
+
+table MachineState{
+	evaporation_pressure:int =0;
+	condensation_pressure:int =0;
+	temperature_gas_scarico:int =0;
+	temperature_environment:int =0;
+	temperature_gas_ritorno:int =0;
+	temperature_extra:int =0;
+
+
+	imc102_communication:ErrorReport;
+	imc102_motor:ErrorReport;
+	imc102_status:MotorStatus;
+	
+	imm101_communication:ErrorReport;
+	imm101_motor:ErrorReport;
+	imm101_status:MotorStatus;
+	
+	pin_enable:int=-1;
+	ar_error:ErrorList;
+	
+	ar_status:ErrorReport;
+
+}
+
+enum RequestType: int{
+	RequestAirRefConf=0,
+	RequestAirRefState,
+	RequestMachineState
+}
+
+table Request{
+	requestType: RequestType;
+}
+
+
+
+union Content{
+  AirRefConf,
+  AirRefState,
+  MachineState,
+  Request
+}
+
+table Message{
+  content: Content;
+}
+
+root_type Message;
