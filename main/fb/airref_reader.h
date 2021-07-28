@@ -428,7 +428,7 @@ __flatbuffers_define_struct_field(10, AirRef_MachineState, imm101_motor, AirRef_
 __flatbuffers_define_struct_field(11, AirRef_MachineState, imm101_status, AirRef_MotorStatus_struct_t, 0)
 __flatbuffers_define_scalar_field(12, AirRef_MachineState, pin_enable, flatbuffers_int32, int32_t, INT32_C(-1))
 __flatbuffers_define_struct_field(13, AirRef_MachineState, ar_error, AirRef_ErrorList_struct_t, 0)
-__flatbuffers_define_table_field(14, AirRef_MachineState, ar_status, AirRef_AirRefState_table_t, 0)
+__flatbuffers_define_struct_field(14, AirRef_MachineState, ar_status, AirRef_ErrorReport_struct_t, 0)
 
 struct AirRef_Request_table { uint8_t unused__; };
 

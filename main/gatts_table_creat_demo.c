@@ -41,7 +41,7 @@
 //#include "protobuf-c/protobuf-c/protobuf-c/protobuf-c/protobuf-c.h"
 
 #include "air_ref/air_ref.h"
-#include "air_ref/serial_logger.h"
+#include "air_ref/serial_logger/logger_hw.h"
 #include "ble/ble.h"
 #define GATTS_TABLE_TAG "GATTS_TABLE_DEMO"
 
@@ -157,9 +157,12 @@ void app_main(void)
     ESP_ERROR_CHECK(ret);
 
     configure_led();
-    configure_serial();
+
+    configure_serial(); 
+
 
     BLE_init();
-    logger_init();
+    logger_init(); //TODO un thread per mandare richieste periodiche, e un thread per la sola ricezione.
+
     //xTaskCreate(bridge_task, "bridge_task", BRIDGE_TASK_STACK_SIZE, NULL, 10, NULL);
 }

@@ -39,7 +39,6 @@
 
 
 #define GATTS_AR_CONF_TAG "GATTS_AR_CONF"
-#define INDEX_AR_CONF 2
 
 extern machine_state_t m_state;
 extern air_ref_conf_t ar_conf;
@@ -52,8 +51,8 @@ extern uint8_t raw_scan_rsp_data[10];
 extern uint8_t raw_adv_data[26];
 extern struct gatts_profile_inst heart_rate_profile_tab[PROFILE_NUM];
 
-const uint16_t GATT_AR_CONF_UUID_SERVICE = (0xFF00 | GATT_AR_CONF_IDX_SERVICE) & (INDEX_AR_CONF <<8);
-const uint16_t GATT_AR_CONF_UUID_VALUE = (0xFF00 | GATT_AR_CONF_IDX_VALUE) & (INDEX_AR_CONF <<8);
+const uint16_t GATT_AR_CONF_UUID_SERVICE = (0xFF00 | GATT_AR_CONF_IDX_SERVICE) & (PROFILE_AR_CONF_IDX <<8);
+const uint16_t GATT_AR_CONF_UUID_VALUE = (0xFF00 | GATT_AR_CONF_IDX_VALUE) & (PROFILE_AR_CONF_IDX <<8);
 
 
 static const uint16_t primary_service_uuid = ESP_GATT_UUID_PRI_SERVICE;

@@ -1,9 +1,7 @@
 
 #include "stdbool.h"
-#include "logger_frame.h"
 #include "logger_hw.h"
-// #include "fb/airref_builder.h"
-// #include "fb/airref_reader.h"
+#include "logger_frame.h"
 #include "../air_ref.h"
 
 
@@ -17,7 +15,7 @@
 
 extern air_ref_conf_t ar_conf;
 extern air_ref_conf_t ar_conf_old;
-extern bool ready_to_update_ar_conf;
+extern bool ready_to_update_ar_conf;         
 
 void send_new_conf(air_ref_conf_t *ar_conf_new)
 {
@@ -39,7 +37,16 @@ void do_request_m_state()
     logger_frame_t request;
 
     flatcc_builder_init(&builder);
+
+    AirRef_Request_start(&builder);
+    AirRef_Request_requestType_add(&builder,AirRef_RequestType_RequestMachineState);
     // TODO create message
+    //AirRef_Request_ref_t ar_request = AirRef_Request_end(&builder);
+    AirRef_Request_ref_t ar_request = AirRef_Request_end(&builder);
+    
+
+    AirRef_Content_union_ref_t content = AirRef_Content_as_Request(ar_request);
+    AirRef_Message_create_as_root(&builder, content);
     build_frame(&request, &builder);
     send_frame(&request);
     flatcc_builder_clear(&builder);
@@ -49,9 +56,12 @@ void do_reply_m_state()
 {
     flatcc_builder_t builder;
     logger_frame_t request;
-
+     // TODO create message
     flatcc_builder_init(&builder);
-    // TODO create message
+   
+
+
+
     build_frame(&request, &builder);
     send_frame(&request);
     flatcc_builder_clear(&builder);

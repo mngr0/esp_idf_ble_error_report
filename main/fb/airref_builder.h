@@ -173,7 +173,7 @@ __flatbuffers_build_table_prolog(flatbuffers_, AirRef_AirRefState, AirRef_AirRef
   int32_t v0, int32_t v1, int32_t v2, int32_t v3,\
   int32_t v4, int32_t v5, AirRef_ErrorReport_t *v6, AirRef_ErrorReport_t *v7,\
   AirRef_MotorStatus_t *v8, AirRef_ErrorReport_t *v9, AirRef_ErrorReport_t *v10, AirRef_MotorStatus_t *v11,\
-  int32_t v12, AirRef_ErrorList_t *v13, AirRef_AirRefState_ref_t v14
+  int32_t v12, AirRef_ErrorList_t *v13, AirRef_ErrorReport_t *v14
 #define __AirRef_MachineState_call_args ,\
   v0, v1, v2, v3,\
   v4, v5, v6, v7,\
@@ -319,7 +319,7 @@ __flatbuffers_build_struct_field(10, flatbuffers_, AirRef_MachineState_imm101_mo
 __flatbuffers_build_struct_field(11, flatbuffers_, AirRef_MachineState_imm101_status, AirRef_MotorStatus, 40, 4, AirRef_MachineState)
 __flatbuffers_build_scalar_field(12, flatbuffers_, AirRef_MachineState_pin_enable, flatbuffers_int32, int32_t, 4, 4, INT32_C(-1), AirRef_MachineState)
 __flatbuffers_build_struct_field(13, flatbuffers_, AirRef_MachineState_ar_error, AirRef_ErrorList, 80, 4, AirRef_MachineState)
-__flatbuffers_build_table_field(14, flatbuffers_, AirRef_MachineState_ar_status, AirRef_AirRefState, AirRef_MachineState)
+__flatbuffers_build_struct_field(14, flatbuffers_, AirRef_MachineState_ar_status, AirRef_ErrorReport, 8, 4, AirRef_MachineState)
 
 static inline AirRef_MachineState_ref_t AirRef_MachineState_create(flatbuffers_builder_t *B __AirRef_MachineState_formal_args)
 {

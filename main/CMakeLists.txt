@@ -10,5 +10,6 @@ idf_component_register(SRCS "gatts_table_creat_demo.c"
                             "air_ref/air_ref.c"
                             "fb/builder.c"
                             "fb/emitter.c"
+                            "fb/refmap.c"
                     INCLUDE_DIRS "."
                                  "fb")

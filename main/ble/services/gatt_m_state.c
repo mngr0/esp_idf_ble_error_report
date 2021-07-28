@@ -38,7 +38,7 @@
 #include "air_ref/air_ref.h"
 #include "air_ref/serial_logger.h"
 
-#define INDEX_M_STATE 3
+
 #define GATTS_M_STATE_TAG "GATTS_M_STATE"
 
 extern machine_state_t m_state;
@@ -47,9 +47,9 @@ extern air_ref_state_t ar_state;
 
 extern uint8_t raw_scan_rsp_data[10];
 extern uint8_t raw_adv_data[26];
-extern struct gatts_profile_inst heart_rate_profile_tab[PROFILE_NUM];
-const uint16_t GATT_M_STATE_UUID_SERVICE = (0xFF00 | GATT_M_STATE_IDX_SERVICE) & (INDEX_M_STATE << 8);
-const uint16_t GATT_M_STATE_UUID_VALUE = (0xFF00 | GATT_M_STATE_IDX_VALUE) & (INDEX_M_STATE << 8);
+extern struct gatts_profile_inst machine_state_profile_tab[PROFILE_NUM];
+const uint16_t GATT_M_STATE_UUID_SERVICE = (0xFF00 | GATT_M_STATE_IDX_SERVICE) & (PROFILE_M_STATE_IDX << 8);
+const uint16_t GATT_M_STATE_UUID_VALUE = (0xFF00 | GATT_M_STATE_IDX_VALUE) & (PROFILE_M_STATE_IDX << 8);
 
 static const uint16_t primary_service_uuid = ESP_GATT_UUID_PRI_SERVICE;
 static const uint16_t character_declaration_uuid = ESP_GATT_UUID_CHAR_DECLARE;

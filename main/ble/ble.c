@@ -153,6 +153,22 @@ struct gatts_profile_inst heart_rate_profile_tab[PROFILE_NUM] = {
         .gatts_cb = gatts_profile_event_handler,
         .gatts_if = ESP_GATT_IF_NONE, /* Not get the gatt_if, so initial is ESP_GATT_IF_NONE */
     },
+    [PROFILE_M_STATE_IDX] = {
+        .gatts_cb = gatts_profile_event_handler,
+        .gatts_if = ESP_GATT_IF_NONE, /* Not get the gatt_if, so initial is ESP_GATT_IF_NONE */
+    },
+    [PROFILE_AR_CONF_IDX] = {
+        .gatts_cb = gatts_profile_event_handler,
+        .gatts_if = ESP_GATT_IF_NONE, /* Not get the gatt_if, so initial is ESP_GATT_IF_NONE */
+    },
+    [PROFILE_AR_STATE_IDX] = {
+        .gatts_cb = gatts_profile_event_handler,
+        .gatts_if = ESP_GATT_IF_NONE, /* Not get the gatt_if, so initial is ESP_GATT_IF_NONE */
+    },
+    [PROFILE_BLUEFI_IDX] = {
+        .gatts_cb = gatts_profile_event_handler,
+        .gatts_if = ESP_GATT_IF_NONE, /* Not get the gatt_if, so initial is ESP_GATT_IF_NONE */
+    }
 
 };
 
@@ -575,11 +591,11 @@ void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts
         {
             if (param->add_attr_tab.num_handle != GATT_AR_CONF_NB)
             {
-                ESP_LOGE(GATTS_TABLE_TAG, "create attribute table abnormally, num_handle (%d) isn't equal to INFO_NB(%d)", param->add_attr_tab.num_handle, GATT_AR_CONF_NB);
+                ESP_LOGE(GATTS_TABLE_TAG, "create attribute ar conf table abnormally, num_handle (%d) isn't equal to INFO_NB(%d)", param->add_attr_tab.num_handle, GATT_AR_CONF_NB);
             }
             else
             {
-                ESP_LOGI(GATTS_TABLE_TAG, "create attribute table successfully, the number handle = %d\n", param->add_attr_tab.num_handle);
+                ESP_LOGI(GATTS_TABLE_TAG, "create attribute ar_conf table successfully, the number handle = %d\n", param->add_attr_tab.num_handle);
                 memcpy(ar_conf_handle_table, param->add_attr_tab.handles, sizeof(ar_conf_handle_table));
                 esp_ble_gatts_start_service(ar_conf_handle_table[GATT_AR_CONF_IDX_SERVICE]);
             }
@@ -589,11 +605,11 @@ void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts
         {
             if (param->add_attr_tab.num_handle != GATT_AR_STATE_NB)
             {
-                ESP_LOGE(GATTS_TABLE_TAG, "create attribute table abnormally, num_handle (%d) isn't equal to INFO_NB(%d)", param->add_attr_tab.num_handle, GATT_AR_STATE_NB);
+                ESP_LOGE(GATTS_TABLE_TAG, "create attribute ar state table abnormally, num_handle (%d) isn't equal to INFO_NB(%d)", param->add_attr_tab.num_handle, GATT_AR_STATE_NB);
             }
             else
             {
-                ESP_LOGI(GATTS_TABLE_TAG, "create attribute table successfully, the number handle = %d\n", param->add_attr_tab.num_handle);
+                ESP_LOGI(GATTS_TABLE_TAG, "create attribute ar state table successfully, the number handle = %d\n", param->add_attr_tab.num_handle);
                 memcpy(ar_state_handle_table, param->add_attr_tab.handles, sizeof(ar_state_handle_table));
                 esp_ble_gatts_start_service(ar_state_handle_table[GATT_AR_STATE_IDX_SERVICE]);
             }
@@ -603,11 +619,11 @@ void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts
         {
             if (param->add_attr_tab.num_handle != GATT_M_STATE_NB)
             {
-                ESP_LOGE(GATTS_TABLE_TAG, "create attribute table abnormally, num_handle (%d) isn't equal to INFO_NB(%d)", param->add_attr_tab.num_handle, GATT_M_STATE_NB);
+                ESP_LOGE(GATTS_TABLE_TAG, "create attribute m state table abnormally, num_handle (%d) isn't equal to INFO_NB(%d)", param->add_attr_tab.num_handle, GATT_M_STATE_NB);
             }
             else
             {
-                ESP_LOGI(GATTS_TABLE_TAG, "create attribute table successfully, the number handle = %d\n", param->add_attr_tab.num_handle);
+                ESP_LOGI(GATTS_TABLE_TAG, "create attribute m state table successfully, the number handle = %d\n", param->add_attr_tab.num_handle);
                 memcpy(m_state_handle_table, param->add_attr_tab.handles, sizeof(m_state_handle_table));
                 esp_ble_gatts_start_service(m_state_handle_table[GATT_M_STATE_IDX_SERVICE]);
             }
@@ -617,11 +633,11 @@ void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts
         {
             if (param->add_attr_tab.num_handle != GATT_AR_CONF_NB)
             {
-                ESP_LOGE(GATTS_TABLE_TAG, "create attribute table abnormally, num_handle (%d) isn't equal to INFO_NB(%d)", param->add_attr_tab.num_handle, GATT_BLUEFI_NB);
+                ESP_LOGE(GATTS_TABLE_TAG, "create attribute bluefi table abnormally, num_handle (%d) isn't equal to INFO_NB(%d)", param->add_attr_tab.num_handle, GATT_BLUEFI_NB);
             }
             else
             {
-                ESP_LOGI(GATTS_TABLE_TAG, "create attribute table successfully, the number handle = %d\n", param->add_attr_tab.num_handle);
+                ESP_LOGI(GATTS_TABLE_TAG, "create attribute bluefi table successfully, the number handle = %d\n", param->add_attr_tab.num_handle);
                 memcpy(bluefi_handle_table, param->add_attr_tab.handles, sizeof(bluefi_handle_table));
                 esp_ble_gatts_start_service(bluefi_handle_table[GATT_BLUEFI_IDX_SERVICE]);
             }

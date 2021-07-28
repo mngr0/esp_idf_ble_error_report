@@ -38,7 +38,7 @@
 #include "air_ref/serial_logger.h"
 
 #define GATTS_AR_STATE_TAG "GATTS_AR_STATE"
-#define INDEX_AR_STATE 1
+
 extern machine_state_t m_state;
 extern air_ref_conf_t ar_conf;
 extern air_ref_state_t ar_state;
@@ -52,10 +52,10 @@ uint16_t ar_state_handle_table[GATT_AR_STATE_NB];
 extern uint8_t raw_scan_rsp_data[10];
 extern uint8_t raw_adv_data[26];
 extern struct gatts_profile_inst heart_rate_profile_tab[PROFILE_NUM];
-const uint16_t GATT_AR_STATE_UUID_SERVICE = (0xFF00 | GATT_AR_STATE_IDX_SERVICE) & (INDEX_AR_STATE << 8);
+const uint16_t GATT_AR_STATE_UUID_SERVICE = (0xFF00 | GATT_AR_STATE_IDX_SERVICE) & (PROFILE_AR_CONF_IDX << 8);
 
 //static const uint16_t GATT_AR_STATE_UUID_CHAR= (0xFF00 | GATT_AR_STATE_IDX_CHAR) & (INDEX_AR_STATE << 8);
-static const uint16_t GATT_AR_STATE_UUID_VALUE = (0xFF00 | GATT_AR_STATE_IDX_VALUE) & (INDEX_AR_STATE << 8);
+static const uint16_t GATT_AR_STATE_UUID_VALUE = (0xFF00 | GATT_AR_STATE_IDX_VALUE) & (PROFILE_AR_STATE_IDX << 8);
 
 static const uint16_t primary_service_uuid = ESP_GATT_UUID_PRI_SERVICE;
 static const uint16_t character_declaration_uuid = ESP_GATT_UUID_CHAR_DECLARE;

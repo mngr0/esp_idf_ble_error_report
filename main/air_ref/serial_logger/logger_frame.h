@@ -38,15 +38,15 @@ typedef enum
 
 #define FRAME_AS_REQUEST(f) \
 	f->start_of_frame[0]=START_OF_REQUEST; \
-	f->start_of_frame[0]=START_OF_REQUEST; \
+	f->start_of_frame[1]=START_OF_REQUEST; \
 	f->end_of_frame[0]=END_OF_REQUEST; \
-	f->end_of_frame[0]=END_OF_REQUEST; \
+	f->end_of_frame[1]=END_OF_REQUEST; \
 
 #define FRAME_AS_REPLY(f) \
 	f->start_of_frame[0]=START_OF_REPLY; \
-	f->start_of_frame[0]=START_OF_REPLY; \
+	f->start_of_frame[1]=START_OF_REPLY; \
 	f->end_of_frame[0]=END_OF_REPLY; \
-	f->end_of_frame[0]=END_OF_REPLY; \
+	f->end_of_frame[1]=END_OF_REPLY; \
 
 
 
