@@ -120,7 +120,7 @@ static void receiver_task(void *arg){
         if (length > 0)
         {
             ESP_LOGI(LOGGER_TAG, "something received");
-            ESP_LOG_BUFFER_HEX(LOGGER_TAG, data, length);
+            //ESP_LOG_BUFFER_HEX(LOGGER_TAG, data, length);
             if (receive_reply(&reply, data, length))
             {
                 ESP_LOGI(LOGGER_TAG, "parse ok");

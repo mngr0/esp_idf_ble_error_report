@@ -61,8 +61,6 @@ static uint8_t adv_config_done = 0;
 
 static prepare_type_env_t prepare_write_env;
 
-#define CONFIG_SET_RAW_ADV_DATA
-
 #ifdef CONFIG_SET_RAW_ADV_DATA
 uint8_t raw_adv_data[] = {
     /* flags */
@@ -152,22 +150,76 @@ struct gatts_profile_inst heart_rate_profile_tab[PROFILE_NUM] = {
     [PROFILE_APP_IDX] = {
         .gatts_cb = gatts_profile_event_handler,
         .gatts_if = ESP_GATT_IF_NONE, /* Not get the gatt_if, so initial is ESP_GATT_IF_NONE */
+        .service_id = {
+            .is_primary = true,
+            .id = {
+                .inst_id = 0x00,
+                .uuid = {
+                    .len = ESP_UUID_LEN_16,
+                    .uuid = {
+                        .uuid16 = 0x00FF,
+                    },
+                },
+            },
+        },
     },
     [PROFILE_M_STATE_IDX] = {
-        .gatts_cb = gatts_profile_event_handler,
+        .gatts_cb = m_state_event_handler,
         .gatts_if = ESP_GATT_IF_NONE, /* Not get the gatt_if, so initial is ESP_GATT_IF_NONE */
+        .service_id = {
+            .is_primary = false,
+            .id = {
+                .inst_id = 0x00,
+                .uuid = {
+                    .len = ESP_UUID_LEN_16,
+                    .uuid = {
+                        .uuid16 = GATT_M_STATE_UUID_SERVICE,
+                    },
+                },
+            },
+        },
     },
     [PROFILE_AR_CONF_IDX] = {
-        .gatts_cb = gatts_profile_event_handler,
+        .gatts_cb = ar_conf_event_handler,
         .gatts_if = ESP_GATT_IF_NONE, /* Not get the gatt_if, so initial is ESP_GATT_IF_NONE */
+        .is_primary = false,
+        .id = {
+            .inst_id = 0x00,
+            .uuid = {
+                .len = ESP_UUID_LEN_16,
+                .uuid = {
+                    .uuid16 = GATT_AR_CONF_UUID_SERVICE,
+                },
+            },
+        },
     },
     [PROFILE_AR_STATE_IDX] = {
-        .gatts_cb = gatts_profile_event_handler,
+        .gatts_cb = ar_state_event_handler,
         .gatts_if = ESP_GATT_IF_NONE, /* Not get the gatt_if, so initial is ESP_GATT_IF_NONE */
+        .is_primary = false,
+        .id = {
+            .inst_id = 0x00,
+            .uuid = {
+                .len = ESP_UUID_LEN_16,
+                .uuid = {
+                    .uuid16 = GATT_AR_STATE_UUID_SERVICE,
+                },
+            },
+        },
     },
     [PROFILE_BLUEFI_IDX] = {
-        .gatts_cb = gatts_profile_event_handler,
+        .gatts_cb = bluefi_event_handler,
         .gatts_if = ESP_GATT_IF_NONE, /* Not get the gatt_if, so initial is ESP_GATT_IF_NONE */
+        .is_primary = false,
+        .id = {
+            .inst_id = 0x00,
+            .uuid = {
+                .len = ESP_UUID_LEN_16,
+                .uuid = {
+                    .uuid16 = GATT_BLUEFI_UUID_SERVICE,
+                },
+            },
+        },
     }
 
 };
@@ -443,30 +495,42 @@ void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts
         // {
         //     ESP_LOGE(GATTS_TABLE_TAG, "create attr table failed, error code = %x", create_attr_ret);
         // }
-        esp_err_t create_attr_ret = esp_ble_gatts_create_attr_tab(gatt_ar_conf_db, gatts_if, GATT_AR_CONF_NB, 0);
-        if (create_attr_ret)
-        {
-            ESP_LOGE(GATTS_TABLE_TAG, "create attr table failed, error code = %x", create_attr_ret);
-        }
-        create_attr_ret = esp_ble_gatts_create_attr_tab(gatt_ar_state_db, gatts_if, GATT_AR_CONF_NB, 0);
-        if (create_attr_ret)
-        {
-            ESP_LOGE(GATTS_TABLE_TAG, "create attr table failed, error code = %x", create_attr_ret);
-        }
-        create_attr_ret = esp_ble_gatts_create_attr_tab(gatt_m_state_db, gatts_if, GATT_AR_CONF_NB, 0);
-        if (create_attr_ret)
-        {
-            ESP_LOGE(GATTS_TABLE_TAG, "create attr table failed, error code = %x", create_attr_ret);
-        }
-        create_attr_ret = esp_ble_gatts_create_attr_tab(gatt_bluefi_db, gatts_if, GATT_AR_CONF_NB, 0);
-        if (create_attr_ret)
-        {
-            ESP_LOGE(GATTS_TABLE_TAG, "create attr table failed, error code = %x", create_attr_ret);
-        }
+
+        // esp_err_t create_attr_ret = esp_ble_gatts_create_attr_tab(gatt_ar_conf_db, gatts_if, GATT_AR_CONF_NB, 0);
+        // if (create_attr_ret)
+        // {
+        //     ESP_LOGE(GATTS_TABLE_TAG, "create attr table failed, error code = %x", create_attr_ret);
+        // }
+        // create_attr_ret = esp_ble_gatts_create_attr_tab(gatt_ar_state_db, gatts_if, GATT_AR_CONF_NB, 0);
+        // if (create_attr_ret)
+        // {
+        //     ESP_LOGE(GATTS_TABLE_TAG, "create attr table failed, error code = %x", create_attr_ret);
+        // }
+        // create_attr_ret = esp_ble_gatts_create_attr_tab(gatt_m_state_db, gatts_if, GATT_AR_CONF_NB, 0);
+        // if (create_attr_ret)
+        // {
+        //     ESP_LOGE(GATTS_TABLE_TAG, "create attr table failed, error code = %x", create_attr_ret);
+        // }
+        // create_attr_ret = esp_ble_gatts_create_attr_tab(gatt_bluefi_db, gatts_if, GATT_AR_CONF_NB, 0);
+        // if (create_attr_ret)
+        // {
+        //     ESP_LOGE(GATTS_TABLE_TAG, "create attr table failed, error code = %x", create_attr_ret);
+        // }
     }
     break;
     case ESP_GATTS_READ_EVT:
         ESP_LOGI(GATTS_TABLE_TAG, "ESP_GATTS_READ_EVT");
+        ESP_LOGI(GATTS_TABLE_TAG, "GATT_READ_EVT, conn_id %d, trans_id %d, handle %d\n", param->read.conn_id, param->read.trans_id, param->read.handle);
+        esp_gatt_rsp_t rsp;
+        memset(&rsp, 0, sizeof(esp_gatt_rsp_t));
+        rsp.attr_value.handle = param->read.handle;
+        rsp.attr_value.len = 4;
+        rsp.attr_value.value[0] = 0xde;
+        rsp.attr_value.value[1] = 0xed;
+        rsp.attr_value.value[2] = 0xbe;
+        rsp.attr_value.value[3] = 0xef;
+        esp_ble_gatts_send_response(gatts_if, param->read.conn_id, param->read.trans_id,
+                                    ESP_GATT_OK, &rsp);
         break;
     case ESP_GATTS_WRITE_EVT:
         if (!param->write.is_prep)
@@ -666,7 +730,7 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
     {
         if (param->reg.status == ESP_GATT_OK)
         {
-            heart_rate_profile_tab[PROFILE_APP_IDX].gatts_if = gatts_if;
+            heart_rate_profile_tab[param->reg.app_id].gatts_if = gatts_if;
         }
         else
         {
@@ -741,7 +805,20 @@ void BLE_init(void)
         ESP_LOGE(GATTS_TABLE_TAG, "gap register error, error code = %x", ret);
         return;
     }
-    ret = esp_ble_gatts_app_register(ESP_APP_ID);
+    // ret = esp_ble_gatts_app_register(ESP_APP_ID);
+    // if (ret)
+    // {
+    //     ESP_LOGE(GATTS_TABLE_TAG, "gatts app register error, error code = %x", ret);
+    //     return;
+    // }
+
+    ret = esp_ble_gatts_app_register(PROFILE_APP_IDX);
+    if (ret)
+    {
+        ESP_LOGE(GATTS_TABLE_TAG, "gatts app register error, error code = %x", ret);
+        return;
+    }
+    ret = esp_ble_gatts_app_register(PROFILE_M_STATE_IDX);
     if (ret)
     {
         ESP_LOGE(GATTS_TABLE_TAG, "gatts app register error, error code = %x", ret);

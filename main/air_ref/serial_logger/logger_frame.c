@@ -84,8 +84,8 @@ void build_frame(logger_frame_t *frame, flatcc_builder_t* builder )
     void *buf;
 
     buf = flatcc_builder_finalize_buffer(builder, &size); 
-    ESP_LOGI("receive", "beffer to send");  
-     ESP_LOG_BUFFER_HEX(LOGGER_TAG,buf,size);
+   // ESP_LOGI("receive", "beffer to send");  
+    // ESP_LOG_BUFFER_HEX(LOGGER_TAG,buf,size);
     //buf = flatcc_builder_finalize_aligned_buffer(&builder, &size);
     //logger_frame_t request;
     FRAME_AS_REQUEST( (frame) );
@@ -120,8 +120,8 @@ void send_frame(logger_frame_t *frame)
     tmp_buffer_out[HEADER_SIZE+size+2] = frame->end_of_frame[0];
     tmp_buffer_out[HEADER_SIZE+size+3] = frame->end_of_frame[1];
     //send
-    ESP_LOGI("receive", "message to send");  
-    ESP_LOG_BUFFER_HEX(LOGGER_TAG,tmp_buffer_out,5+size +4 );
+    //ESP_LOGI("receive", "message to send");  
+    //ESP_LOG_BUFFER_HEX(LOGGER_TAG,tmp_buffer_out,5+size +4 );
     //uart_send
     uart_write_bytes(uart_num, (const char *)tmp_buffer_out, 5+size +4);
 }

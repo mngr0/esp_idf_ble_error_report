@@ -74,3 +74,60 @@ const esp_gatts_attr_db_t gatt_ar_state_db[GATT_AR_STATE_NB] =
             {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&GATT_AR_STATE_UUID_VALUE, ESP_GATT_PERM_READ, GATTS_DEMO_CHAR_VAL_LEN_MAX, sizeof(air_ref_state_t), (uint8_t *)&ar_state}},
 
 };
+
+void ar_state_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param)
+{
+    switch (event)
+    {
+    case ESP_GATTS_REG_EVT:
+    {
+//         esp_err_t set_dev_name_ret = esp_ble_gap_set_device_name(SAMPLE_DEVICE_NAME);
+//         if (set_dev_name_ret)
+//         {
+//             ESP_LOGE(GATTS_AR_CONF_TAG, "set device name failed, error code = %x", set_dev_name_ret);
+//         }
+//         esp_err_t raw_adv_ret = esp_ble_gap_config_adv_data_raw(raw_adv_data, sizeof(raw_adv_data));
+//         if (raw_adv_ret)
+//         {
+//             ESP_LOGE(GATTS_AR_CONF_TAG, "config raw adv data failed, error code = %x ", raw_adv_ret);
+//         }
+//         gatt_ar_state_adv_config_done |= ADV_CONFIG_FLAG;
+//         esp_err_t raw_scan_ret = esp_ble_gap_config_scan_rsp_data_raw(raw_scan_rsp_data, sizeof(raw_scan_rsp_data));
+//         if (raw_scan_ret)
+//         {
+//             ESP_LOGE(GATTS_AR_CONF_TAG, "config raw scan rsp data failed, error code = %x", raw_scan_ret);
+//         }
+//         gatt_ar_state_adv_config_done |= SCAN_RSP_CONFIG_FLAG;
+//         // esp_err_t create_attr_ret  = esp_ble_gatts_create_service(gatts_if, &heart_rate_profile_tab[PROFILE_AR_CONF].service_id, GATT_AR_CONF_NB);
+       
+//         // //esp_err_t create_attr_ret = esp_ble_gatts_create_attr_tab(gatt_ar_conf_db, gatts_if, HRS_IDX_NB, SVC_INST_ID);
+//         // if (create_attr_ret)
+//         // {
+//         //     ESP_LOGE(GATTS_AR_CONF_TAG, "create attr table failed, error code = %x", create_attr_ret);
+//         // }
+     }
+    break;
+    case ESP_GATTS_READ_EVT:
+        ESP_LOGI(GATTS_AR_STATE_TAG, "ESP_GATTS_READ_EVT");
+        break;
+    case ESP_GATTS_WRITE_EVT:
+    case ESP_GATTS_EXEC_WRITE_EVT:
+    case ESP_GATTS_MTU_EVT:
+    case ESP_GATTS_CONF_EVT:
+    case ESP_GATTS_START_EVT:
+    case ESP_GATTS_CONNECT_EVT:
+    case ESP_GATTS_DISCONNECT_EVT:
+    case ESP_GATTS_CREAT_ATTR_TAB_EVT:
+    case ESP_GATTS_STOP_EVT:
+    case ESP_GATTS_OPEN_EVT:
+    case ESP_GATTS_CANCEL_OPEN_EVT:
+    case ESP_GATTS_CLOSE_EVT:
+    case ESP_GATTS_LISTEN_EVT:
+    case ESP_GATTS_CONGEST_EVT:
+    case ESP_GATTS_UNREG_EVT:
+    case ESP_GATTS_DELETE_EVT:
+    default:
+        ESP_LOGI(GATTS_AR_STATE_TAG, "SOME EVENT, MTU %d", event);
+        break;
+    }
+}

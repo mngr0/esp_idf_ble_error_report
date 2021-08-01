@@ -8,6 +8,8 @@
 #define ESP_APP_ID_AR_CONF 0x57
 #define ESP_APP_ID_AR_STATE 0x58
 
+#define CONFIG_SET_RAW_ADV_DATA
+
 
 #define SAMPLE_DEVICE_NAME "AIR_REF_CONF"
 #define SVC_INST_ID 0
@@ -55,7 +57,7 @@ struct gatts_profile_inst
     esp_bt_uuid_t descr_uuid;
 };
 
-
+extern struct gatts_profile_inst heart_rate_profile_tab[PROFILE_NUM];
 
 void example_exec_write_event_env(prepare_type_env_t *prepare_write_env, esp_ble_gatts_cb_param_t *param);
 
