@@ -28,7 +28,7 @@ typedef enum
     PROFILE_M_STATE_IDX,
     PROFILE_AR_STATE_IDX,
     PROFILE_AR_CONF_IDX,
-    PROFILE_BLUEFI_IDX,
+   // PROFILE_BLUEFI_IDX,
     PROFILE_NUM
 } PROFILE_NUMBERS;
 
@@ -63,7 +63,7 @@ void example_exec_write_event_env(prepare_type_env_t *prepare_write_env, esp_ble
 
 void BLE_init(void);
 
-
+void example_write_event_env(esp_gatt_if_t gatts_if, prepare_type_env_t *prepare_write_env, esp_ble_gatts_cb_param_t *param);
 
 // void gatts_profile_event_handler(esp_gatts_cb_event_t event,
 //                                         esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param);

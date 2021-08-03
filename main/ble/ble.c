@@ -150,77 +150,77 @@ struct gatts_profile_inst heart_rate_profile_tab[PROFILE_NUM] = {
     [PROFILE_APP_IDX] = {
         .gatts_cb = gatts_profile_event_handler,
         .gatts_if = ESP_GATT_IF_NONE, /* Not get the gatt_if, so initial is ESP_GATT_IF_NONE */
-        .service_id = {
-            .is_primary = true,
-            .id = {
-                .inst_id = 0x00,
-                .uuid = {
-                    .len = ESP_UUID_LEN_16,
-                    .uuid = {
-                        .uuid16 = 0x00FF,
-                    },
-                },
-            },
-        },
+        // .service_id = {
+        //     .is_primary = true,
+        //     .id = {
+        //         .inst_id = 0x00,
+        //         .uuid = {
+        //             .len = ESP_UUID_LEN_16,
+        //             .uuid = {
+        //                 .uuid16 = 0x00FF,
+        //             },
+        //         },
+        //     },
+        // },
     },
     [PROFILE_M_STATE_IDX] = {
         .gatts_cb = m_state_event_handler,
         .gatts_if = ESP_GATT_IF_NONE, /* Not get the gatt_if, so initial is ESP_GATT_IF_NONE */
-        .service_id = {
-            .is_primary = false,
-            .id = {
-                .inst_id = 0x00,
-                .uuid = {
-                    .len = ESP_UUID_LEN_16,
-                    .uuid = {
-                        .uuid16 = GATT_M_STATE_UUID_SERVICE,
-                    },
-                },
-            },
-        },
+        // .service_id = {
+        //     .is_primary = false,
+        //     .id = {
+        //         .inst_id = 0x00,
+        //         .uuid = {
+        //             .len = ESP_UUID_LEN_16,
+        //             .uuid = {
+        //                 .uuid16 = GATT_M_STATE_UUID_SERVICE,
+        //             },
+        //         },
+        //     },
+        // },
     },
     [PROFILE_AR_CONF_IDX] = {
         .gatts_cb = ar_conf_event_handler,
         .gatts_if = ESP_GATT_IF_NONE, /* Not get the gatt_if, so initial is ESP_GATT_IF_NONE */
-        .is_primary = false,
-        .id = {
-            .inst_id = 0x00,
-            .uuid = {
-                .len = ESP_UUID_LEN_16,
-                .uuid = {
-                    .uuid16 = GATT_AR_CONF_UUID_SERVICE,
-                },
-            },
-        },
+        // .is_primary = false,
+        // .id = {
+        //     .inst_id = 0x00,
+        //     .uuid = {
+        //         .len = ESP_UUID_LEN_16,
+        //         .uuid = {
+        //             .uuid16 = GATT_AR_CONF_UUID_SERVICE,
+        //         },
+        //     },
+        // },
     },
     [PROFILE_AR_STATE_IDX] = {
         .gatts_cb = ar_state_event_handler,
         .gatts_if = ESP_GATT_IF_NONE, /* Not get the gatt_if, so initial is ESP_GATT_IF_NONE */
-        .is_primary = false,
-        .id = {
-            .inst_id = 0x00,
-            .uuid = {
-                .len = ESP_UUID_LEN_16,
-                .uuid = {
-                    .uuid16 = GATT_AR_STATE_UUID_SERVICE,
-                },
-            },
-        },
+        // .is_primary = false,
+        // .id = {
+        //     .inst_id = 0x00,
+        //     .uuid = {
+        //         .len = ESP_UUID_LEN_16,
+        //         .uuid = {
+        //             .uuid16 = GATT_AR_STATE_UUID_SERVICE,
+        //         },
+        //     },
+        // },
     },
-    [PROFILE_BLUEFI_IDX] = {
-        .gatts_cb = bluefi_event_handler,
-        .gatts_if = ESP_GATT_IF_NONE, /* Not get the gatt_if, so initial is ESP_GATT_IF_NONE */
-        .is_primary = false,
-        .id = {
-            .inst_id = 0x00,
-            .uuid = {
-                .len = ESP_UUID_LEN_16,
-                .uuid = {
-                    .uuid16 = GATT_BLUEFI_UUID_SERVICE,
-                },
-            },
-        },
-    }
+    // [PROFILE_BLUEFI_IDX] = {
+    //     .gatts_cb = bluefi_event_handler,
+    //     .gatts_if = ESP_GATT_IF_NONE, /* Not get the gatt_if, so initial is ESP_GATT_IF_NONE */
+    //     //.is_primary = false,
+    //     // .id = {
+    //     //     .inst_id = 0x00,
+    //     //     .uuid = {
+    //     //         .len = ESP_UUID_LEN_16,
+    //     //         .uuid = {
+    //     //             .uuid16 = GATT_BLUEFI_UUID_SERVICE,
+    //     //         },
+    //     //     },
+    //     //},
+    // }
 
 };
 
@@ -448,6 +448,16 @@ void example_exec_write_event_env(prepare_type_env_t *prepare_write_env, esp_ble
     }
     prepare_write_env->prepare_len = 0;
 }
+
+
+
+
+
+
+
+
+
+
 
 void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param)
 {
@@ -693,19 +703,19 @@ void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts
             }
         }
 
-        else if (param->add_attr_tab.svc_uuid.uuid.uuid16 == GATT_BLUEFI_UUID_SERVICE)
-        {
-            if (param->add_attr_tab.num_handle != GATT_AR_CONF_NB)
-            {
-                ESP_LOGE(GATTS_TABLE_TAG, "create attribute bluefi table abnormally, num_handle (%d) isn't equal to INFO_NB(%d)", param->add_attr_tab.num_handle, GATT_BLUEFI_NB);
-            }
-            else
-            {
-                ESP_LOGI(GATTS_TABLE_TAG, "create attribute bluefi table successfully, the number handle = %d\n", param->add_attr_tab.num_handle);
-                memcpy(bluefi_handle_table, param->add_attr_tab.handles, sizeof(bluefi_handle_table));
-                esp_ble_gatts_start_service(bluefi_handle_table[GATT_BLUEFI_IDX_SERVICE]);
-            }
-        }
+        // else if (param->add_attr_tab.svc_uuid.uuid.uuid16 == GATT_BLUEFI_UUID_SERVICE)
+        // {
+        //     if (param->add_attr_tab.num_handle != GATT_AR_CONF_NB)
+        //     {
+        //         ESP_LOGE(GATTS_TABLE_TAG, "create attribute bluefi table abnormally, num_handle (%d) isn't equal to INFO_NB(%d)", param->add_attr_tab.num_handle, GATT_BLUEFI_NB);
+        //     }
+        //     else
+        //     {
+        //         ESP_LOGI(GATTS_TABLE_TAG, "create attribute bluefi table successfully, the number handle = %d\n", param->add_attr_tab.num_handle);
+        //         memcpy(bluefi_handle_table, param->add_attr_tab.handles, sizeof(bluefi_handle_table));
+        //         esp_ble_gatts_start_service(bluefi_handle_table[GATT_BLUEFI_IDX_SERVICE]);
+        //     }
+        // }
 
         break;
     }
@@ -724,7 +734,6 @@ void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts
 
 static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param)
 {
-
     /* If event is register event, store the gatts_if for each profile */
     if (event == ESP_GATTS_REG_EVT)
     {
@@ -824,6 +833,20 @@ void BLE_init(void)
         ESP_LOGE(GATTS_TABLE_TAG, "gatts app register error, error code = %x", ret);
         return;
     }
+    ret = esp_ble_gatts_app_register(PROFILE_AR_CONF_IDX);
+    if (ret)
+    {
+        ESP_LOGE(GATTS_TABLE_TAG, "gatts app register error, error code = %x", ret);
+        return;
+    }
+
+    ret = esp_ble_gatts_app_register(PROFILE_AR_STATE_IDX);
+    if (ret)
+    {
+        ESP_LOGE(GATTS_TABLE_TAG, "gatts app register error, error code = %x", ret);
+        return;
+    }
+
 
     esp_err_t local_mtu_ret = esp_ble_gatt_set_local_mtu(500);
     if (local_mtu_ret)
