@@ -99,49 +99,6 @@ static void configure_serial(){
 
 
 
-// static void  bridge_task(void *arg)
-// {
-//     uint8_t data[BUF_SIZE*4];
-
-    
-//         //init
-//     //uint8_t last_btn_state = gpio_get_level(BTN_GPIO);
-//     logger_reply_t reply;
-//     machine_state_t m_state;
-//     int length = 50;
-//     while (1){
-        
-//         length = uart_read_bytes(uart_num, data, BUF_SIZE, 20 / portTICK_RATE_MS);
-//         if (receive_reply(&reply,data,length)){
-//             memcpy(&m_state, reply.buffer, sizeof(machine_state_t));
-//             ESP_LOGI("RECVED:","HP=%d\tLP=%d\tTGS=%d\tTritorno=%d\tTenv=%d\tTc=%d\tExtC=%d\n",
-//                 m_state.condensation_pressure,
-//                 m_state.evaporation_pressure,
-//                 m_state.temperature_gas_scarico,
-//                 m_state.temperature_gas_ritorno,
-//                 m_state.temperature_environment,
-//                 m_state.temperature_extra,
-//                 m_state.pin_enable);
-//         }
-//         // ESP_LOGI("BRIDGE TASK", "READ DATA: %d\t",length);
-//         // for (int i=0;i<length;i++){
-//         //     ESP_LOGI("BRIDGE TASK", "%d\t",data[i]);
-//         // }
-
-
-//         //update status
-//         //uint8_t new_btn_state = gpio_get_level(BTN_GPIO);
-//         // if(new_btn_state != last_btn_state){
-//         //     esp_ble_gatts_send_indicate(gatts_if, param->write.conn_id, heart_rate_handle_table[IDX_CHAR_VAL_A], sizeof(notify_data), notify_data, false);
-//         //     last_btn_state = new_btn_state;
-//         // }
-//         //consider if save on SD card
-//         //maybe check if data needs to be calncelled for being too old
-//         //os sleep
-//         vTaskDelay(500 / portTICK_PERIOD_MS);
-//         //os_sleep(500);
-//     }
-// }
 
 void app_main(void)
 {
@@ -162,7 +119,6 @@ void app_main(void)
 
 
     BLE_init();
-    logger_init(); //TODO un thread per mandare richieste periodiche, e un thread per la sola ricezione.
+    logger_init(); 
 
-    //xTaskCreate(bridge_task, "bridge_task", BRIDGE_TASK_STACK_SIZE, NULL, 10, NULL);
 }

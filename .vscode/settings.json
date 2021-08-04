@@ -7,7 +7,8 @@
         "air_ref.h": "c",
         "airref_builder.h": "c",
         "logger_frame.h": "c",
-        "stdbool.h": "c"
+        "stdbool.h": "c",
+        "ble.h": "c"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }

@@ -84,10 +84,6 @@ void build_frame(logger_frame_t *frame, flatcc_builder_t* builder )
     void *buf;
 
     buf = flatcc_builder_finalize_buffer(builder, &size); 
-   // ESP_LOGI("receive", "beffer to send");  
-    // ESP_LOG_BUFFER_HEX(LOGGER_TAG,buf,size);
-    //buf = flatcc_builder_finalize_aligned_buffer(&builder, &size);
-    //logger_frame_t request;
     FRAME_AS_REQUEST( (frame) );
     frame->protocol_version = PROTOCOL_VERSION;
 
@@ -95,9 +91,7 @@ void build_frame(logger_frame_t *frame, flatcc_builder_t* builder )
     frame->frame_size = size;
     flatcc_builder_aligned_free(buf);
 
-    access_message_buffer(frame->buffer);
-
-
+    //access_message_buffer(frame->buffer);
 }
 
 void send_frame(logger_frame_t *frame)

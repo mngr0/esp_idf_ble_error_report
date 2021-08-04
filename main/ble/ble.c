@@ -35,7 +35,6 @@
 
 #include "ble/ble.h"
 #include "air_ref/air_ref.h"
-#include "air_ref/serial_logger.h"
 
 #include "services/gatt_ar_conf.h"
 #include "services/gatt_ar_state.h"
@@ -800,6 +799,8 @@ void BLE_init(void)
         ESP_LOGE(GATTS_TABLE_TAG, "%s enable bluetooth failed: %s", __func__, esp_err_to_name(ret));
         return;
     }
+
+    esp_ble_gatt_set_local_mtu(500);
 
     ret = esp_ble_gatts_register_callback(gatts_event_handler);
     if (ret)

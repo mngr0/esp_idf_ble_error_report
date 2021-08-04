@@ -35,7 +35,6 @@
 #include "gatt_ar_conf.h"
 #include "ble/ble.h"
 #include "air_ref/air_ref.h"
-#include "air_ref/serial_logger.h"
 
 #define GATTS_AR_CONF_TAG "GATTS_AR_CONF"
 

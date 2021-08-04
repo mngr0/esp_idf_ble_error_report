@@ -36,8 +36,11 @@
 
 #include "ble/ble.h"
 #include "air_ref/air_ref.h"
-#include "air_ref/serial_logger.h"
+#include "stdbool.h"
 
+#include "air_ref/serial_logger/logger_frame.h"
+#include "air_ref/serial_logger/logger_air_ref.h"
+#include "air_ref/air_ref.h"
 
 #define GATTS_M_STATE_TAG "GATTS_M_STATE"
 
@@ -54,7 +57,6 @@ const uint16_t GATT_M_STATE_UUID_VALUE = (0xFF00 | GATT_M_STATE_IDX_VALUE) & (PR
 static const uint16_t primary_service_uuid = ESP_GATT_UUID_PRI_SERVICE;
 static const uint16_t character_declaration_uuid = ESP_GATT_UUID_CHAR_DECLARE;
 static const uint8_t char_prop_read_notify = ESP_GATT_CHAR_PROP_BIT_READ | ESP_GATT_CHAR_PROP_BIT_NOTIFY;
-
 
 static prepare_type_env_t b_prepare_write_env;
 static esp_gatt_char_prop_t b_property = 0;
@@ -73,8 +75,10 @@ const esp_gatts_attr_db_t gatt_m_state_db[GATT_M_STATE_NB] =
 
 };
 
-void m_state_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param) {
-    switch (event) {
+void m_state_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param)
+{
+    switch (event)
+    {
     case ESP_GATTS_REG_EVT:
         ESP_LOGI(GATTS_M_STATE_TAG, "REGISTER_APP_EVT, status %d, app_id %d\n", param->reg.status, param->reg.app_id);
         heart_rate_profile_tab[PROFILE_M_STATE_IDX].service_id.is_primary = true;
@@ -84,24 +88,38 @@ void m_state_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, e
 
         esp_ble_gatts_create_service(gatts_if, &heart_rate_profile_tab[PROFILE_M_STATE_IDX].service_id, GATT_M_STATE_NB);
         break;
-    case ESP_GATTS_READ_EVT: { // READ MACHINE STATE
+    case ESP_GATTS_READ_EVT:
+    { // READ MACHINE STATE
         ESP_LOGI(GATTS_M_STATE_TAG, "GATT_READ_EVT, conn_id %d, trans_id %d, handle %d\n", param->read.conn_id, param->read.trans_id, param->read.handle);
         esp_gatt_rsp_t rsp;
         memset(&rsp, 0, sizeof(esp_gatt_rsp_t));
         rsp.attr_value.handle = param->read.handle;
-        rsp.attr_value.len = 4;
-        //TODO LOAD M_STATE
-        rsp.attr_value.value[0] = 0xde;
-        rsp.attr_value.value[1] = 0xad;
-        rsp.attr_value.value[2] = 0xbe;
-        rsp.attr_value.value[3] = 0xef;
+
+        flatcc_builder_t builder;
+        size_t size;
+        flatcc_builder_init(&builder);
+        load_m_state(&builder, &m_state);
+
+        void *buf;
+
+        buf = flatcc_builder_finalize_buffer(&builder, &size);
+        rsp.attr_value.len = size;
+        memcpy(rsp.attr_value.value, buf, size);
+        ESP_LOGI(GATTS_M_STATE_TAG, "required size: %d\n", size);
+
+        flatcc_builder_aligned_free(buf);
+
+        flatcc_builder_clear(&builder);
+
         esp_ble_gatts_send_response(gatts_if, param->read.conn_id, param->read.trans_id,
                                     ESP_GATT_OK, &rsp);
         break;
     }
-    case ESP_GATTS_WRITE_EVT: { //EDIT CONF
+    case ESP_GATTS_WRITE_EVT:
+    { //EDIT CONF
         ESP_LOGI(GATTS_M_STATE_TAG, "GATT_WRITE_EVT, conn_id %d, trans_id %d, handle %d\n", param->write.conn_id, param->write.trans_id, param->write.handle);
-        if (!param->write.is_prep){
+        if (!param->write.is_prep)
+        {
             ESP_LOGI(GATTS_M_STATE_TAG, "GATT_WRITE_EVT, value len %d, value :", param->write.len);
             esp_log_buffer_hex(GATTS_M_STATE_TAG, param->write.value, param->write.len);
         }
@@ -109,7 +127,7 @@ void m_state_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, e
         break;
     }
     case ESP_GATTS_EXEC_WRITE_EVT:
-        ESP_LOGI(GATTS_M_STATE_TAG,"ESP_GATTS_EXEC_WRITE_EVT");
+        ESP_LOGI(GATTS_M_STATE_TAG, "ESP_GATTS_EXEC_WRITE_EVT");
         esp_ble_gatts_send_response(gatts_if, param->write.conn_id, param->write.trans_id, ESP_GATT_OK, NULL);
         example_exec_write_event_env(&b_prepare_write_env, param);
         break;
@@ -126,12 +144,13 @@ void m_state_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, e
 
         esp_ble_gatts_start_service(heart_rate_profile_tab[PROFILE_M_STATE_IDX].service_handle);
         b_property = ESP_GATT_CHAR_PROP_BIT_READ | ESP_GATT_CHAR_PROP_BIT_WRITE | ESP_GATT_CHAR_PROP_BIT_NOTIFY;
-        esp_err_t add_char_ret =esp_ble_gatts_add_char( heart_rate_profile_tab[PROFILE_M_STATE_IDX].service_handle, &heart_rate_profile_tab[PROFILE_M_STATE_IDX].char_uuid,
+        esp_err_t add_char_ret = esp_ble_gatts_add_char(heart_rate_profile_tab[PROFILE_M_STATE_IDX].service_handle, &heart_rate_profile_tab[PROFILE_M_STATE_IDX].char_uuid,
                                                         ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE,
                                                         b_property,
                                                         NULL, NULL);
-        if (add_char_ret){
-            ESP_LOGE(GATTS_M_STATE_TAG, "add char failed, error code =%x",add_char_ret);
+        if (add_char_ret)
+        {
+            ESP_LOGE(GATTS_M_STATE_TAG, "add char failed, error code =%x", add_char_ret);
         }
         break;
     case ESP_GATTS_ADD_INCL_SRVC_EVT:
@@ -169,10 +188,11 @@ void m_state_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, e
         break;
     case ESP_GATTS_CONF_EVT:
         ESP_LOGI(GATTS_M_STATE_TAG, "ESP_GATTS_CONF_EVT status %d attr_handle %d", param->conf.status, param->conf.handle);
-        if (param->conf.status != ESP_GATT_OK){
+        if (param->conf.status != ESP_GATT_OK)
+        {
             esp_log_buffer_hex(GATTS_M_STATE_TAG, param->conf.value, param->conf.len);
         }
-    break;
+        break;
     case ESP_GATTS_DISCONNECT_EVT:
     case ESP_GATTS_OPEN_EVT:
     case ESP_GATTS_CANCEL_OPEN_EVT:
