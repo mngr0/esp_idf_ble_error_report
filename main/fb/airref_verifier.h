@@ -111,14 +111,15 @@ static int AirRef_AirRefConf_verify_table(flatcc_table_verifier_descriptor_t *td
     int ret;
     if ((ret = flatcc_verify_field(td, 0, 4, 4) /* serial_control */)) return ret;
     if ((ret = flatcc_verify_field(td, 1, 4, 4) /* fan_target_pressure */)) return ret;
-    if ((ret = flatcc_verify_field(td, 2, 4, 4) /* fan_coeff_offset */)) return ret;
-    if ((ret = flatcc_verify_field(td, 3, 4, 4) /* fan_min_pressure */)) return ret;
-    if ((ret = flatcc_verify_field(td, 4, 4, 4) /* fan_max_pressure */)) return ret;
-    if ((ret = flatcc_verify_field(td, 5, 4, 4) /* compressor_target_pressure */)) return ret;
-    if ((ret = flatcc_verify_field(td, 6, 4, 4) /* compressor_activation_offset */)) return ret;
-    if ((ret = flatcc_verify_field(td, 7, 4, 4) /* compressor_action_delay */)) return ret;
-    if ((ret = flatcc_verify_field(td, 8, 40, 4) /* compressor_speed */)) return ret;
-    if ((ret = flatcc_verify_field(td, 9, 4, 4) /* compressor_start_interval */)) return ret;
+    if ((ret = flatcc_verify_field(td, 2, 4, 4) /* fan_coeff_p */)) return ret;
+    if ((ret = flatcc_verify_field(td, 3, 4, 4) /* fan_coeff_offset */)) return ret;
+    if ((ret = flatcc_verify_field(td, 4, 4, 4) /* fan_min_pressure */)) return ret;
+    if ((ret = flatcc_verify_field(td, 5, 4, 4) /* fan_max_pressure */)) return ret;
+    if ((ret = flatcc_verify_field(td, 6, 4, 4) /* compressor_target_pressure */)) return ret;
+    if ((ret = flatcc_verify_field(td, 7, 4, 4) /* compressor_activation_offset */)) return ret;
+    if ((ret = flatcc_verify_field(td, 8, 4, 4) /* compressor_action_delay */)) return ret;
+    if ((ret = flatcc_verify_field(td, 9, 40, 4) /* compressor_speed */)) return ret;
+    if ((ret = flatcc_verify_field(td, 10, 4, 4) /* compressor_start_interval */)) return ret;
     return flatcc_verify_ok;
 }
 
@@ -220,7 +221,7 @@ static inline int AirRef_MachineState_verify_as_root_with_type_hash(const void *
 static int AirRef_Request_verify_table(flatcc_table_verifier_descriptor_t *td)
 {
     int ret;
-    if ((ret = flatcc_verify_field(td, 0, 4, 4) /* requestType */)) return ret;
+    if ((ret = flatcc_verify_field(td, 0, 4, 4) /* request_type */)) return ret;
     return flatcc_verify_ok;
 }
 

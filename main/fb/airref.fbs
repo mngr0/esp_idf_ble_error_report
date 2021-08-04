@@ -55,6 +55,7 @@ struct MotorStatus{
 table AirRefConf{
 	serial_control:int =-1;
 	fan_target_pressure:int =-1;
+	fan_coeff_p:int =-1;
 	fan_coeff_offset:int =-1;
 	fan_min_pressure:int =-1; //(milliBar)
 	fan_max_pressure:int =-1; //(milliBar)
@@ -109,7 +110,7 @@ enum RequestType: int{
 }
 
 table Request{
-	requestType: RequestType;
+	request_type: RequestType;
 }
 
 

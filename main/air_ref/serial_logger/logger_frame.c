@@ -6,10 +6,10 @@
 
 #define LOGGER_TAG "LOGGER"
 
-machine_state_t m_state;
-air_ref_conf_t ar_conf;
-air_ref_conf_t ar_conf_old;
-air_ref_state_t ar_state;
+extern machine_state_t m_state;
+extern air_ref_conf_t ar_conf;
+extern air_ref_conf_t ar_conf_old;
+extern air_ref_state_t ar_state;
 
 QueueHandle_t command_queue;
 TaskHandle_t xLoggerTask;

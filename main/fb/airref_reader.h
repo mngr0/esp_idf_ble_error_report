@@ -380,14 +380,15 @@ __flatbuffers_table_as_root(AirRef_AirRefConf)
 
 __flatbuffers_define_scalar_field(0, AirRef_AirRefConf, serial_control, flatbuffers_int32, int32_t, INT32_C(-1))
 __flatbuffers_define_scalar_field(1, AirRef_AirRefConf, fan_target_pressure, flatbuffers_int32, int32_t, INT32_C(-1))
-__flatbuffers_define_scalar_field(2, AirRef_AirRefConf, fan_coeff_offset, flatbuffers_int32, int32_t, INT32_C(-1))
-__flatbuffers_define_scalar_field(3, AirRef_AirRefConf, fan_min_pressure, flatbuffers_int32, int32_t, INT32_C(-1))
-__flatbuffers_define_scalar_field(4, AirRef_AirRefConf, fan_max_pressure, flatbuffers_int32, int32_t, INT32_C(-1))
-__flatbuffers_define_scalar_field(5, AirRef_AirRefConf, compressor_target_pressure, flatbuffers_int32, int32_t, INT32_C(-1))
-__flatbuffers_define_scalar_field(6, AirRef_AirRefConf, compressor_activation_offset, flatbuffers_int32, int32_t, INT32_C(-1))
-__flatbuffers_define_scalar_field(7, AirRef_AirRefConf, compressor_action_delay, flatbuffers_int32, int32_t, INT32_C(-1))
-__flatbuffers_define_struct_field(8, AirRef_AirRefConf, compressor_speed, AirRef_CompressorSpeed_struct_t, 0)
-__flatbuffers_define_scalar_field(9, AirRef_AirRefConf, compressor_start_interval, flatbuffers_int32, int32_t, INT32_C(-1))
+__flatbuffers_define_scalar_field(2, AirRef_AirRefConf, fan_coeff_p, flatbuffers_int32, int32_t, INT32_C(-1))
+__flatbuffers_define_scalar_field(3, AirRef_AirRefConf, fan_coeff_offset, flatbuffers_int32, int32_t, INT32_C(-1))
+__flatbuffers_define_scalar_field(4, AirRef_AirRefConf, fan_min_pressure, flatbuffers_int32, int32_t, INT32_C(-1))
+__flatbuffers_define_scalar_field(5, AirRef_AirRefConf, fan_max_pressure, flatbuffers_int32, int32_t, INT32_C(-1))
+__flatbuffers_define_scalar_field(6, AirRef_AirRefConf, compressor_target_pressure, flatbuffers_int32, int32_t, INT32_C(-1))
+__flatbuffers_define_scalar_field(7, AirRef_AirRefConf, compressor_activation_offset, flatbuffers_int32, int32_t, INT32_C(-1))
+__flatbuffers_define_scalar_field(8, AirRef_AirRefConf, compressor_action_delay, flatbuffers_int32, int32_t, INT32_C(-1))
+__flatbuffers_define_struct_field(9, AirRef_AirRefConf, compressor_speed, AirRef_CompressorSpeed_struct_t, 0)
+__flatbuffers_define_scalar_field(10, AirRef_AirRefConf, compressor_start_interval, flatbuffers_int32, int32_t, INT32_C(-1))
 
 struct AirRef_AirRefState_table { uint8_t unused__; };
 
@@ -438,7 +439,7 @@ static inline AirRef_Request_table_t AirRef_Request_vec_at(AirRef_Request_vec_t 
 __flatbuffers_offset_vec_at(AirRef_Request_table_t, vec, i, 0)
 __flatbuffers_table_as_root(AirRef_Request)
 
-__flatbuffers_define_scalar_field(0, AirRef_Request, requestType, AirRef_RequestType, AirRef_RequestType_enum_t, INT32_C(0))
+__flatbuffers_define_scalar_field(0, AirRef_Request, request_type, AirRef_RequestType, AirRef_RequestType_enum_t, INT32_C(0))
 typedef uint8_t AirRef_Content_union_type_t;
 __flatbuffers_define_integer_type(AirRef_Content, AirRef_Content_union_type_t, 8)
 __flatbuffers_define_union(flatbuffers_, AirRef_Content)
