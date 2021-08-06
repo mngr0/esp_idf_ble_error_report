@@ -17,6 +17,57 @@ extern const uart_port_t uart_num;
 
 #define LOGGER_BUF_SIZE 1024
 
+
+int access_message_buffer(const void *buffer)
+{
+	// Note that we use the `table_t` suffix when reading a table object
+	// as opposed to the `ref_t` suffix used during the construction of
+	// the buffer.
+
+	AirRef_Message_table_t message = AirRef_Message_as_root(buffer);
+	test_assert(message != 0);
+	ESP_LOGI("DECODED", "assert ok");
+	if (AirRef_Message_content_type(message) == AirRef_Content_MachineState)
+	{
+		//update local machine state
+		ESP_LOGI("DECODED", "right content type");
+		// Note: root object pointers are NOT the same as the `buffer` pointer.
+
+		// Make sure the buffer is accessible.
+
+		AirRef_MachineState_table_t machineState = (AirRef_MachineState_table_t)AirRef_Message_content(message);
+
+		parse_m_state(machineState, &m_state);
+
+		ESP_LOGI("DECODED", "evaporation_pressure:%d\t", m_state.evaporation_pressure);
+		ESP_LOGI("DECODED", "condensation_pressure:%d\t", m_state.condensation_pressure);
+		ESP_LOGI("DECODED", "temperature_gas_scarico:%d\t", m_state.temperature_gas_scarico);
+		ESP_LOGI("DECODED", "temperature_environment:%d\t", m_state.temperature_environment);
+		ESP_LOGI("DECODED", "temperature_gas_ritorno:%d\t", m_state.temperature_gas_ritorno);
+		ESP_LOGI("DECODED", "temperature_extra:%d\n", m_state.temperature_extra);
+	}
+	else if (AirRef_Message_content_type(message) == AirRef_Content_AirRefConf)
+	{
+        AirRef_AirRefConf_table_t airRefConf = (AirRef_AirRefConf_table_t)AirRef_Message_content(message);
+        parse_ar_conf(airRefConf, &ar_conf);
+		//update local airrefconf
+	}
+	else if (AirRef_Message_content_type(message) == AirRef_Content_AirRefState)
+	{
+		//update local airrefstate
+	}
+	else if (AirRef_Message_content_type(message) == AirRef_Content_Request)
+	{
+		AirRef_Request_table_t request = (AirRef_Request_table_t)AirRef_Message_content(message);
+
+		//if ()
+		//if request is air_ref_conf_received -> reset state to idle
+	}
+	return 0;
+}
+
+
+
 static void logger_task(void *arg)
 {
     timestamp_last_update_m_state = xTaskGetTickCount();
@@ -47,65 +98,32 @@ static void logger_task(void *arg)
             timestamp_last_update_m_state = xTaskGetTickCount();
             do_request_m_state(&req);
         }
-        // else if (timestamp_last_update_ar_state + 30000 / portTICK_PERIOD_MS < xTaskGetTickCount())
-        // {
-        //     ESP_LOGI(LOGGER_TAG, "asking for ar_state state");
-        //     (timestamp_last_update_ar_state = xTaskGetTickCount());
-        //     do_request_ar_state(&req);
-        // }
+        else if (timestamp_last_update_ar_state + 30000 / portTICK_PERIOD_MS < xTaskGetTickCount())
+        {
+            ESP_LOGI(LOGGER_TAG, "asking for ar_state state");
+            (timestamp_last_update_ar_state = xTaskGetTickCount());
+            do_request_ar_state(&req);
+        }
 
-        // else if (timestamp_last_update_ar_conf + 50000 / portTICK_PERIOD_MS < xTaskGetTickCount())
-        // {
-        //     ESP_LOGI(LOGGER_TAG, "asking for ar_conf");
-        //     timestamp_last_update_ar_conf = xTaskGetTickCount();
-        //     do_request_ar_state(&req);
-        // }
+        else if (timestamp_last_update_ar_conf + 50000 / portTICK_PERIOD_MS < xTaskGetTickCount())
+        {
+            ESP_LOGI(LOGGER_TAG, "asking for ar_conf");
+            timestamp_last_update_ar_conf = xTaskGetTickCount();
+            do_request_ar_state(&req);
+        }
         else
         {
             ESP_LOGI(LOGGER_TAG, "delay .... ");
             vTaskDelay(5000 / portTICK_PERIOD_MS);
            // continue;
         }
-
-       // ESP_LOGI(LOGGER_TAG, "communication tansaction");
-        // if no command request, update state
-        //send_request(&req);
-
-        // do
-        // {
-        //     vTaskDelay(50 / portTICK_PERIOD_MS);
-        //     //TODO manage buffer, receive separated
-        //     length = uart_read_bytes(uart_num, data, LOGGER_BUF_SIZE, 20 / portTICK_RATE_MS);
-        //     //manage start, end.
-        //     if (length > 0)
-        //     {
-        //         //CHECK START OF PACKET , END OF PACKET AND SHIT LIKE THAT
-        //         tot_length += length;
-        //         ESP_LOGI(LOGGER_TAG, "received len = %d ", length);
-
-        //         ESP_LOG_BUFFER_HEX("RECVED:", data, tot_length);
-        //         if (receive_reply(&reply, data, length))
-        //         {
-        //             ESP_LOGI(LOGGER_TAG, "receive success");
-        //             access_message_buffer(data);
-        //         }
-        //         else
-        //         {
-        //             ESP_LOGI(LOGGER_TAG, "receive error");
-        //         }
-        //         done = true;
-        //     }
-        // } while (done == false);
-
-        // ESP_LOGI(LOGGER_TAG, "sizeof error_report_t is %d", sizeof(error_report_t));
-        // ESP_LOGI(LOGGER_TAG, "sizeof air_ref_status_t is %d", sizeof(air_ref_status_t));
+        // if status is waiting for confirm (ar_conf update) for more than given time -> resend conf
     }
 }
 
 static void receiver_task(void *arg){
 
 
-    //TODO list of things to check: M_STATE AR_STATE
     int length;
     int tot_length = 0;
     logger_frame_t reply;
@@ -142,10 +160,6 @@ static void receiver_task(void *arg){
 
 void logger_init()
 {
-    //TODO prepare buffers
-    // TODO two task: periodic send (forse un giorno il same manda e esp configura il periodo)
-    // autonomous receiver
-
 
     xTaskCreate(logger_task, "logger_task", LOGGER_TASK_STACK_SIZE, NULL, 10, &(xLoggerTask));
     xTaskCreate(receiver_task, "logger_task", LOGGER_TASK_STACK_SIZE, NULL, 10, &(xLoggerTask));

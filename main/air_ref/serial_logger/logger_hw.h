@@ -32,8 +32,6 @@ void logger_init();
 
 void send_buffer(uint8_t* data, int lenght);
 
-
-
 void routine_send_state(machine_state_t* m_state);
 
 #endif

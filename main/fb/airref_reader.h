@@ -281,6 +281,7 @@ __flatbuffers_define_integer_type(AirRef_RequestType, AirRef_RequestType_enum_t,
 #define AirRef_RequestType_RequestAirRefConf ((AirRef_RequestType_enum_t)INT32_C(0))
 #define AirRef_RequestType_RequestAirRefState ((AirRef_RequestType_enum_t)INT32_C(1))
 #define AirRef_RequestType_RequestMachineState ((AirRef_RequestType_enum_t)INT32_C(2))
+#define AirRef_RequestType_AirRefConfReceived ((AirRef_RequestType_enum_t)INT32_C(3))
 
 static inline const char *AirRef_RequestType_name(AirRef_RequestType_enum_t value)
 {
@@ -288,6 +289,7 @@ static inline const char *AirRef_RequestType_name(AirRef_RequestType_enum_t valu
     case AirRef_RequestType_RequestAirRefConf: return "RequestAirRefConf";
     case AirRef_RequestType_RequestAirRefState: return "RequestAirRefState";
     case AirRef_RequestType_RequestMachineState: return "RequestMachineState";
+    case AirRef_RequestType_AirRefConfReceived: return "AirRefConfReceived";
     default: return "";
     }
 }
@@ -298,6 +300,7 @@ static inline int AirRef_RequestType_is_known_value(AirRef_RequestType_enum_t va
     case AirRef_RequestType_RequestAirRefConf: return 1;
     case AirRef_RequestType_RequestAirRefState: return 1;
     case AirRef_RequestType_RequestMachineState: return 1;
+    case AirRef_RequestType_AirRefConfReceived: return 1;
     default: return 0;
     }
 }

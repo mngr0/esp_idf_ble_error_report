@@ -92,23 +92,22 @@ void m_state_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, e
     { // READ MACHINE STATE
         ESP_LOGI(GATTS_M_STATE_TAG, "GATT_READ_EVT, conn_id %d, trans_id %d, handle %d\n", param->read.conn_id, param->read.trans_id, param->read.handle);
         esp_gatt_rsp_t rsp;
-        memset(&rsp, 0, sizeof(esp_gatt_rsp_t));
-        rsp.attr_value.handle = param->read.handle;
 
         flatcc_builder_t builder;
         size_t size;
-        flatcc_builder_init(&builder);
-        load_m_state(&builder, &m_state);
-
         void *buf;
 
+        memset(&rsp, 0, sizeof(esp_gatt_rsp_t));
+        rsp.attr_value.handle = param->read.handle;
+
+        flatcc_builder_init(&builder);
+        load_m_state(&builder, &m_state);
         buf = flatcc_builder_finalize_buffer(&builder, &size);
         rsp.attr_value.len = size;
         memcpy(rsp.attr_value.value, buf, size);
         ESP_LOGI(GATTS_M_STATE_TAG, "required size: %d\n", size);
 
         flatcc_builder_aligned_free(buf);
-
         flatcc_builder_clear(&builder);
 
         esp_ble_gatts_send_response(gatts_if, param->read.conn_id, param->read.trans_id,

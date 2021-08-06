@@ -103,6 +103,9 @@ void ar_conf_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, e
         if (!param->write.is_prep){
             ESP_LOGI(GATTS_AR_CONF_TAG, "GATT_WRITE_EVT, value len %d, value :", param->write.len);
             esp_log_buffer_hex(GATTS_AR_CONF_TAG, param->write.value, param->write.len);
+
+            //TODO call function to send new conf
+
             // if (heart_rate_profile_tab[PROFILE_AR_CONF_IDX].descr_handle == param->write.handle && param->write.len == 2){
             //     uint16_t descr_value= param->write.value[1]<<8 | param->write.value[0];
             //     if (descr_value == 0x0001){

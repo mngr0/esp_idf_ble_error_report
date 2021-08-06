@@ -106,7 +106,8 @@ table MachineState{
 enum RequestType: int{
 	RequestAirRefConf=0,
 	RequestAirRefState,
-	RequestMachineState
+	RequestMachineState,
+	AirRefConfReceived
 }
 
 table Request{

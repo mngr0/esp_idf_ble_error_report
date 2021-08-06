@@ -11,8 +11,6 @@
 
 #define LOGGER_PACKET_SIZE 300
 
-#
-
 typedef struct {
 	uint8_t start_of_frame[2];
 	uint8_t protocol_version;
