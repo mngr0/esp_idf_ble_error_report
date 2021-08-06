@@ -112,11 +112,9 @@ void ar_conf_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, e
 
             AirRef_Message_table_t message = AirRef_Message_as_root(param->write.value);
             test_assert(message != 0);
-            ESP_LOGI("DECODED", "assert ok");
+            ESP_LOGI("GATTS_AR_CONF_TAG", "assert ok");
             if (AirRef_Message_content_type(message) == AirRef_Content_AirRefConf)
             {
-
-                ESP_LOGI("DECODED", "right content type");
 
                 AirRef_AirRefConf_table_t airRefConf = (AirRef_AirRefConf_table_t)AirRef_Message_content(message);
 
