@@ -21,7 +21,7 @@
 #define SCAN_RSP_CONFIG_FLAG (1 << 1)
 
 
-//TODO in future, add profile for wifi connection
+//TODO in future, try to understand how the hell blufi works
 typedef enum
 {
     PROFILE_APP_IDX = 0,

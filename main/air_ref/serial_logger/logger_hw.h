@@ -34,4 +34,6 @@ void send_buffer(uint8_t* data, int lenght);
 
 void routine_send_state(machine_state_t* m_state);
 
+void routine_send_new_conf(air_ref_conf_t *ar_conf_new);
+
 #endif

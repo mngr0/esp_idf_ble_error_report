@@ -67,13 +67,20 @@ int access_message_buffer(const void *buffer)
 }
 
 
+void routine_send_new_conf(air_ref_conf_t *ar_conf_new){
+    // send conf
+    	//TODO check message is received
+	//machine state
+    send_new_conf(ar_conf_new);
+	// state 0 idle
+	// state 1 waiting for reply
+}
 
 static void logger_task(void *arg)
 {
     timestamp_last_update_m_state = xTaskGetTickCount();
     timestamp_last_update_ar_state = xTaskGetTickCount();
     timestamp_last_update_ar_conf = xTaskGetTickCount();
-    //TODO list of things to check: M_STATE AR_STATE
 
     bool done = false;
     int length;
@@ -98,19 +105,19 @@ static void logger_task(void *arg)
             timestamp_last_update_m_state = xTaskGetTickCount();
             do_request_m_state(&req);
         }
-        else if (timestamp_last_update_ar_state + 30000 / portTICK_PERIOD_MS < xTaskGetTickCount())
-        {
-            ESP_LOGI(LOGGER_TAG, "asking for ar_state state");
-            (timestamp_last_update_ar_state = xTaskGetTickCount());
-            do_request_ar_state(&req);
-        }
+        // else if (timestamp_last_update_ar_state + 30000 / portTICK_PERIOD_MS < xTaskGetTickCount())
+        // {
+        //     ESP_LOGI(LOGGER_TAG, "asking for ar_state state");
+        //     (timestamp_last_update_ar_state = xTaskGetTickCount());
+        //     do_request_ar_state(&req);
+        // }
 
-        else if (timestamp_last_update_ar_conf + 50000 / portTICK_PERIOD_MS < xTaskGetTickCount())
-        {
-            ESP_LOGI(LOGGER_TAG, "asking for ar_conf");
-            timestamp_last_update_ar_conf = xTaskGetTickCount();
-            do_request_ar_state(&req);
-        }
+        // else if (timestamp_last_update_ar_conf + 50000 / portTICK_PERIOD_MS < xTaskGetTickCount())
+        // {
+        //     ESP_LOGI(LOGGER_TAG, "asking for ar_conf");
+        //     timestamp_last_update_ar_conf = xTaskGetTickCount();
+        //     do_request_ar_conf(&req);
+        // }
         else
         {
             ESP_LOGI(LOGGER_TAG, "delay .... ");

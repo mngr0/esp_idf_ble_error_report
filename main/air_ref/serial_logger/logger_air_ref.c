@@ -186,7 +186,9 @@ void parse_m_state(AirRef_MachineState_table_t machineState, machine_state_t *m_
 
 void send_new_conf(air_ref_conf_t *ar_conf_new)
 {
-	//TODO copy actual in old
+
+	memcpy(&ar_conf_old,&ar_conf,sizeof(air_ref_conf_t));
+	memcpy(&ar_conf,&ar_conf_new,sizeof(air_ref_conf_t));
 	flatcc_builder_t builder;
 	logger_frame_t request;
 
@@ -196,10 +198,7 @@ void send_new_conf(air_ref_conf_t *ar_conf_new)
 	build_frame(&request, &builder);
 	send_frame(&request);
 	flatcc_builder_clear(&builder);
-	//TODO check message is received
-	//machine state
-	// state 0 idle
-	// state 1 waiting for reply
+
 	
 }
 

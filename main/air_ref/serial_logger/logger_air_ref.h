@@ -9,7 +9,7 @@
 		if (!(x))      \
 		{              \
 			assert(0); \
-			return -1; \
+			return ; \
 		}              \
 	} while (0)
 

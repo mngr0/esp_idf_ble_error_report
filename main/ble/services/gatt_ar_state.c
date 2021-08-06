@@ -27,7 +27,6 @@
 #include "esp_gap_ble_api.h"
 #include "esp_gatts_api.h"
 #include "esp_bt_main.h"
-//#include "gatts_table_creat_demo.h"
 #include "esp_gatt_common_api.h"
 #include "driver/gpio.h"
 #include "driver/uart.h"
@@ -44,16 +43,11 @@ extern air_ref_state_t ar_state;
 
 uint16_t ar_state_handle_table[GATT_AR_STATE_NB];
 
-//         /* Characteristic Declaration */
-//         [IDX_CHAR_A] =
-//             {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&character_declaration_uuid, ESP_GATT_PERM_READ, CHAR_DECLARATION_SIZE, CHAR_DECLARATION_SIZE, (uint8_t *)&char_prop_read_write_notify}},
-//static uint8_t gatt_ar_state_adv_config_done = 0; //TODO consider if it mus be extern
+
 extern uint8_t raw_scan_rsp_data[10];
 extern uint8_t raw_adv_data[26];
 extern struct gatts_profile_inst heart_rate_profile_tab[PROFILE_NUM];
 const uint16_t GATT_AR_STATE_UUID_SERVICE = (0xFF00 | GATT_AR_STATE_IDX_SERVICE) & (PROFILE_AR_STATE_IDX << 8);
-
-//static const uint16_t GATT_AR_STATE_UUID_CHAR= (0xFF00 | GATT_AR_STATE_IDX_CHAR) & (INDEX_AR_STATE << 8);
 static const uint16_t GATT_AR_STATE_UUID_VALUE = (0xFF00 | GATT_AR_STATE_IDX_VALUE) & (PROFILE_AR_STATE_IDX << 8);
 
 static const uint16_t primary_service_uuid = ESP_GATT_UUID_PRI_SERVICE;
@@ -107,40 +101,7 @@ void ar_state_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, 
         if (!param->write.is_prep){
             ESP_LOGI(GATTS_AR_STATE_TAG, "GATT_WRITE_EVT, value len %d, value :", param->write.len);
             esp_log_buffer_hex(GATTS_AR_STATE_TAG, param->write.value, param->write.len);
-            // if (heart_rate_profile_tab[PROFILE_AR_STATE_IDX].descr_handle == param->write.handle && param->write.len == 2){
-            //     uint16_t descr_value= param->write.value[1]<<8 | param->write.value[0];
-            //     if (descr_value == 0x0001){
-            //         if (b_property & ESP_GATT_CHAR_PROP_BIT_NOTIFY){
-            //             ESP_LOGI(GATTS_AR_STATE_TAG, "notify enable");
-            //             uint8_t notify_data[15];
-            //             for (int i = 0; i < sizeof(notify_data); ++i)
-            //             {
-            //                 notify_data[i] = i%0xff;
-            //             }
-            //             //the size of notify_data[] need less than MTU size
-            //             esp_ble_gatts_send_indicate(gatts_if, param->write.conn_id, heart_rate_profile_tab[PROFILE_AR_STATE_IDX].char_handle,
-            //                                     sizeof(notify_data), notify_data, false);
-            //         }
-            //     }else if (descr_value == 0x0002){
-            //         if (b_property & ESP_GATT_CHAR_PROP_BIT_INDICATE){
-            //             ESP_LOGI(GATTS_AR_STATE_TAG, "indicate enable");
-            //             uint8_t indicate_data[15];
-            //             for (int i = 0; i < sizeof(indicate_data); ++i)
-            //             {
-            //                 indicate_data[i] = i%0xff;
-            //             }
-            //             //the size of indicate_data[] need less than MTU size
-            //             esp_ble_gatts_send_indicate(gatts_if, param->write.conn_id, heart_rate_profile_tab[PROFILE_AR_STATE_IDX].char_handle,
-            //                                     sizeof(indicate_data), indicate_data, true);
-            //         }
-            //     }
-            //     else if (descr_value == 0x0000){
-            //         ESP_LOGI(GATTS_AR_STATE_TAG, "notify/indicate disable ");
-            //     }else{
-            //         ESP_LOGE(GATTS_AR_STATE_TAG, "unknown value");
-            //     }
-
-            // }
+          
         }
         example_write_event_env(gatts_if, &b_prepare_write_env, param);
         break;
