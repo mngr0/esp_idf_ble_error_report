@@ -1,7 +1,6 @@
 #include "logger_hw.h"
 #include "logger_frame.h"
 #include "logger_air_ref.h"
-//#include "../air_ref.h"
 #include "airref_builder.h"
 
 #define LOGGER_TAG "LOGGER"
@@ -11,12 +10,11 @@ extern air_ref_conf_t ar_conf;
 extern air_ref_conf_t ar_conf_old;
 extern air_ref_state_t ar_state;
 
-QueueHandle_t command_queue;
-TaskHandle_t xLoggerTask;
 uint32_t timestamp_last_update_m_state;
 uint32_t timestamp_last_update_ar_state;
 uint32_t timestamp_last_update_ar_conf;
 extern const uart_port_t uart_num;
+logger_device_t io_logger;
 
 
 uint16_t logger_checksum(uint8_t *data, uint16_t length)
@@ -44,15 +42,12 @@ void parse_reply(logger_frame_t *reply, uint8_t *logger_buffer)
     reply->checksum = (logger_buffer[HEADER_SIZE + reply->frame_size] | (logger_buffer[HEADER_SIZE + reply->frame_size + 1] << 8)) & 0xffff;
 }
 
-//TODO ACCEPT ALL REPLIES
 
 int8_t receive_frame(logger_frame_t *reply, uint8_t *data, int length)
 {
-    ESP_LOGI("LENGTH", "LEN:%d", length);
     if (length >= HEADER_SIZE + 2)
     {
         parse_reply(reply, data);
-        ESP_LOGI("LENGTH", " frame size: %d", reply->frame_size);
         int16_t chksum = logger_checksum((uint8_t *)data, reply->frame_size + HEADER_SIZE);
         if ((0xFFFF & chksum) != (0xFFFF & reply->checksum))
         {
@@ -61,12 +56,10 @@ int8_t receive_frame(logger_frame_t *reply, uint8_t *data, int length)
         }
         else
         {
-            ESP_LOGI("receive", "correct chksum: %2X", chksum);
             return 1;
         }
         //TODO check protocol version
         //TODO check length coerent with dataframe
-        //TODO check checksum
         return 1;
     }
     return 0;
@@ -86,9 +79,11 @@ void build_frame(logger_frame_t *frame, flatcc_builder_t *builder)
     flatcc_builder_aligned_free(buf);
 }
 
+static uint8_t tmp_buffer_out[LOGGER_BUF_SIZE];
+
 void send_frame(logger_frame_t *frame)
 {
-    uint8_t tmp_buffer_out[LOGGER_BUF_SIZE];
+    //uint8_t tmp_buffer_out[LOGGER_BUF_SIZE];
     size_t size = frame->frame_size;
     tmp_buffer_out[0] = frame->start_of_frame[0];
     tmp_buffer_out[1] = frame->start_of_frame[1];
@@ -102,27 +97,16 @@ void send_frame(logger_frame_t *frame)
         tmp_buffer_out[i + HEADER_SIZE] = frame->buffer[i];
     }
 
-    uint16_t chksum = logger_checksum(tmp_buffer_out, HEADER_SIZE + size); //4?
+    uint16_t chksum = logger_checksum(tmp_buffer_out, HEADER_SIZE + size);
     tmp_buffer_out[HEADER_SIZE + size + 0] = chksum & 0xff;
     tmp_buffer_out[HEADER_SIZE + size + 1] = (chksum >> 8) & 0xff;
     tmp_buffer_out[HEADER_SIZE + size + 2] = frame->end_of_frame[0];
     tmp_buffer_out[HEADER_SIZE + size + 3] = frame->end_of_frame[1];
     tmp_buffer_out[HEADER_SIZE + size + 4] = frame->end_of_frame[2];
-    //send
-    //ESP_LOGI("receive", "message to send");
-    //ESP_LOG_BUFFER_HEX(LOGGER_TAG,tmp_buffer_out,5+size +4 );
-    //uart_send
 
     uart_write_bytes(uart_num, (const char *)tmp_buffer_out, HEADER_SIZE + size + DELIMITER_SIZE +2);
 }
 
-logger_device_t io_logger;
-
-//il mio buffer
-
-//funzione accoda al buffer
-//funzione prendi pacchetto
-//CRITICAL SECTION BETWEEN THE TWO
 
 void init_logger(){
     io_logger.cnt_in_begin=0;
@@ -146,14 +130,16 @@ int16_t take_frame(uint8_t *frame_buf)
 {
 
     //CS BEGIN
-    //start looking at begin, when sof found go search for end
+    //search for SOF, if not found cancel any data in the buffer.
+    //any data after SOF is valid, EOF might still be in travel.
+
+    
     bool sof_found = false;
     bool eof_found = false;
     int cnt = io_logger.cnt_in_begin;
     int cnt_sof = 0;
     int cnt_eof = 0;
     size_t frame_size = -1;
-  //  ESP_LOGI("TAKE_FRAME", "cnt_in_begin: %d\t cnt_in_end: %d",io_logger.cnt_in_begin,io_logger.cnt_in_end);
     while ((LOGGER_SUM_MOD(cnt, 0) != io_logger.cnt_in_end) && (!sof_found))
     {
         if ((io_logger.buffer_in[LOGGER_SUM_MOD(cnt, 0)] == START_OF_FRAME) && (io_logger.buffer_in[LOGGER_SUM_MOD(cnt, 1)] == START_OF_FRAME) && (io_logger.buffer_in[LOGGER_SUM_MOD(cnt, 2)] == START_OF_FRAME)  )
@@ -167,11 +153,10 @@ int16_t take_frame(uint8_t *frame_buf)
             io_logger.cnt_in_begin++;
         }
     }
-   // ESP_LOGI("TAKE_FRAME", "cnt_in_begin: %d\t cnt_in_end: %d",io_logger.cnt_in_begin,io_logger.cnt_in_end);
-  //  ESP_LOGI("TAKE_FRAME", "sof_found: %d",sof_found);
-
     cnt_sof = LOGGER_SUM_MOD(cnt, 0);
-
+    
+    // after SOF found, if there are still data ( == SOF found) search for EOF
+    // TODO check for unexpected SOF 
     while ((LOGGER_SUM_MOD(cnt, 0) != io_logger.cnt_in_end) && (!eof_found))
     {
         if ((io_logger.buffer_in[LOGGER_SUM_MOD(cnt, 0)] == END_OF_FRAME) && (io_logger.buffer_in[LOGGER_SUM_MOD(cnt, 1)] == END_OF_FRAME)&& (io_logger.buffer_in[LOGGER_SUM_MOD(cnt, 2)] == END_OF_FRAME)   )
@@ -183,14 +168,10 @@ int16_t take_frame(uint8_t *frame_buf)
             cnt++;
         }
     }
-    ESP_LOGI("TAKE_FRAME", "eof_found: %d",eof_found);
-    ESP_LOGI("TAKE_FRAME", "cnt_in_begin: %d\t cnt_in_end: %d",io_logger.cnt_in_begin,io_logger.cnt_in_end);
     if ((eof_found) && (sof_found))
     {
         cnt_eof = LOGGER_SUM_MOD(cnt, DELIMITER_SIZE);
-     //   ESP_LOGI("TAKE_FRAME", "cnt_sof: %d\t cnt_eof: %d",cnt_sof,cnt_eof);
         frame_size = LOGGER_SUM_MOD(cnt_eof, 0 - cnt_sof);
-       // ESP_LOGI("TAKE_FRAME", "frame size: %d",frame_size);
         for (int i = 0; i < frame_size; i++)
         {
             frame_buf[i] = io_logger.buffer_in[LOGGER_SUM_MOD(i, cnt_sof)];
@@ -198,6 +179,6 @@ int16_t take_frame(uint8_t *frame_buf)
         io_logger.cnt_in_begin = LOGGER_SUM_MOD(cnt_eof, 0);
     }
     //CS END
-   // ESP_LOGI("TAKE_FRAME", "END_TAKE_FRAME");
+
     return frame_size;
 }

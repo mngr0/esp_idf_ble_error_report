@@ -4,11 +4,6 @@
 #include "logger_frame.h"
 #include "air_ref/air_ref.h"
 
-#ifdef ns
-#error "ns already used"
-#endif
-
-
 extern machine_state_t m_state;
 extern air_ref_state_t ar_state;
 extern air_ref_conf_t ar_conf;
@@ -66,7 +61,7 @@ void load_ar_conf(flatcc_builder_t *B, air_ref_conf_t *ar_conf)
 
 	AirRef_AirRefConf_compressor_speed_add(B, &compressorSpeed);
 	AirRef_AirRefConf_ref_t airRefConf = AirRef_AirRefConf_end(B);
-	AirRef_Content_union_ref_t content = AirRef_Content_as_MachineState(airRefConf);
+	AirRef_Content_union_ref_t content = AirRef_Content_as_AirRefConf(airRefConf);
 	AirRef_Message_create_as_root(B, content);
 }
 
@@ -90,6 +85,29 @@ void parse_ar_conf(AirRef_AirRefConf_table_t airRefConf, air_ref_conf_t *ar_conf
 		ar_conf->compressor_speed[i] = compressorSpeed->speed[i];
 	}
 }
+
+void log_ar_conf( air_ref_conf_t *ar_conf){
+
+	ESP_LOGI("LOG_AR_CONF", "serial_control : %d",ar_conf->serial_control);
+	ESP_LOGI("LOG_AR_CONF", "fan_coeff_P : %d",ar_conf->fan_coeff_P);
+	ESP_LOGI("LOG_AR_CONF", "fan_target_pressure : %d",ar_conf->fan_target_pressure);
+	ESP_LOGI("LOG_AR_CONF", "fan_coeff_offset : %d",ar_conf->fan_coeff_offset);
+	ESP_LOGI("LOG_AR_CONF", "fan_min_pressure : %d",ar_conf->fan_min_pressure);
+	ESP_LOGI("LOG_AR_CONF", "fan_max_pressure : %d",ar_conf->fan_max_pressure);
+	ESP_LOGI("LOG_AR_CONF", "compressor_target_pressure : %d",ar_conf->compressor_target_pressure);
+	ESP_LOGI("LOG_AR_CONF", "compressor_activation_offset : %d",ar_conf->compressor_activation_offset);
+	ESP_LOGI("LOG_AR_CONF", "compressor_action_delay : %d",ar_conf->compressor_action_delay);
+	ESP_LOGI("LOG_AR_CONF", "compressor_start_interval : %d",ar_conf->compressor_start_interval);
+
+	for (int i = 0; i < 10; i++)
+	{
+		ESP_LOGI("LOG_AR_CONF", "compressor_speed(%d) : %d",i,ar_conf->compressor_speed[i] );
+	}
+
+}
+
+
+
 
 void load_m_state(flatcc_builder_t *B, machine_state_t *m_state)
 {
@@ -188,7 +206,9 @@ void send_new_conf(air_ref_conf_t *ar_conf_new)
 {
 
 	memcpy(&ar_conf_old,&ar_conf,sizeof(air_ref_conf_t));
-	memcpy(&ar_conf,&ar_conf_new,sizeof(air_ref_conf_t));
+	memcpy(&ar_conf,ar_conf_new,sizeof(air_ref_conf_t));
+
+	log_ar_conf( &ar_conf);
 	flatcc_builder_t builder;
 	logger_frame_t request;
 
@@ -197,9 +217,8 @@ void send_new_conf(air_ref_conf_t *ar_conf_new)
 
 	build_frame(&request, &builder);
 	send_frame(&request);
-	flatcc_builder_clear(&builder);
 
-	
+	flatcc_builder_clear(&builder);
 }
 
 void do_request_m_state()

@@ -2,14 +2,13 @@
 #define SERIAL_LOGGER_FRAME_H_
 
 #include "stdint.h"
-#include "logger_frame.h"
 #include "fb/airref_builder.h"
 #include "fb/airref_reader.h"
 
 
 #define PROTOCOL_VERSION 1
 
-#define FRAME_MAX_PACKET_SIZE 500 //max size of the frame 
+#define FRAME_MAX_PACKET_SIZE 500 //max size of the frame in the message
 
 #define LOGGER_BUF_SIZE 1024 // size of the phisical buffer 
 

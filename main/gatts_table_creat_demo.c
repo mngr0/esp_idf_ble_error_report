@@ -45,7 +45,7 @@
 #include "ble/ble.h"
 #define GATTS_TABLE_TAG "GATTS_TABLE_DEMO"
 
-#define BRIDGE_TASK_STACK_SIZE  (16384 / sizeof(portSTACK_TYPE))
+//#define BRIDGE_TASK_STACK_SIZE  (16384 / sizeof(portSTACK_TYPE))
 
 const uart_port_t uart_num = UART_NUM_2;
 //status
@@ -63,7 +63,6 @@ const uart_port_t uart_num = UART_NUM_2;
 
 static void configure_led(void)
 {
-    //ESP_LOGI(TAG, "Example configured to blink GPIO LED!");
     gpio_reset_pin(BLINK_GPIO1);
     gpio_reset_pin(BLINK_GPIO2);
     gpio_reset_pin(BLINK_GPIO3);
