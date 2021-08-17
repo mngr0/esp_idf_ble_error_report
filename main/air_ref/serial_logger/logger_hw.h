@@ -13,11 +13,11 @@
 #define LOGGER_TAG "LOGGER"
 
 
-#define RECEIVER_TASK_STACK_SIZE  (100000 / sizeof(portSTACK_TYPE))
+#define RECEIVER_TASK_STACK_SIZE  (32800 / sizeof(portSTACK_TYPE))
 #define TASK_RECEIVCER_STACK_PRIORITY (tskIDLE_PRIORITY + 1)
 
 
-#define SENDER_TASK_STACK_SIZE  (100000 / sizeof(portSTACK_TYPE))
+#define SENDER_TASK_STACK_SIZE  (32800 / sizeof(portSTACK_TYPE))
 #define TASK_SENDER_STACK_PRIORITY (tskIDLE_PRIORITY + 1)
 
 
@@ -30,5 +30,8 @@ void send_buffer(uint8_t* data, int lenght);
 void routine_send_state(machine_state_t* m_state);
 
 void routine_send_new_conf(air_ref_conf_t *ar_conf_new);
+
+void log_ar_conf( air_ref_conf_t *ar_conf);
+
 
 #endif

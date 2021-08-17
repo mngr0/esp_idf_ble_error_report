@@ -77,6 +77,7 @@ static void logger_task(void *arg)
     vTaskDelay(5000 / portTICK_PERIOD_MS);
     ESP_LOGI(LOGGER_TAG, "asking for ar_conf");
     do_request_ar_conf();
+    //TODO wait for arconf received
     vTaskDelay(800 / portTICK_PERIOD_MS);
     while (1)
     {
@@ -88,12 +89,12 @@ static void logger_task(void *arg)
             timestamp_last_update_m_state = xTaskGetTickCount();
             do_request_m_state();
         }
-        else if (timestamp_last_update_ar_state + 3000 / portTICK_PERIOD_MS < xTaskGetTickCount())
-        {
-            ESP_LOGI(LOGGER_TAG, "asking for ar_state state");
-            (timestamp_last_update_ar_state = xTaskGetTickCount());
-            do_request_ar_state();
-        }
+            else if (timestamp_last_update_ar_state + 10000 / portTICK_PERIOD_MS < xTaskGetTickCount())
+            {
+                ESP_LOGI(LOGGER_TAG, "asking for ar_state state");
+                (timestamp_last_update_ar_state = xTaskGetTickCount());
+                do_request_ar_state();
+            }
         vTaskDelay(800 / portTICK_PERIOD_MS);
         
         // if status is waiting for confirm (ar_conf update) for more than given time -> resend conf
@@ -137,3 +138,26 @@ void logger_init()
     xTaskCreate(logger_task, "logger_task", SENDER_TASK_STACK_SIZE, NULL, TASK_SENDER_STACK_PRIORITY, &(xSenderTask));
     xTaskCreate(receiver_task, "receiver_task", RECEIVER_TASK_STACK_SIZE, NULL, TASK_RECEIVCER_STACK_PRIORITY, &(xReceiverTask));
 }
+
+
+
+void log_ar_conf( air_ref_conf_t *ar_conf){
+
+	ESP_LOGI("LOG_AR_CONF", "serial_control : %d",ar_conf->serial_control);
+	ESP_LOGI("LOG_AR_CONF", "fan_coeff_P : %d",ar_conf->fan_coeff_P);
+	ESP_LOGI("LOG_AR_CONF", "fan_target_pressure : %d",ar_conf->fan_target_pressure);
+	ESP_LOGI("LOG_AR_CONF", "fan_coeff_offset : %d",ar_conf->fan_coeff_offset);
+	ESP_LOGI("LOG_AR_CONF", "fan_min_pressure : %d",ar_conf->fan_min_pressure);
+	ESP_LOGI("LOG_AR_CONF", "fan_max_pressure : %d",ar_conf->fan_max_pressure);
+	ESP_LOGI("LOG_AR_CONF", "compressor_target_pressure : %d",ar_conf->compressor_target_pressure);
+	ESP_LOGI("LOG_AR_CONF", "compressor_activation_offset : %d",ar_conf->compressor_activation_offset);
+	ESP_LOGI("LOG_AR_CONF", "compressor_action_delay : %d",ar_conf->compressor_action_delay);
+	ESP_LOGI("LOG_AR_CONF", "compressor_start_interval : %d",ar_conf->compressor_start_interval);
+
+	for (int i = 0; i < 10; i++)
+	{
+		ESP_LOGI("LOG_AR_CONF", "compressor_speed(%d) : %d",i,ar_conf->compressor_speed[i] );
+	}
+
+}
+
