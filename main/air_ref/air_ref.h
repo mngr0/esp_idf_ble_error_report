@@ -9,7 +9,7 @@
 #include "error.h"
 #include "airref_builder.h"
 
-#define COMPRESSOR_SPEED_N 10 //TODO in firmware configure 16 slots, partial use
+#define COMPRESSOR_SPEED_N 10
 
 typedef struct { //public
 	int32_t serial_control;

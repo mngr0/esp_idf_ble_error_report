@@ -79,6 +79,7 @@ table AirRefState{
 	fan_time_last_command:int=-1;
 }
 
+//TODO add machine status
 table MachineState{
 	evaporation_pressure:int =0;
 	condensation_pressure:int =0;

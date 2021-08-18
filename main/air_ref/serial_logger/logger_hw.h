@@ -33,5 +33,5 @@ void routine_send_new_conf(air_ref_conf_t *ar_conf_new);
 
 void log_ar_conf( air_ref_conf_t *ar_conf);
 
-
+void log_m_state( machine_state_t *m_state);
 #endif

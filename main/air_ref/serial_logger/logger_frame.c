@@ -83,7 +83,6 @@ static uint8_t tmp_buffer_out[LOGGER_BUF_SIZE];
 
 void send_frame(logger_frame_t *frame)
 {
-    //uint8_t tmp_buffer_out[LOGGER_BUF_SIZE];
     size_t size = frame->frame_size;
     tmp_buffer_out[0] = frame->start_of_frame[0];
     tmp_buffer_out[1] = frame->start_of_frame[1];
@@ -122,7 +121,7 @@ void add_to_ringbuffer(uint8_t *new_buf, int16_t length)
         io_logger.buffer_in[LOGGER_SUM_MOD(i, io_logger.cnt_in_end)] = new_buf[i];
     }
     io_logger.cnt_in_end = LOGGER_SUM_MOD(io_logger.cnt_in_end , length);
-    ESP_LOGI("ADD_TO_RINGBUFFER", "cnt_in_begin: %d\t cnt_in_end: %d",io_logger.cnt_in_begin,io_logger.cnt_in_end);
+    //ESP_LOGI("ADD_TO_RINGBUFFER", "cnt_in_begin: %d\t cnt_in_end: %d",io_logger.cnt_in_begin,io_logger.cnt_in_end);
     //CS END
 }
 

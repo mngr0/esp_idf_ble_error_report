@@ -143,7 +143,7 @@ void load_m_state(flatcc_builder_t *B, machine_state_t *m_state)
 
 void parse_m_state(AirRef_MachineState_table_t machineState, machine_state_t *m_state)
 {
-	m_state->condensation_pressure = AirRef_MachineState_evaporation_pressure(machineState);
+	m_state->condensation_pressure = AirRef_MachineState_condensation_pressure(machineState);
 	m_state->evaporation_pressure = AirRef_MachineState_evaporation_pressure(machineState);
 	m_state->temperature_gas_scarico = AirRef_MachineState_temperature_gas_scarico(machineState);
 	m_state->temperature_environment = AirRef_MachineState_temperature_environment(machineState);
@@ -184,8 +184,7 @@ void parse_m_state(AirRef_MachineState_table_t machineState, machine_state_t *m_
 void send_new_conf(air_ref_conf_t *ar_conf_new)
 {
 
-	memcpy(&ar_conf_old,&ar_conf,sizeof(air_ref_conf_t));
-	memcpy(&ar_conf,ar_conf_new,sizeof(air_ref_conf_t));
+
 	flatcc_builder_t builder;
 	logger_frame_t request;
 
