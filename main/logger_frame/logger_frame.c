@@ -1,19 +1,14 @@
 #include "logger_hw.h"
 #include "logger_frame.h"
-#include "logger_air_ref.h"
-#include "airref_builder.h"
 
-#define LOGGER_TAG "LOGGER"
+#define LOGGER_TAG "LOGGER_FRAME"
 
-extern machine_state_t m_state;
-extern air_ref_conf_t ar_conf;
-extern air_ref_conf_t ar_conf_old;
-extern air_ref_state_t ar_state;
+// extern machine_state_t m_state;
+// extern air_ref_conf_t ar_conf;
+// extern air_ref_conf_t ar_conf_old;
+// extern air_ref_state_t ar_state;
 
-uint32_t timestamp_last_update_m_state;
-uint32_t timestamp_last_update_ar_state;
-uint32_t timestamp_last_update_ar_conf;
-extern const uart_port_t uart_num;
+
 logger_device_t io_logger;
 
 

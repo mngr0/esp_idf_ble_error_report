@@ -1,7 +1,6 @@
 
 #include "stdbool.h"
-//#include "logger_hw.h"
-#include "logger_frame.h"
+#include "logger_frame/logger_frame.h"
 #include "air_ref/air_ref.h"
 
 extern machine_state_t m_state;

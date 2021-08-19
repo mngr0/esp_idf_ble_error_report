@@ -121,15 +121,16 @@ void ar_conf_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, e
             air_ref_conf_t ar_conf_new;
 
             AirRef_Message_table_t message = AirRef_Message_as_root(param->write.value);
-            test_assert(message != 0);
-            if (AirRef_Message_content_type(message) == AirRef_Content_AirRefConf)
-            {
+            if(message !=0 ){
+                if (AirRef_Message_content_type(message) == AirRef_Content_AirRefConf)
+                {
 
-                AirRef_AirRefConf_table_t airRefConf = (AirRef_AirRefConf_table_t)AirRef_Message_content(message);
+                    AirRef_AirRefConf_table_t airRefConf = (AirRef_AirRefConf_table_t)AirRef_Message_content(message);
 
-                parse_ar_conf(airRefConf, &ar_conf_new);
-                log_ar_conf( &ar_conf_new);
-                routine_send_new_conf(&ar_conf_new);
+                    parse_ar_conf(airRefConf, &ar_conf_new);
+                    log_ar_conf( &ar_conf_new);
+                    routine_send_new_conf(&ar_conf_new);
+                }
             }
         }
         example_write_event_env(gatts_if, &b_prepare_write_env, param);

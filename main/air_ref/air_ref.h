@@ -102,5 +102,19 @@ typedef struct{//public
 void send_m_state(flatcc_builder_t *B, machine_state_t *m_state);
 int access_message_buffer(const void *buffer);
 
+
+
+void logger_init();
+
+
+void routine_send_state(machine_state_t* m_state);
+
+void routine_send_new_conf(air_ref_conf_t *ar_conf_new);
+
+void log_ar_conf( air_ref_conf_t *ar_conf);
+
+void log_m_state( machine_state_t *m_state);
+
+
 #endif /* AIR_REF_H_ */
 #endif

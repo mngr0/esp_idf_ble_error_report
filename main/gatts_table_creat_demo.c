@@ -34,18 +34,10 @@
 #include "driver/gpio.h"
 #include "driver/uart.h"
 
-// #include <custom_provisioning/custom_config.h>
-// #include <protocomm.h>
-
-#include "fb/airref_reader.h"
-//#include "protobuf-c/protobuf-c/protobuf-c/protobuf-c/protobuf-c.h"
-
-#include "air_ref/air_ref.h"
-#include "air_ref/serial_logger/logger_hw.h"
 #include "ble/ble.h"
+#include "air_ref/air_ref.h"
 #define GATTS_TABLE_TAG "GATTS_TABLE_DEMO"
 
-//#define BRIDGE_TASK_STACK_SIZE  (16384 / sizeof(portSTACK_TYPE))
 
 const uart_port_t uart_num = UART_NUM_2;
 //status
