@@ -29,6 +29,9 @@ __flatbuffers_build_scalar(flatbuffers_, AirRef_AirRefStatus, AirRef_AirRefStatu
 #define __AirRef_RequestType_formal_args , AirRef_RequestType_enum_t v0
 #define __AirRef_RequestType_call_args , v0
 __flatbuffers_build_scalar(flatbuffers_, AirRef_RequestType, AirRef_RequestType_enum_t)
+#define __AirRef_LoggerCommunicationState_formal_args , AirRef_LoggerCommunicationState_enum_t v0
+#define __AirRef_LoggerCommunicationState_call_args , v0
+__flatbuffers_build_scalar(flatbuffers_, AirRef_LoggerCommunicationState, AirRef_LoggerCommunicationState_enum_t)
 
 #define __AirRef_ErrorReport_formal_args , AirRef_ErrorState_enum_t v0, int32_t v1
 #define __AirRef_ErrorReport_call_args , v0, v1
@@ -79,22 +82,22 @@ __flatbuffers_define_fixed_array_primitives(flatbuffers_, AirRef_CompressorSpeed
 #define __AirRef_ErrorList_formal_args , const AirRef_ErrorReport_t v0[10]
 #define __AirRef_ErrorList_call_args , v0
 static inline AirRef_ErrorList_t *AirRef_ErrorList_assign(AirRef_ErrorList_t *p, const AirRef_ErrorReport_t v0[10])
-{ AirRef_ErrorReport_array_copy(p->speed, v0, 10);
+{ AirRef_ErrorReport_array_copy(p->errors, v0, 10);
   return p; }
 static inline AirRef_ErrorList_t *AirRef_ErrorList_copy(AirRef_ErrorList_t *p, const AirRef_ErrorList_t *p2)
-{ AirRef_ErrorReport_array_copy(p->speed, p2->speed, 10);
+{ AirRef_ErrorReport_array_copy(p->errors, p2->errors, 10);
   return p; }
 static inline AirRef_ErrorList_t *AirRef_ErrorList_assign_to_pe(AirRef_ErrorList_t *p, const AirRef_ErrorReport_t v0[10])
-{ AirRef_ErrorReport_array_copy_to_pe(p->speed, v0, 10);
+{ AirRef_ErrorReport_array_copy_to_pe(p->errors, v0, 10);
   return p; }
 static inline AirRef_ErrorList_t *AirRef_ErrorList_copy_to_pe(AirRef_ErrorList_t *p, const AirRef_ErrorList_t *p2)
-{ AirRef_ErrorReport_array_copy_to_pe(p->speed, p2->speed, 10);
+{ AirRef_ErrorReport_array_copy_to_pe(p->errors, p2->errors, 10);
   return p; }
 static inline AirRef_ErrorList_t *AirRef_ErrorList_assign_from_pe(AirRef_ErrorList_t *p, const AirRef_ErrorReport_t v0[10])
-{ AirRef_ErrorReport_array_copy_from_pe(p->speed, v0, 10);
+{ AirRef_ErrorReport_array_copy_from_pe(p->errors, v0, 10);
   return p; }
 static inline AirRef_ErrorList_t *AirRef_ErrorList_copy_from_pe(AirRef_ErrorList_t *p, const AirRef_ErrorList_t *p2)
-{ AirRef_ErrorReport_array_copy_from_pe(p->speed, p2->speed, 10);
+{ AirRef_ErrorReport_array_copy_from_pe(p->errors, p2->errors, 10);
   return p; }
 __flatbuffers_build_struct(flatbuffers_, AirRef_ErrorList, 80, 4, AirRef_ErrorList_file_identifier, AirRef_ErrorList_type_identifier)
 __flatbuffers_define_fixed_array_primitives(flatbuffers_, AirRef_ErrorList, AirRef_ErrorList_t)
@@ -146,6 +149,11 @@ typedef flatbuffers_ref_t AirRef_Request_ref_t;
 static AirRef_Request_ref_t AirRef_Request_clone(flatbuffers_builder_t *B, AirRef_Request_table_t t);
 __flatbuffers_build_table(flatbuffers_, AirRef_Request, 1)
 
+static const flatbuffers_voffset_t __AirRef_LoggerState_required[] = { 0 };
+typedef flatbuffers_ref_t AirRef_LoggerState_ref_t;
+static AirRef_LoggerState_ref_t AirRef_LoggerState_clone(flatbuffers_builder_t *B, AirRef_LoggerState_table_t t);
+__flatbuffers_build_table(flatbuffers_, AirRef_LoggerState, 1)
+
 static const flatbuffers_voffset_t __AirRef_Message_required[] = { 0 };
 typedef flatbuffers_ref_t AirRef_Message_ref_t;
 static AirRef_Message_ref_t AirRef_Message_clone(flatbuffers_builder_t *B, AirRef_Message_table_t t);
@@ -175,7 +183,7 @@ __flatbuffers_build_table_prolog(flatbuffers_, AirRef_AirRefState, AirRef_AirRef
   int32_t v0, int32_t v1, int32_t v2, int32_t v3,\
   int32_t v4, int32_t v5, AirRef_ErrorReport_t *v6, AirRef_ErrorReport_t *v7,\
   AirRef_MotorStatus_t *v8, AirRef_ErrorReport_t *v9, AirRef_ErrorReport_t *v10, AirRef_MotorStatus_t *v11,\
-  int32_t v12, AirRef_ErrorList_t *v13, AirRef_ErrorReport_t *v14
+  int32_t v12, AirRef_ErrorList_t *v13, AirRef_AirRefStatus_enum_t v14
 #define __AirRef_MachineState_call_args ,\
   v0, v1, v2, v3,\
   v4, v5, v6, v7,\
@@ -188,6 +196,11 @@ __flatbuffers_build_table_prolog(flatbuffers_, AirRef_MachineState, AirRef_Machi
 #define __AirRef_Request_call_args , v0
 static inline AirRef_Request_ref_t AirRef_Request_create(flatbuffers_builder_t *B __AirRef_Request_formal_args);
 __flatbuffers_build_table_prolog(flatbuffers_, AirRef_Request, AirRef_Request_file_identifier, AirRef_Request_type_identifier)
+
+#define __AirRef_LoggerState_formal_args , AirRef_LoggerCommunicationState_enum_t v0
+#define __AirRef_LoggerState_call_args , v0
+static inline AirRef_LoggerState_ref_t AirRef_LoggerState_create(flatbuffers_builder_t *B __AirRef_LoggerState_formal_args);
+__flatbuffers_build_table_prolog(flatbuffers_, AirRef_LoggerState, AirRef_LoggerState_file_identifier, AirRef_LoggerState_type_identifier)
 
 #define __AirRef_Message_formal_args , AirRef_Content_union_ref_t v1
 #define __AirRef_Message_call_args , v1
@@ -324,7 +337,7 @@ __flatbuffers_build_struct_field(10, flatbuffers_, AirRef_MachineState_imm101_mo
 __flatbuffers_build_struct_field(11, flatbuffers_, AirRef_MachineState_imm101_status, AirRef_MotorStatus, 40, 4, AirRef_MachineState)
 __flatbuffers_build_scalar_field(12, flatbuffers_, AirRef_MachineState_pin_enable, flatbuffers_int32, int32_t, 4, 4, INT32_C(-1), AirRef_MachineState)
 __flatbuffers_build_struct_field(13, flatbuffers_, AirRef_MachineState_ar_error, AirRef_ErrorList, 80, 4, AirRef_MachineState)
-__flatbuffers_build_struct_field(14, flatbuffers_, AirRef_MachineState_ar_status, AirRef_ErrorReport, 8, 4, AirRef_MachineState)
+__flatbuffers_build_scalar_field(14, flatbuffers_, AirRef_MachineState_ar_status, AirRef_AirRefStatus, AirRef_AirRefStatus_enum_t, 4, 4, INT32_C(0), AirRef_MachineState)
 
 static inline AirRef_MachineState_ref_t AirRef_MachineState_create(flatbuffers_builder_t *B __AirRef_MachineState_formal_args)
 {
@@ -392,6 +405,27 @@ static AirRef_Request_ref_t AirRef_Request_clone(flatbuffers_builder_t *B, AirRe
         return 0;
     }
     __flatbuffers_memoize_end(B, t, AirRef_Request_end(B));
+}
+
+__flatbuffers_build_scalar_field(0, flatbuffers_, AirRef_LoggerState_state, AirRef_LoggerCommunicationState, AirRef_LoggerCommunicationState_enum_t, 4, 4, INT32_C(0), AirRef_LoggerState)
+
+static inline AirRef_LoggerState_ref_t AirRef_LoggerState_create(flatbuffers_builder_t *B __AirRef_LoggerState_formal_args)
+{
+    if (AirRef_LoggerState_start(B)
+        || AirRef_LoggerState_state_add(B, v0)) {
+        return 0;
+    }
+    return AirRef_LoggerState_end(B);
+}
+
+static AirRef_LoggerState_ref_t AirRef_LoggerState_clone(flatbuffers_builder_t *B, AirRef_LoggerState_table_t t)
+{
+    __flatbuffers_memoize_begin(B, t);
+    if (AirRef_LoggerState_start(B)
+        || AirRef_LoggerState_state_pick(B, t)) {
+        return 0;
+    }
+    __flatbuffers_memoize_end(B, t, AirRef_LoggerState_end(B));
 }
 
 __flatbuffers_build_union_field(1, flatbuffers_, AirRef_Message_content, AirRef_Content, AirRef_Message)

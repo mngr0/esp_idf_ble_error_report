@@ -45,7 +45,7 @@ struct CompressorSpeed{
 }
 
 struct ErrorList{
-  speed:[ErrorReport:10];
+  errors:[ErrorReport:10];
 }
 
 struct MotorStatus{
@@ -79,7 +79,6 @@ table AirRefState{
 	fan_time_last_command:int=-1;
 }
 
-//TODO add machine status
 table MachineState{
 	evaporation_pressure:int =0;
 	condensation_pressure:int =0;
@@ -100,14 +99,14 @@ table MachineState{
 	pin_enable:int=-1;
 	ar_error:ErrorList;
 	
-	ar_status:ErrorReport;
-
+	ar_status:AirRefStatus;
 }
 
 enum RequestType: int{
 	RequestAirRefConf=0,
 	RequestAirRefState,
 	RequestMachineState,
+	RequestLoggerState,
 	AirRefConfReceived
 }
 
@@ -115,6 +114,16 @@ table Request{
 	request_type: RequestType;
 }
 
+enum LoggerCommunicationState: int{
+	CommunicationIdle=0,
+	ComunicationDone,
+	CommunicationFailed
+}
+
+
+table LoggerState{
+	state: LoggerCommunicationState;
+}
 
 
 union Content{

@@ -13,6 +13,7 @@ static int AirRef_AirRefConf_verify_table(flatcc_table_verifier_descriptor_t *td
 static int AirRef_AirRefState_verify_table(flatcc_table_verifier_descriptor_t *td);
 static int AirRef_MachineState_verify_table(flatcc_table_verifier_descriptor_t *td);
 static int AirRef_Request_verify_table(flatcc_table_verifier_descriptor_t *td);
+static int AirRef_LoggerState_verify_table(flatcc_table_verifier_descriptor_t *td);
 static int AirRef_Message_verify_table(flatcc_table_verifier_descriptor_t *td);
 
 static int AirRef_Content_union_verifier(flatcc_union_verifier_descriptor_t *ud)
@@ -194,7 +195,7 @@ static int AirRef_MachineState_verify_table(flatcc_table_verifier_descriptor_t *
     if ((ret = flatcc_verify_field(td, 11, 40, 4) /* imm101_status */)) return ret;
     if ((ret = flatcc_verify_field(td, 12, 4, 4) /* pin_enable */)) return ret;
     if ((ret = flatcc_verify_field(td, 13, 80, 4) /* ar_error */)) return ret;
-    if ((ret = flatcc_verify_field(td, 14, 8, 4) /* ar_status */)) return ret;
+    if ((ret = flatcc_verify_field(td, 14, 4, 4) /* ar_status */)) return ret;
     return flatcc_verify_ok;
 }
 
@@ -243,6 +244,33 @@ static inline int AirRef_Request_verify_as_root_with_identifier(const void *buf,
 static inline int AirRef_Request_verify_as_root_with_type_hash(const void *buf, size_t bufsiz, flatbuffers_thash_t thash)
 {
     return flatcc_verify_table_as_typed_root(buf, bufsiz, thash, &AirRef_Request_verify_table);
+}
+
+static int AirRef_LoggerState_verify_table(flatcc_table_verifier_descriptor_t *td)
+{
+    int ret;
+    if ((ret = flatcc_verify_field(td, 0, 4, 4) /* state */)) return ret;
+    return flatcc_verify_ok;
+}
+
+static inline int AirRef_LoggerState_verify_as_root(const void *buf, size_t bufsiz)
+{
+    return flatcc_verify_table_as_root(buf, bufsiz, AirRef_LoggerState_identifier, &AirRef_LoggerState_verify_table);
+}
+
+static inline int AirRef_LoggerState_verify_as_typed_root(const void *buf, size_t bufsiz)
+{
+    return flatcc_verify_table_as_root(buf, bufsiz, AirRef_LoggerState_type_identifier, &AirRef_LoggerState_verify_table);
+}
+
+static inline int AirRef_LoggerState_verify_as_root_with_identifier(const void *buf, size_t bufsiz, const char *fid)
+{
+    return flatcc_verify_table_as_root(buf, bufsiz, fid, &AirRef_LoggerState_verify_table);
+}
+
+static inline int AirRef_LoggerState_verify_as_root_with_type_hash(const void *buf, size_t bufsiz, flatbuffers_thash_t thash)
+{
+    return flatcc_verify_table_as_typed_root(buf, bufsiz, thash, &AirRef_LoggerState_verify_table);
 }
 
 static int AirRef_Message_verify_table(flatcc_table_verifier_descriptor_t *td)

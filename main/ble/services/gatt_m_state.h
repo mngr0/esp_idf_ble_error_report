@@ -10,7 +10,7 @@ typedef enum
 {
     GATT_M_STATE_IDX_SERVICE,
     GATT_M_STATE_IDX_CHAR,
-    GATT_M_STATE_IDX_VALUE,
+    GATT_M_STATE_IDX_VALUE,    
     GATT_M_STATE_NB
 } gatt_m_state_t;
 

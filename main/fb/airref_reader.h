@@ -55,6 +55,10 @@ typedef const struct AirRef_Request_table *AirRef_Request_table_t;
 typedef struct AirRef_Request_table *AirRef_Request_mutable_table_t;
 typedef const flatbuffers_uoffset_t *AirRef_Request_vec_t;
 typedef flatbuffers_uoffset_t *AirRef_Request_mutable_vec_t;
+typedef const struct AirRef_LoggerState_table *AirRef_LoggerState_table_t;
+typedef struct AirRef_LoggerState_table *AirRef_LoggerState_mutable_table_t;
+typedef const flatbuffers_uoffset_t *AirRef_LoggerState_vec_t;
+typedef flatbuffers_uoffset_t *AirRef_LoggerState_mutable_vec_t;
 typedef const struct AirRef_Message_table *AirRef_Message_table_t;
 typedef struct AirRef_Message_table *AirRef_Message_mutable_table_t;
 typedef const flatbuffers_uoffset_t *AirRef_Message_vec_t;
@@ -154,6 +158,18 @@ typedef flatbuffers_uoffset_t *AirRef_Message_mutable_vec_t;
 #define AirRef_Request_type_identifier "\x0f\xdb\x88\x01"
 #ifndef AirRef_Request_file_extension
 #define AirRef_Request_file_extension "bin"
+#endif
+#ifndef AirRef_LoggerState_file_identifier
+#define AirRef_LoggerState_file_identifier 0
+#endif
+/* deprecated, use AirRef_LoggerState_file_identifier */
+#ifndef AirRef_LoggerState_identifier
+#define AirRef_LoggerState_identifier 0
+#endif
+#define AirRef_LoggerState_type_hash ((flatbuffers_thash_t)0xe36a0ab3)
+#define AirRef_LoggerState_type_identifier "\xb3\x0a\x6a\xe3"
+#ifndef AirRef_LoggerState_file_extension
+#define AirRef_LoggerState_file_extension "bin"
 #endif
 #ifndef AirRef_Message_file_identifier
 #define AirRef_Message_file_identifier 0
@@ -281,7 +297,8 @@ __flatbuffers_define_integer_type(AirRef_RequestType, AirRef_RequestType_enum_t,
 #define AirRef_RequestType_RequestAirRefConf ((AirRef_RequestType_enum_t)INT32_C(0))
 #define AirRef_RequestType_RequestAirRefState ((AirRef_RequestType_enum_t)INT32_C(1))
 #define AirRef_RequestType_RequestMachineState ((AirRef_RequestType_enum_t)INT32_C(2))
-#define AirRef_RequestType_AirRefConfReceived ((AirRef_RequestType_enum_t)INT32_C(3))
+#define AirRef_RequestType_RequestLoggerState ((AirRef_RequestType_enum_t)INT32_C(3))
+#define AirRef_RequestType_AirRefConfReceived ((AirRef_RequestType_enum_t)INT32_C(4))
 
 static inline const char *AirRef_RequestType_name(AirRef_RequestType_enum_t value)
 {
@@ -289,6 +306,7 @@ static inline const char *AirRef_RequestType_name(AirRef_RequestType_enum_t valu
     case AirRef_RequestType_RequestAirRefConf: return "RequestAirRefConf";
     case AirRef_RequestType_RequestAirRefState: return "RequestAirRefState";
     case AirRef_RequestType_RequestMachineState: return "RequestMachineState";
+    case AirRef_RequestType_RequestLoggerState: return "RequestLoggerState";
     case AirRef_RequestType_AirRefConfReceived: return "AirRefConfReceived";
     default: return "";
     }
@@ -300,7 +318,34 @@ static inline int AirRef_RequestType_is_known_value(AirRef_RequestType_enum_t va
     case AirRef_RequestType_RequestAirRefConf: return 1;
     case AirRef_RequestType_RequestAirRefState: return 1;
     case AirRef_RequestType_RequestMachineState: return 1;
+    case AirRef_RequestType_RequestLoggerState: return 1;
     case AirRef_RequestType_AirRefConfReceived: return 1;
+    default: return 0;
+    }
+}
+
+typedef int32_t AirRef_LoggerCommunicationState_enum_t;
+__flatbuffers_define_integer_type(AirRef_LoggerCommunicationState, AirRef_LoggerCommunicationState_enum_t, 32)
+#define AirRef_LoggerCommunicationState_CommunicationIdle ((AirRef_LoggerCommunicationState_enum_t)INT32_C(0))
+#define AirRef_LoggerCommunicationState_ComunicationDone ((AirRef_LoggerCommunicationState_enum_t)INT32_C(1))
+#define AirRef_LoggerCommunicationState_CommunicationFailed ((AirRef_LoggerCommunicationState_enum_t)INT32_C(2))
+
+static inline const char *AirRef_LoggerCommunicationState_name(AirRef_LoggerCommunicationState_enum_t value)
+{
+    switch (value) {
+    case AirRef_LoggerCommunicationState_CommunicationIdle: return "CommunicationIdle";
+    case AirRef_LoggerCommunicationState_ComunicationDone: return "ComunicationDone";
+    case AirRef_LoggerCommunicationState_CommunicationFailed: return "CommunicationFailed";
+    default: return "";
+    }
+}
+
+static inline int AirRef_LoggerCommunicationState_is_known_value(AirRef_LoggerCommunicationState_enum_t value)
+{
+    switch (value) {
+    case AirRef_LoggerCommunicationState_CommunicationIdle: return 1;
+    case AirRef_LoggerCommunicationState_ComunicationDone: return 1;
+    case AirRef_LoggerCommunicationState_CommunicationFailed: return 1;
     default: return 0;
     }
 }
@@ -341,7 +386,7 @@ __flatbuffers_struct_as_root(AirRef_CompressorSpeed)
 __flatbuffers_define_struct_scalar_fixed_array_field(AirRef_CompressorSpeed, speed, flatbuffers_int32, int32_t, 10)
 
 struct AirRef_ErrorList {
-    alignas(4) AirRef_ErrorReport_t speed[10];
+    alignas(4) AirRef_ErrorReport_t errors[10];
 };
 static_assert(sizeof(AirRef_ErrorList_t) == 80, "struct size mismatch");
 
@@ -354,7 +399,7 @@ static inline size_t AirRef_ErrorList_vec_len(AirRef_ErrorList_vec_t vec)
 __flatbuffers_vec_len(vec)
 __flatbuffers_struct_as_root(AirRef_ErrorList)
 
-__flatbuffers_define_struct_struct_fixed_array_field(AirRef_ErrorList, speed, AirRef_ErrorReport_struct_t, 10)
+__flatbuffers_define_struct_struct_fixed_array_field(AirRef_ErrorList, errors, AirRef_ErrorReport_struct_t, 10)
 
 struct AirRef_MotorStatus {
     alignas(4) int32_t state[10];
@@ -432,7 +477,7 @@ __flatbuffers_define_struct_field(10, AirRef_MachineState, imm101_motor, AirRef_
 __flatbuffers_define_struct_field(11, AirRef_MachineState, imm101_status, AirRef_MotorStatus_struct_t, 0)
 __flatbuffers_define_scalar_field(12, AirRef_MachineState, pin_enable, flatbuffers_int32, int32_t, INT32_C(-1))
 __flatbuffers_define_struct_field(13, AirRef_MachineState, ar_error, AirRef_ErrorList_struct_t, 0)
-__flatbuffers_define_struct_field(14, AirRef_MachineState, ar_status, AirRef_ErrorReport_struct_t, 0)
+__flatbuffers_define_scalar_field(14, AirRef_MachineState, ar_status, AirRef_AirRefStatus, AirRef_AirRefStatus_enum_t, INT32_C(0))
 
 struct AirRef_Request_table { uint8_t unused__; };
 
@@ -443,6 +488,16 @@ __flatbuffers_offset_vec_at(AirRef_Request_table_t, vec, i, 0)
 __flatbuffers_table_as_root(AirRef_Request)
 
 __flatbuffers_define_scalar_field(0, AirRef_Request, request_type, AirRef_RequestType, AirRef_RequestType_enum_t, INT32_C(0))
+
+struct AirRef_LoggerState_table { uint8_t unused__; };
+
+static inline size_t AirRef_LoggerState_vec_len(AirRef_LoggerState_vec_t vec)
+__flatbuffers_vec_len(vec)
+static inline AirRef_LoggerState_table_t AirRef_LoggerState_vec_at(AirRef_LoggerState_vec_t vec, size_t i)
+__flatbuffers_offset_vec_at(AirRef_LoggerState_table_t, vec, i, 0)
+__flatbuffers_table_as_root(AirRef_LoggerState)
+
+__flatbuffers_define_scalar_field(0, AirRef_LoggerState, state, AirRef_LoggerCommunicationState, AirRef_LoggerCommunicationState_enum_t, INT32_C(0))
 typedef uint8_t AirRef_Content_union_type_t;
 __flatbuffers_define_integer_type(AirRef_Content, AirRef_Content_union_type_t, 8)
 __flatbuffers_define_union(flatbuffers_, AirRef_Content)
