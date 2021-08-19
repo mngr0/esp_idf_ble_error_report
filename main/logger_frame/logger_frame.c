@@ -1,13 +1,9 @@
 #include "logger_hw.h"
 #include "logger_frame.h"
 
+#include "esp_log.h"
+
 #define LOGGER_TAG "LOGGER_FRAME"
-
-// extern machine_state_t m_state;
-// extern air_ref_conf_t ar_conf;
-// extern air_ref_conf_t ar_conf_old;
-// extern air_ref_state_t ar_state;
-
 
 logger_device_t io_logger;
 
@@ -98,7 +94,8 @@ void send_frame(logger_frame_t *frame)
     tmp_buffer_out[HEADER_SIZE + size + 3] = frame->end_of_frame[1];
     tmp_buffer_out[HEADER_SIZE + size + 4] = frame->end_of_frame[2];
 
-    uart_write_bytes(uart_num, (const char *)tmp_buffer_out, HEADER_SIZE + size + DELIMITER_SIZE +2);
+    send_buffer( tmp_buffer_out, HEADER_SIZE + size + DELIMITER_SIZE +2);
+
 }
 
 

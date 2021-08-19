@@ -1,7 +1,8 @@
 #ifndef SERIAL_LOGGER_AIR_REF_H_
 #define SERIAL_LOGGER_AIR_REF_H_
 
-#include "logger_frame/logger_hw.h"
+#include "air_ref/air_ref.h"
+#include "airref_builder.h"
 
 void send_new_conf(air_ref_conf_t *ar_conf_new);
 
@@ -19,7 +20,7 @@ void load_m_state(flatcc_builder_t *B, machine_state_t *m_state);
 
 void load_ar_conf(flatcc_builder_t *B, air_ref_conf_t *ar_conf);
 
-void load_log_state(flatcc_builder_t *B, bool sticazzi);
+void load_log_state(flatcc_builder_t *B, int sticazzi);
 
 void parse_m_state(AirRef_MachineState_table_t machineState, machine_state_t *m_state);
 

@@ -1,7 +1,16 @@
 
-// #include "logger_hw.h"
+#include "logger_frame/logger_hw.h"
 #include "serial_logger/logger_air_ref.h"
 #include "logger_frame/logger_frame.h"
+
+#include "freertos/FreeRTOS.h"
+#include "freertos/queue.h"
+#include "esp_log.h"
+#include "driver/uart.h"
+extern const uart_port_t uart_num;
+
+#define AIR_REF_TAG "AIR_REF_TAG"
+
 
 machine_state_t m_state;
 air_ref_conf_t ar_conf;
@@ -96,7 +105,7 @@ static void logger_task(void *arg)
 
     do
     {
-        ESP_LOGI(LOGGER_TAG, "asking for ar_conf");
+        ESP_LOGI(AIR_REF_TAG, "asking for ar_conf");
         do_request_ar_conf();
         vTaskDelay(3000 / portTICK_PERIOD_MS);
     } while (conf_received == false);
@@ -108,7 +117,7 @@ static void logger_task(void *arg)
         {
             if (timestamp_last_update_ar_conf + 1000 / portTICK_PERIOD_MS < xTaskGetTickCount())
             {
-                ESP_LOGI(LOGGER_TAG, "SEND UPDATED CONF");
+                ESP_LOGI(AIR_REF_TAG, "SEND UPDATED CONF");
                 timestamp_last_update_ar_conf = xTaskGetTickCount();
                 send_new_conf(&ar_conf);
             }
@@ -116,13 +125,13 @@ static void logger_task(void *arg)
 
         else if (timestamp_last_update_m_state + 2000 / portTICK_PERIOD_MS < xTaskGetTickCount())
         {
-            ESP_LOGI(LOGGER_TAG, "asking for m_state");
+            ESP_LOGI(AIR_REF_TAG, "asking for m_state");
             timestamp_last_update_m_state = xTaskGetTickCount();
             do_request_m_state();
         }
         else if (timestamp_last_update_ar_state + 10000 / portTICK_PERIOD_MS < xTaskGetTickCount())
         {
-            ESP_LOGI(LOGGER_TAG, "asking for ar_state state");
+            ESP_LOGI(AIR_REF_TAG, "asking for ar_state state");
             (timestamp_last_update_ar_state = xTaskGetTickCount());
             do_request_ar_state();
         }

@@ -1,10 +1,6 @@
 #ifndef __AIR_REF_H__
 #define __AIR_REF_H__
 
-
-#ifndef AIR_REF_H_
-#define AIR_REF_H_
-
 #include "infineonlib.h"
 #include "error.h"
 #include "airref_builder.h"
@@ -117,4 +113,3 @@ void log_m_state( machine_state_t *m_state);
 
 
 #endif /* AIR_REF_H_ */
-#endif

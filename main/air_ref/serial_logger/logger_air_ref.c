@@ -3,6 +3,8 @@
 #include "logger_frame/logger_frame.h"
 #include "air_ref/air_ref.h"
 
+#include "esp_log.h"
+
 extern machine_state_t m_state;
 extern air_ref_state_t ar_state;
 extern air_ref_conf_t ar_conf;

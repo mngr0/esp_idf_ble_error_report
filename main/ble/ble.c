@@ -593,12 +593,12 @@ void BLE_init(void)
         return;
     }
 
-    ret = esp_ble_gatts_app_register(PROFILE_LOG_STATE_IDX);
-    if (ret)
-    {
-        ESP_LOGE(GATTS_TABLE_TAG, "gatts app register error, error code = %x", ret);
-        return;
-    }
+    // ret = esp_ble_gatts_app_register(PROFILE_LOG_STATE_IDX);
+    // if (ret)
+    // {
+    //     ESP_LOGE(GATTS_TABLE_TAG, "gatts app register error, error code = %x", ret);
+    //     return;
+    // }
 
     esp_err_t local_mtu_ret = esp_ble_gatt_set_local_mtu(500);
     if (local_mtu_ret)
