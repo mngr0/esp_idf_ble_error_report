@@ -26,10 +26,6 @@
 
 #define GATTS_LOG_STATE_TAG "GATTS_LOG_STATE"
 
-extern machine_state_t log_state;
-extern air_ref_conf_t ar_conf;
-extern air_ref_state_t ar_state;
-
 extern uint8_t raw_scan_rsp_data[10];
 extern uint8_t raw_adv_data[26];
 extern struct gatts_profile_inst machine_state_profile_tab[PROFILE_NUM];
@@ -58,25 +54,25 @@ void log_state_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if,
         ESP_LOGI(GATTS_LOG_STATE_TAG, "GATT_READ_EVT, conn_id %d, trans_id %d, handle %d\n", param->read.conn_id, param->read.trans_id, param->read.handle);
         esp_gatt_rsp_t rsp;
 
-        flatcc_builder_t builder;
-        size_t size;
-        void *buf;
+    //     flatcc_builder_t builder;
+    //     size_t size;
+    //     void *buf;
 
-        memset(&rsp, 0, sizeof(esp_gatt_rsp_t));
-        rsp.attr_value.handle = param->read.handle;
+    //     memset(&rsp, 0, sizeof(esp_gatt_rsp_t));
+    //     rsp.attr_value.handle = param->read.handle;
 
-        flatcc_builder_init(&builder);
-       // load_log_state(&builder, &log_state);
-        buf = flatcc_builder_finalize_buffer(&builder, &size);
-        rsp.attr_value.len = size;
-        memcpy(rsp.attr_value.value, buf, size);
-        ESP_LOGI(GATTS_LOG_STATE_TAG, "required size: %d\n", size);
+    //     flatcc_builder_init(&builder);
+    //    // load_log_state(&builder, &log_state);
+    //     buf = flatcc_builder_finalize_buffer(&builder, &size);
+    //     rsp.attr_value.len = size;
+    //     memcpy(rsp.attr_value.value, buf, size);
+    //     ESP_LOGI(GATTS_LOG_STATE_TAG, "required size: %d\n", size);
 
-        flatcc_builder_aligned_free(buf);
-        flatcc_builder_clear(&builder);
+    //     flatcc_builder_aligned_free(buf);
+    //     flatcc_builder_clear(&builder);
 
-        esp_ble_gatts_send_response(gatts_if, param->read.conn_id, param->read.trans_id,
-                                    ESP_GATT_OK, &rsp);
+    //     esp_ble_gatts_send_response(gatts_if, param->read.conn_id, param->read.trans_id,
+    //                                 ESP_GATT_OK, &rsp);
         break;
     }
     case ESP_GATTS_WRITE_EVT:
