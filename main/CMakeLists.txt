@@ -14,6 +14,9 @@ idf_component_register(SRCS "gatts_table_creat_demo.c"
                             "fb/emitter.c"
                             "fb/refmap.c"
 
+                            "rtcc/mcp7940.c"
+
+
                             "logger_frame/logger_frame.c" 
                             "logger_frame/logger_hw.c" 
                     INCLUDE_DIRS "."
