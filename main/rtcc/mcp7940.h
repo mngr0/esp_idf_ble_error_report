@@ -18,7 +18,7 @@ typedef struct {
     uint8_t year;
 } rtc_time_t;
 
-int mcp7940_init(uint8_t cap_size, uint8_t battery_control);
+int mcp7940_init(uint8_t battery_control);
 int mcp7940_set_time( const rtc_time_t *pTime);
 int mcp7940_get_time(rtc_time_t *pTime);
 
