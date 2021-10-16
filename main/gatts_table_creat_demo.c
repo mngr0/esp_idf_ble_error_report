@@ -67,7 +67,7 @@
 #define I2C_MASTER_NUM                                                         \
   0 /*!< I2C master i2c port number, the number of i2c peripheral interfaces   \
        available will depend on the chip */
-#define I2C_MASTER_FREQ_HZ 10000    /*!< I2C master clock frequency */
+#define I2C_MASTER_FREQ_HZ 100000   /*!< I2C master clock frequency */
 #define I2C_MASTER_TX_BUF_DISABLE 0 /*!< I2C master doesn't need buffer */
 #define I2C_MASTER_RX_BUF_DISABLE 0 /*!< I2C master doesn't need buffer */
 #define I2C_MASTER_TIMEOUT_MS 1000
@@ -263,14 +263,23 @@ void do_test_spi_sd() {
   // deinitialize the bus after all devices are removed
   spi_bus_free(host.slot);
 }
+//https://gist.github.com/mws-rmain/2ba434cd2a3f32d6d343c1c60fbd65c8
 
 static void blink_task(void *arg) {
+  rtc_time_t pTime;
+  rtc_time_t pTime_set;
+  pTime_set.year = 20;
+  pTime_set.hour = 17;
+  pTime_set.month = 10;
+  pTime_set.day = 16;
+  pTime_set.min = 20;
+
   if (i2c_master_init()) {
     ESP_LOGI("TEST_CS", "i2c INIT NOT GOOD ----------------------------");
   } else {
     ESP_LOGI("TEST_CS", "i2c INIT GOOD/////////////////////////");
   }
-
+  //mcp7940_set_time(&pTime_set);
   // do_test_spi_sd();
   if (mcp7940_init(1)) {
     ESP_LOGI("TEST_CS", "MCP INIT NOT GOOD ----------------------------");
@@ -279,6 +288,7 @@ static void blink_task(void *arg) {
   }
   // set time?
   uint8_t counter = 5; // ALL 1
+  
   while (1) {
     // read RTCC. print time
 
@@ -286,10 +296,12 @@ static void blink_task(void *arg) {
     gpio_set_level(LED_G, led_blink[counter][1]);
     gpio_set_level(LED_B, led_blink[counter][2]);
     vTaskDelay(500 / portTICK_PERIOD_MS);
-    // counter++;
+    //counter++;
     counter %= 8;
     ESP_LOGI("TEST_CS", "doing: %d %d %d", led_blink[counter][0],
              led_blink[counter][1], led_blink[counter][2]);
+    mcp7940_get_time(&pTime);
+    ESP_LOGI("TIME","%d/%d/%d - %d:%d:%d",pTime.day,pTime.month,pTime.year,pTime.hour, pTime.min,  pTime.sec);
   }
 }
 
@@ -309,8 +321,8 @@ void app_main(void) {
 
   xTaskCreate(blink_task, "blink_task", SENDER_TASK_STACK_SIZE, NULL, 2, NULL);
 
-  // configure_serial();
+  configure_serial();
 
-  // BLE_init();
-  // logger_init();
+  BLE_init();
+  logger_init();
 }
