@@ -15,6 +15,9 @@ FILE *file_pointer_to_last_used = NULL; //after first search it points to last f
 // - - create new file if necessary (check remaining disk space on SD card)
 // - append to file
 
+//init utility -> search for last used file
+
+
 //show files over bt/wifi
 
 //query logs over a given period of time

@@ -166,6 +166,13 @@ struct gatts_profile_inst heart_rate_profile_tab[PROFILE_NUM] = {
 
     },
 
+    // [PROFILE_BLUEFI_IDX] = {
+    //     .gatts_cb = ar_state_event_handler,
+    //      .gatts_if = ESP_GATT_IF_NONE, /* Not get the gatt_if, so initial is ESP_GATT_IF_NONE */
+
+    // },
+
+
     [PROFILE_LOG_STATE_IDX] = {
         .gatts_cb = log_state_event_handler,
          .gatts_if = ESP_GATT_IF_NONE, /* Not get the gatt_if, so initial is ESP_GATT_IF_NONE */
