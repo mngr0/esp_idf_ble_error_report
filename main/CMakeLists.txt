@@ -5,6 +5,7 @@ idf_component_register(SRCS "gatts_table_creat_demo.c"
                             "ble/ble_lib.c"
 
                             "ble/blufi.c"
+                            "ble/blufi_security.c"
                             "ble/blufi_init.c"
                             "ble/services/gatt_ar_state.c" 
                             "ble/services/gatt_m_state.c" 
