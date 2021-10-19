@@ -28,8 +28,9 @@ typedef struct {
 	uint16_t frame_size;
 	uint8_t buffer[FRAME_MAX_PACKET_SIZE];
 	uint16_t checksum;
-	uint8_t end_of_frame[3];
 	//RECEIVE_TIMESTAMP
+	uint8_t end_of_frame[3];
+
 }logger_frame_t;
 //RENAME IN PACKET_RECEIVED_T
 
