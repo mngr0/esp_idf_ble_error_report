@@ -72,6 +72,8 @@ void build_frame(logger_frame_t *frame, flatcc_builder_t *builder)
 
 static uint8_t tmp_buffer_out[LOGGER_BUF_SIZE];
 
+
+//DATA AS PARAMETER INSTEAD OF FRAME, IT IS USELESS TO BUILD THE STRUCTURE
 void send_frame(logger_frame_t *frame)
 {
     size_t size = frame->frame_size;
@@ -99,6 +101,35 @@ void send_frame(logger_frame_t *frame)
 }
 
 
+//DATA AS PARAMETER INSTEAD OF FRAME, IT IS USELESS TO BUILD THE STRUCTURE
+void send_frame(logger_frame_t *frame)
+{
+    size_t size = frame->frame_size;
+    tmp_buffer_out[0] = frame->start_of_frame[0];
+    tmp_buffer_out[1] = frame->start_of_frame[1];
+    tmp_buffer_out[2] = frame->start_of_frame[2];
+    tmp_buffer_out[3] = frame->protocol_version;
+    tmp_buffer_out[4] = frame->frame_size & 0xff;
+    tmp_buffer_out[5] = (frame->frame_size >> 8) & 0xff;
+
+    for (int i = 0; i < size; i++)
+    {
+        tmp_buffer_out[i + HEADER_SIZE] = frame->buffer[i];
+    }
+
+    uint16_t chksum = logger_checksum(tmp_buffer_out, HEADER_SIZE + size);
+    tmp_buffer_out[HEADER_SIZE + size + 0] = chksum & 0xff;
+    tmp_buffer_out[HEADER_SIZE + size + 1] = (chksum >> 8) & 0xff;
+    tmp_buffer_out[HEADER_SIZE + size + 2] = frame->end_of_frame[0];
+    tmp_buffer_out[HEADER_SIZE + size + 3] = frame->end_of_frame[1];
+    tmp_buffer_out[HEADER_SIZE + size + 4] = frame->end_of_frame[2];
+
+    send_buffer( tmp_buffer_out, HEADER_SIZE + size + DELIMITER_SIZE +2);
+
+}
+
+
+
 void init_logger(){
     io_logger.cnt_in_begin=0;
     io_logger.cnt_in_end=0;
@@ -119,6 +150,9 @@ void add_to_ringbuffer(uint8_t *new_buf, int16_t length)
 
 int16_t take_frame(uint8_t *frame_buf)
 {
+    // direct access to io_logger.buffer_in, from which it takes the packet
+    // packet detected stored in frame_buf
+
 
     //CS BEGIN
     //search for SOF, if not found cancel any data in the buffer.

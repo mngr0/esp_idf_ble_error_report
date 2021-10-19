@@ -148,11 +148,11 @@ struct gatts_profile_inst heart_rate_profile_tab[PROFILE_NUM] = {
 
     },
 
-    // [PROFILE_BLUEFI_IDX] = {
-    //     .gatts_cb = ar_state_event_handler,
-    //      .gatts_if = ESP_GATT_IF_NONE, /* Not get the gatt_if, so initial is ESP_GATT_IF_NONE */
+    [PROFILE_BLUEFI_IDX] = {
+        .gatts_cb = bluefi_event_handler,
+         .gatts_if = ESP_GATT_IF_NONE, /* Not get the gatt_if, so initial is ESP_GATT_IF_NONE */
 
-    // },
+    },
 
 
     [PROFILE_LOG_STATE_IDX] = {
@@ -575,11 +575,17 @@ void BLE_init(void)
         return;
     }
 
+    ret = esp_ble_gatts_app_register(PROFILE_BLUEFI_IDX);
+    if (ret)
+    {
+        ESP_LOGE(GATTS_TABLE_TAG, "gatts app register error, error code = %x", ret);
+        return;
+    }
+
     esp_err_t local_mtu_ret = esp_ble_gatt_set_local_mtu(500);
     if (local_mtu_ret)
     {
         ESP_LOGE(GATTS_TABLE_TAG, "set local  MTU failed, error code = %x", local_mtu_ret);
     }
-blufi_app_main();
-
+    
 }

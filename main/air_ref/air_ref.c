@@ -143,6 +143,7 @@ static void logger_task(void *arg)
 
 static void receiver_task(void *arg)
 {
+//TODO ADD USAGE OF HEAP MEMORY TO MANAGE MULTIPLE DEVICES CONNECTED
 
     int length;
     logger_frame_t reply;
@@ -162,7 +163,9 @@ static void receiver_task(void *arg)
 
             if (receive_frame(&reply, data, length))
             {
+                //ADD TIMESTAMP TO PACKET
                 access_message_buffer(reply.buffer);
+                //TODO SAVE RECEIVED FRAME TO SSD (AFTER REPLY)
             }
             else
             {

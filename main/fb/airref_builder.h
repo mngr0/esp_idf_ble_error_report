@@ -20,6 +20,9 @@
 #define __AirRef_ErrorState_formal_args , AirRef_ErrorState_enum_t v0
 #define __AirRef_ErrorState_call_args , v0
 __flatbuffers_build_scalar(flatbuffers_, AirRef_ErrorState, AirRef_ErrorState_enum_t)
+#define __AirRef_ControlType_formal_args , AirRef_ControlType_enum_t v0
+#define __AirRef_ControlType_call_args , v0
+__flatbuffers_build_scalar(flatbuffers_, AirRef_ControlType, AirRef_ControlType_enum_t)
 #define __AirRef_AirRefIndexError_formal_args , AirRef_AirRefIndexError_enum_t v0
 #define __AirRef_AirRefIndexError_call_args , v0
 __flatbuffers_build_scalar(flatbuffers_, AirRef_AirRefIndexError, AirRef_AirRefIndexError_enum_t)
@@ -55,29 +58,6 @@ static inline AirRef_ErrorReport_t *AirRef_ErrorReport_copy_from_pe(AirRef_Error
   return p; }
 __flatbuffers_build_struct(flatbuffers_, AirRef_ErrorReport, 8, 4, AirRef_ErrorReport_file_identifier, AirRef_ErrorReport_type_identifier)
 __flatbuffers_define_fixed_array_primitives(flatbuffers_, AirRef_ErrorReport, AirRef_ErrorReport_t)
-
-#define __AirRef_CompressorSpeed_formal_args , const int32_t v0[10]
-#define __AirRef_CompressorSpeed_call_args , v0
-static inline AirRef_CompressorSpeed_t *AirRef_CompressorSpeed_assign(AirRef_CompressorSpeed_t *p, const int32_t v0[10])
-{ flatbuffers_int32_array_copy(p->speed, v0, 10);
-  return p; }
-static inline AirRef_CompressorSpeed_t *AirRef_CompressorSpeed_copy(AirRef_CompressorSpeed_t *p, const AirRef_CompressorSpeed_t *p2)
-{ flatbuffers_int32_array_copy(p->speed, p2->speed, 10);
-  return p; }
-static inline AirRef_CompressorSpeed_t *AirRef_CompressorSpeed_assign_to_pe(AirRef_CompressorSpeed_t *p, const int32_t v0[10])
-{ flatbuffers_int32_array_copy_to_pe(p->speed, v0, 10);
-  return p; }
-static inline AirRef_CompressorSpeed_t *AirRef_CompressorSpeed_copy_to_pe(AirRef_CompressorSpeed_t *p, const AirRef_CompressorSpeed_t *p2)
-{ flatbuffers_int32_array_copy_to_pe(p->speed, p2->speed, 10);
-  return p; }
-static inline AirRef_CompressorSpeed_t *AirRef_CompressorSpeed_assign_from_pe(AirRef_CompressorSpeed_t *p, const int32_t v0[10])
-{ flatbuffers_int32_array_copy_from_pe(p->speed, v0, 10);
-  return p; }
-static inline AirRef_CompressorSpeed_t *AirRef_CompressorSpeed_copy_from_pe(AirRef_CompressorSpeed_t *p, const AirRef_CompressorSpeed_t *p2)
-{ flatbuffers_int32_array_copy_from_pe(p->speed, p2->speed, 10);
-  return p; }
-__flatbuffers_build_struct(flatbuffers_, AirRef_CompressorSpeed, 40, 4, AirRef_CompressorSpeed_file_identifier, AirRef_CompressorSpeed_type_identifier)
-__flatbuffers_define_fixed_array_primitives(flatbuffers_, AirRef_CompressorSpeed, AirRef_CompressorSpeed_t)
 
 #define __AirRef_ErrorList_formal_args , const AirRef_ErrorReport_t v0[10]
 #define __AirRef_ErrorList_call_args , v0
@@ -160,9 +140,9 @@ static AirRef_Message_ref_t AirRef_Message_clone(flatbuffers_builder_t *B, AirRe
 __flatbuffers_build_table(flatbuffers_, AirRef_Message, 2)
 
 #define __AirRef_AirRefConf_formal_args ,\
-  int32_t v0, int32_t v1, int32_t v2, int32_t v3,\
+  AirRef_ControlType_enum_t v0, int32_t v1, int32_t v2, int32_t v3,\
   int32_t v4, int32_t v5, int32_t v6, int32_t v7,\
-  int32_t v8, AirRef_CompressorSpeed_t *v9, int32_t v10
+  int32_t v8, int32_t v9, int32_t v10
 #define __AirRef_AirRefConf_call_args ,\
   v0, v1, v2, v3,\
   v4, v5, v6, v7,\
@@ -230,32 +210,32 @@ static AirRef_Content_union_ref_t AirRef_Content_clone(flatbuffers_builder_t *B,
     }
 }
 
-__flatbuffers_build_scalar_field(0, flatbuffers_, AirRef_AirRefConf_serial_control, flatbuffers_int32, int32_t, 4, 4, INT32_C(-1), AirRef_AirRefConf)
+__flatbuffers_build_scalar_field(0, flatbuffers_, AirRef_AirRefConf_control_type, AirRef_ControlType, AirRef_ControlType_enum_t, 4, 4, INT32_C(0), AirRef_AirRefConf)
 __flatbuffers_build_scalar_field(1, flatbuffers_, AirRef_AirRefConf_fan_target_pressure, flatbuffers_int32, int32_t, 4, 4, INT32_C(-1), AirRef_AirRefConf)
 __flatbuffers_build_scalar_field(2, flatbuffers_, AirRef_AirRefConf_fan_coeff_p, flatbuffers_int32, int32_t, 4, 4, INT32_C(-1), AirRef_AirRefConf)
 __flatbuffers_build_scalar_field(3, flatbuffers_, AirRef_AirRefConf_fan_coeff_offset, flatbuffers_int32, int32_t, 4, 4, INT32_C(-1), AirRef_AirRefConf)
 __flatbuffers_build_scalar_field(4, flatbuffers_, AirRef_AirRefConf_fan_min_pressure, flatbuffers_int32, int32_t, 4, 4, INT32_C(-1), AirRef_AirRefConf)
 __flatbuffers_build_scalar_field(5, flatbuffers_, AirRef_AirRefConf_fan_max_pressure, flatbuffers_int32, int32_t, 4, 4, INT32_C(-1), AirRef_AirRefConf)
 __flatbuffers_build_scalar_field(6, flatbuffers_, AirRef_AirRefConf_compressor_target_pressure, flatbuffers_int32, int32_t, 4, 4, INT32_C(-1), AirRef_AirRefConf)
-__flatbuffers_build_scalar_field(7, flatbuffers_, AirRef_AirRefConf_compressor_activation_offset, flatbuffers_int32, int32_t, 4, 4, INT32_C(-1), AirRef_AirRefConf)
-__flatbuffers_build_scalar_field(8, flatbuffers_, AirRef_AirRefConf_compressor_action_delay, flatbuffers_int32, int32_t, 4, 4, INT32_C(-1), AirRef_AirRefConf)
-__flatbuffers_build_struct_field(9, flatbuffers_, AirRef_AirRefConf_compressor_speed, AirRef_CompressorSpeed, 40, 4, AirRef_AirRefConf)
-__flatbuffers_build_scalar_field(10, flatbuffers_, AirRef_AirRefConf_compressor_start_interval, flatbuffers_int32, int32_t, 4, 4, INT32_C(-1), AirRef_AirRefConf)
+__flatbuffers_build_scalar_field(7, flatbuffers_, AirRef_AirRefConf_compressor_coeff_P, flatbuffers_int32, int32_t, 4, 4, INT32_C(-1), AirRef_AirRefConf)
+__flatbuffers_build_scalar_field(8, flatbuffers_, AirRef_AirRefConf_compressor_coeff_I, flatbuffers_int32, int32_t, 4, 4, INT32_C(-1), AirRef_AirRefConf)
+__flatbuffers_build_scalar_field(9, flatbuffers_, AirRef_AirRefConf_compressor_start_interval, flatbuffers_int32, int32_t, 4, 4, INT32_C(-1), AirRef_AirRefConf)
+__flatbuffers_build_scalar_field(10, flatbuffers_, AirRef_AirRefConf_low_pressure_limit, flatbuffers_int32, int32_t, 4, 4, INT32_C(-1), AirRef_AirRefConf)
 
 static inline AirRef_AirRefConf_ref_t AirRef_AirRefConf_create(flatbuffers_builder_t *B __AirRef_AirRefConf_formal_args)
 {
     if (AirRef_AirRefConf_start(B)
-        || AirRef_AirRefConf_serial_control_add(B, v0)
+        || AirRef_AirRefConf_control_type_add(B, v0)
         || AirRef_AirRefConf_fan_target_pressure_add(B, v1)
         || AirRef_AirRefConf_fan_coeff_p_add(B, v2)
         || AirRef_AirRefConf_fan_coeff_offset_add(B, v3)
         || AirRef_AirRefConf_fan_min_pressure_add(B, v4)
         || AirRef_AirRefConf_fan_max_pressure_add(B, v5)
         || AirRef_AirRefConf_compressor_target_pressure_add(B, v6)
-        || AirRef_AirRefConf_compressor_activation_offset_add(B, v7)
-        || AirRef_AirRefConf_compressor_action_delay_add(B, v8)
-        || AirRef_AirRefConf_compressor_speed_add(B, v9)
-        || AirRef_AirRefConf_compressor_start_interval_add(B, v10)) {
+        || AirRef_AirRefConf_compressor_coeff_P_add(B, v7)
+        || AirRef_AirRefConf_compressor_coeff_I_add(B, v8)
+        || AirRef_AirRefConf_compressor_start_interval_add(B, v9)
+        || AirRef_AirRefConf_low_pressure_limit_add(B, v10)) {
         return 0;
     }
     return AirRef_AirRefConf_end(B);
@@ -265,25 +245,25 @@ static AirRef_AirRefConf_ref_t AirRef_AirRefConf_clone(flatbuffers_builder_t *B,
 {
     __flatbuffers_memoize_begin(B, t);
     if (AirRef_AirRefConf_start(B)
-        || AirRef_AirRefConf_serial_control_pick(B, t)
+        || AirRef_AirRefConf_control_type_pick(B, t)
         || AirRef_AirRefConf_fan_target_pressure_pick(B, t)
         || AirRef_AirRefConf_fan_coeff_p_pick(B, t)
         || AirRef_AirRefConf_fan_coeff_offset_pick(B, t)
         || AirRef_AirRefConf_fan_min_pressure_pick(B, t)
         || AirRef_AirRefConf_fan_max_pressure_pick(B, t)
         || AirRef_AirRefConf_compressor_target_pressure_pick(B, t)
-        || AirRef_AirRefConf_compressor_activation_offset_pick(B, t)
-        || AirRef_AirRefConf_compressor_action_delay_pick(B, t)
-        || AirRef_AirRefConf_compressor_speed_pick(B, t)
-        || AirRef_AirRefConf_compressor_start_interval_pick(B, t)) {
+        || AirRef_AirRefConf_compressor_coeff_P_pick(B, t)
+        || AirRef_AirRefConf_compressor_coeff_I_pick(B, t)
+        || AirRef_AirRefConf_compressor_start_interval_pick(B, t)
+        || AirRef_AirRefConf_low_pressure_limit_pick(B, t)) {
         return 0;
     }
     __flatbuffers_memoize_end(B, t, AirRef_AirRefConf_end(B));
 }
 
-__flatbuffers_build_scalar_field(0, flatbuffers_, AirRef_AirRefState_compressor_actual_speed_index, flatbuffers_int32, int32_t, 4, 4, INT32_C(-1), AirRef_AirRefState)
-__flatbuffers_build_scalar_field(1, flatbuffers_, AirRef_AirRefState_compressor_last_speed_change_time, flatbuffers_int32, int32_t, 4, 4, INT32_C(-1), AirRef_AirRefState)
-__flatbuffers_build_scalar_field(2, flatbuffers_, AirRef_AirRefState_compressor_speed_to_command, flatbuffers_int32, int32_t, 4, 4, INT32_C(-1), AirRef_AirRefState)
+__flatbuffers_build_scalar_field(0, flatbuffers_, AirRef_AirRefState_compressor_calculated_speed, flatbuffers_int32, int32_t, 4, 4, INT32_C(-1), AirRef_AirRefState)
+__flatbuffers_build_scalar_field(1, flatbuffers_, AirRef_AirRefState_compressor_speed_to_command, flatbuffers_int32, int32_t, 4, 4, INT32_C(-1), AirRef_AirRefState)
+__flatbuffers_build_scalar_field(2, flatbuffers_, AirRef_AirRefState_compressor_I_value, flatbuffers_int32, int32_t, 4, 4, INT32_C(-1), AirRef_AirRefState)
 __flatbuffers_build_scalar_field(3, flatbuffers_, AirRef_AirRefState_compressor_last_stop, flatbuffers_int32, int32_t, 4, 4, INT32_C(-1), AirRef_AirRefState)
 __flatbuffers_build_scalar_field(4, flatbuffers_, AirRef_AirRefState_compressor_is_blocked, flatbuffers_int32, int32_t, 4, 4, INT32_C(-1), AirRef_AirRefState)
 __flatbuffers_build_scalar_field(5, flatbuffers_, AirRef_AirRefState_compressor_is_running, flatbuffers_int32, int32_t, 4, 4, INT32_C(-1), AirRef_AirRefState)
@@ -293,9 +273,9 @@ __flatbuffers_build_scalar_field(7, flatbuffers_, AirRef_AirRefState_fan_time_la
 static inline AirRef_AirRefState_ref_t AirRef_AirRefState_create(flatbuffers_builder_t *B __AirRef_AirRefState_formal_args)
 {
     if (AirRef_AirRefState_start(B)
-        || AirRef_AirRefState_compressor_actual_speed_index_add(B, v0)
-        || AirRef_AirRefState_compressor_last_speed_change_time_add(B, v1)
-        || AirRef_AirRefState_compressor_speed_to_command_add(B, v2)
+        || AirRef_AirRefState_compressor_calculated_speed_add(B, v0)
+        || AirRef_AirRefState_compressor_speed_to_command_add(B, v1)
+        || AirRef_AirRefState_compressor_I_value_add(B, v2)
         || AirRef_AirRefState_compressor_last_stop_add(B, v3)
         || AirRef_AirRefState_compressor_is_blocked_add(B, v4)
         || AirRef_AirRefState_compressor_is_running_add(B, v5)
@@ -310,9 +290,9 @@ static AirRef_AirRefState_ref_t AirRef_AirRefState_clone(flatbuffers_builder_t *
 {
     __flatbuffers_memoize_begin(B, t);
     if (AirRef_AirRefState_start(B)
-        || AirRef_AirRefState_compressor_actual_speed_index_pick(B, t)
-        || AirRef_AirRefState_compressor_last_speed_change_time_pick(B, t)
+        || AirRef_AirRefState_compressor_calculated_speed_pick(B, t)
         || AirRef_AirRefState_compressor_speed_to_command_pick(B, t)
+        || AirRef_AirRefState_compressor_I_value_pick(B, t)
         || AirRef_AirRefState_compressor_last_stop_pick(B, t)
         || AirRef_AirRefState_compressor_is_blocked_pick(B, t)
         || AirRef_AirRefState_compressor_is_running_pick(B, t)

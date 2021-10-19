@@ -5,10 +5,15 @@
 #include "error.h"
 #include "airref_builder.h"
 
-#define COMPRESSOR_SPEED_N 10
+typedef enum {
+	control_type_manual_off =0,
+	control_type_manual_on,	
+	control_type_auto,	
+}control_type_t;
+
 
 typedef struct { //public
-	int32_t serial_control;
+	control_type_t control_type;
 	
 	int32_t fan_target_pressure; //(milliBar)
 	int32_t fan_coeff_P;
@@ -17,14 +22,14 @@ typedef struct { //public
 	int32_t fan_max_pressure; //(milliBar)
 	
 	int32_t compressor_target_pressure; //millibar
-	int32_t compressor_activation_offset; //millbar
-	int32_t compressor_action_delay; // milliseconds
-	int32_t compressor_speed[COMPRESSOR_SPEED_N];
+	int32_t compressor_coeff_P;
+	int32_t compressor_coeff_I;
+
 	int32_t compressor_start_interval;
-	
-	int32_t period_log;
+
 	int32_t LP_low_pressure_limit;
-		
+	//HP_MOP
+	
 }air_ref_conf_t;
 
 typedef enum {
@@ -59,9 +64,9 @@ typedef enum {
 
 
 typedef struct{//READONLY
-	int32_t compressor_actual_speed_index;
-	int32_t compressor_last_speed_change_time;
+	int32_t compressor_I_value;
 	int32_t compressor_speed_to_command;
+	int32_t compressor_calculated_speed;
 	int32_t compressor_last_stop;
 	int32_t compressor_is_blocked;
 	int32_t compressor_is_running;

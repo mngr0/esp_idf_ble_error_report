@@ -29,7 +29,9 @@ typedef struct {
 	uint8_t buffer[FRAME_MAX_PACKET_SIZE];
 	uint16_t checksum;
 	uint8_t end_of_frame[3];
+	//RECEIVE_TIMESTAMP
 }logger_frame_t;
+//RENAME IN PACKET_RECEIVED_T
 
 #define START_OF_FRAME 0xa2
 #define END_OF_FRAME 0xdc
@@ -46,6 +48,13 @@ typedef struct {
 	f->end_of_frame[1]=END_OF_FRAME; \
 	f->end_of_frame[2]=END_OF_FRAME; \
 
+#define DELIMITER_PACKET(buffer,f,size) \
+	buffer[0]=START_OF_FRAME; \
+	buffer[1]=START_OF_FRAME; \
+	buffer[2]=START_OF_FRAME; \
+	buffer[HEADER_SIZE + size + 0]=END_OF_FRAME; \
+	buffer[HEADER_SIZE + size + 1]=END_OF_FRAME; \
+	buffer[HEADER_SIZE + size + 2]=END_OF_FRAME; \
 
 
 uint16_t logger_checksum(uint8_t *data, uint16_t length);

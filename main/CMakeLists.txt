@@ -10,6 +10,7 @@ idf_component_register(SRCS "gatts_table_creat_demo.c"
                             "ble/services/gatt_ar_state.c" 
                             "ble/services/gatt_m_state.c" 
                             "ble/services/gatt_ar_conf.c"  
+                            "ble/services/gatt_bluefi.c"  
                             "ble/services/gatt_log_state.c" 
 
                             "air_ref/air_ref.c"
