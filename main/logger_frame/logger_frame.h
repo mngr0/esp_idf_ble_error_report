@@ -37,8 +37,8 @@ typedef struct {
 #define END_OF_FRAME 0xdc
 
 #define DELIMITER_SIZE 3
-#define HEADER_SIZE DELIMITER_SIZE+3
-
+#define HEADER_SIZE DELIMITER_SIZE+3//1 for protocol version2 for size
+#define FOOTER_SIZE DELIMITER_SIZE+2 //2 for checksum
 
 #define DELIMITER_FRAME(f) \
 	f->start_of_frame[0]=START_OF_FRAME; \
@@ -48,7 +48,7 @@ typedef struct {
 	f->end_of_frame[1]=END_OF_FRAME; \
 	f->end_of_frame[2]=END_OF_FRAME; \
 
-#define DELIMITER_PACKET(buffer,f,size) \
+#define DELIMITER_PACKET(buffer,size) \
 	buffer[0]=START_OF_FRAME; \
 	buffer[1]=START_OF_FRAME; \
 	buffer[2]=START_OF_FRAME; \

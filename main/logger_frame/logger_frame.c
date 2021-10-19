@@ -2,6 +2,7 @@
 #include "logger_frame.h"
 
 #include "esp_log.h"
+#include <bits/stdint-uintn.h>
 
 #define LOGGER_TAG "LOGGER_FRAME"
 
@@ -100,31 +101,24 @@ void send_frame(logger_frame_t *frame)
 
 }
 
-
-//DATA AS PARAMETER INSTEAD OF FRAME, IT IS USELESS TO BUILD THE STRUCTURE
-void send_frame(logger_frame_t *frame)
+void send_data(uint8_t *data, size_t size)
 {
-    size_t size = frame->frame_size;
-    tmp_buffer_out[0] = frame->start_of_frame[0];
-    tmp_buffer_out[1] = frame->start_of_frame[1];
-    tmp_buffer_out[2] = frame->start_of_frame[2];
-    tmp_buffer_out[3] = frame->protocol_version;
-    tmp_buffer_out[4] = frame->frame_size & 0xff;
-    tmp_buffer_out[5] = (frame->frame_size >> 8) & 0xff;
+    DELIMITER_PACKET(tmp_buffer_out,size);
+    tmp_buffer_out[DELIMITER_SIZE] = PROTOCOL_VERSION;//frame->protocol_version;
+    //TODO check taht size <65536 .... or shorter than buf size
+    tmp_buffer_out[DELIMITER_SIZE+1] = size & 0xff;
+    tmp_buffer_out[DELIMITER_SIZE+2] = (size >> 8) & 0xff;
 
     for (int i = 0; i < size; i++)
     {
-        tmp_buffer_out[i + HEADER_SIZE] = frame->buffer[i];
+        tmp_buffer_out[i + HEADER_SIZE] = data[i];
     }
 
     uint16_t chksum = logger_checksum(tmp_buffer_out, HEADER_SIZE + size);
     tmp_buffer_out[HEADER_SIZE + size + 0] = chksum & 0xff;
     tmp_buffer_out[HEADER_SIZE + size + 1] = (chksum >> 8) & 0xff;
-    tmp_buffer_out[HEADER_SIZE + size + 2] = frame->end_of_frame[0];
-    tmp_buffer_out[HEADER_SIZE + size + 3] = frame->end_of_frame[1];
-    tmp_buffer_out[HEADER_SIZE + size + 4] = frame->end_of_frame[2];
 
-    send_buffer( tmp_buffer_out, HEADER_SIZE + size + DELIMITER_SIZE +2);
+    send_buffer( tmp_buffer_out, HEADER_SIZE + size + FOOTER_SIZE);
 
 }
 
