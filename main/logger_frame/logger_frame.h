@@ -58,16 +58,14 @@ typedef struct {
 
 int send_data(uint8_t *data, size_t size);
 
-uint16_t logger_checksum(uint8_t *data, uint16_t length);
+//uint16_t logger_checksum(uint8_t *data, uint16_t length);
 
-void parse_reply(logger_frame_t *reply, uint8_t *logger_buffer);
+//void parse_reply(logger_frame_t *reply, uint8_t *logger_buffer);
 
 int8_t receive_frame(logger_frame_t *reply, uint8_t *data, int length);
 
 void add_to_ringbuffer(uint8_t *new_buf, int16_t length);
 
 int16_t take_frame(uint8_t *frame_buf);
-
-void send_frame(logger_frame_t *frame);
 
 #endif
