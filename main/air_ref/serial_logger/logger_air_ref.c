@@ -173,24 +173,33 @@ void parse_m_state(AirRef_MachineState_table_t machineState, machine_state_t *m_
 	}
 }
 
-void send_new_conf(air_ref_conf_t *ar_conf_new)
-{
+int finalize_and_send_builder(flatcc_builder_t *builder){
+		int ret;
 
 
-	flatcc_builder_t builder;
 	logger_frame_t request;
+    size_t size;
+    void *buf;
+	    buf = flatcc_builder_finalize_buffer(builder, &size);
 
-	flatcc_builder_init(&builder);
-	load_ar_conf(&builder, &ar_conf);
-	//TODO DIRECTLY SEND "DATA"
+	ret = send_data(buf,size);
 
-	build_frame(&request, &builder);
-	send_frame(&request);
-
-	flatcc_builder_clear(&builder);
+    flatcc_builder_aligned_free(buf);
+	flatcc_builder_clear(builder);
+	return ret;
 }
 
-void do_request_m_state()
+
+
+int send_new_conf(air_ref_conf_t *ar_conf_new)
+{	
+	flatcc_builder_t builder;
+	flatcc_builder_init(&builder);
+	load_ar_conf(&builder, &ar_conf);
+	return finalize_and_send_builder(&builder);
+}
+
+int do_request_m_state()
 {
 	flatcc_builder_t builder;
 	logger_frame_t request;
@@ -203,24 +212,21 @@ void do_request_m_state()
 
 	AirRef_Content_union_ref_t content = AirRef_Content_as_Request(ar_request);
 	AirRef_Message_create_as_root(&builder, content);
-	build_frame(&request, &builder);
-	send_frame(&request);
-	flatcc_builder_clear(&builder);
+
+	return finalize_and_send_builder(&builder);
 }
 
-void do_reply_m_state()
+int do_reply_m_state()
 {
 	flatcc_builder_t builder;
 	logger_frame_t request;
 
 	flatcc_builder_init(&builder);
 	load_m_state(&builder, &m_state);
-	build_frame(&request, &builder);
-	send_frame(&request);
-	flatcc_builder_clear(&builder);
+	return finalize_and_send_builder(&builder);
 }
 
-void do_request_ar_state()
+int do_request_ar_state()
 {
 	flatcc_builder_t builder;
 	logger_frame_t request;
@@ -233,23 +239,19 @@ void do_request_ar_state()
 
 	AirRef_Content_union_ref_t content = AirRef_Content_as_Request(ar_request);
 	AirRef_Message_create_as_root(&builder, content);
-	build_frame(&request, &builder);
-	send_frame(&request);
-	flatcc_builder_clear(&builder);
+	return finalize_and_send_builder(&builder);
 }
-void do_reply_ar_state()
+int do_reply_ar_state()
 {
 	flatcc_builder_t builder;
 	logger_frame_t request;
 
 	flatcc_builder_init(&builder);
 	load_ar_state(&builder, &ar_state);
-	build_frame(&request, &builder);
-	send_frame(&request);
-	flatcc_builder_clear(&builder);
+	return finalize_and_send_builder(&builder);
 }
 
-void do_request_ar_conf()
+int do_request_ar_conf()
 {
 	flatcc_builder_t builder;
 	logger_frame_t request;
@@ -261,20 +263,16 @@ void do_request_ar_conf()
 	AirRef_Content_union_ref_t content = AirRef_Content_as_Request(ar_request);
 	AirRef_Message_create_as_root(&builder, content);
 
-	build_frame(&request, &builder);
-	send_frame(&request);
-	flatcc_builder_clear(&builder);
+	return finalize_and_send_builder(&builder);
 }
 
-void do_reply_ar_conf()
+int do_reply_ar_conf()
 {
 	flatcc_builder_t builder;
 	logger_frame_t request;
 
 	flatcc_builder_init(&builder);
 	load_ar_conf(&builder, &ar_conf);
-	build_frame(&request, &builder);
-	send_frame(&request);
-	flatcc_builder_clear(&builder);
+	return finalize_and_send_builder(&builder);
 }
 

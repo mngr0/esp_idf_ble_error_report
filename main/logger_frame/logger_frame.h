@@ -1,10 +1,8 @@
 #ifndef SERIAL_LOGGER_FRAME_H_
 #define SERIAL_LOGGER_FRAME_H_
 
-#include "stdint.h"
-#include "fb/airref_builder.h"
-#include "fb/airref_reader.h"
-
+#include <stddef.h>
+#include <stdint.h>
 
 #define PROTOCOL_VERSION 1
 
@@ -58,6 +56,8 @@ typedef struct {
 	buffer[HEADER_SIZE + size + 2]=END_OF_FRAME; \
 
 
+int send_data(uint8_t *data, size_t size);
+
 uint16_t logger_checksum(uint8_t *data, uint16_t length);
 
 void parse_reply(logger_frame_t *reply, uint8_t *logger_buffer);
@@ -67,9 +67,6 @@ int8_t receive_frame(logger_frame_t *reply, uint8_t *data, int length);
 void add_to_ringbuffer(uint8_t *new_buf, int16_t length);
 
 int16_t take_frame(uint8_t *frame_buf);
-
-
-void build_frame(logger_frame_t *frame, flatcc_builder_t* builder );
 
 void send_frame(logger_frame_t *frame);
 

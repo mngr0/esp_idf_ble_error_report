@@ -2,7 +2,6 @@
 #include "logger_frame.h"
 
 #include "esp_log.h"
-#include <bits/stdint-uintn.h>
 
 #define LOGGER_TAG "LOGGER_FRAME"
 
@@ -57,20 +56,6 @@ int8_t receive_frame(logger_frame_t *reply, uint8_t *data, int length)
     return 0;
 }
 
-void build_frame(logger_frame_t *frame, flatcc_builder_t *builder)
-{
-    size_t size;
-    void *buf;
-
-    buf = flatcc_builder_finalize_buffer(builder, &size);
-    DELIMITER_FRAME((frame));
-    frame->protocol_version = PROTOCOL_VERSION;
-
-    memcpy(frame->buffer, buf, size);
-    frame->frame_size = size;
-    flatcc_builder_aligned_free(buf);
-}
-
 static uint8_t tmp_buffer_out[LOGGER_BUF_SIZE];
 
 
@@ -101,8 +86,11 @@ void send_frame(logger_frame_t *frame)
 
 }
 
-void send_data(uint8_t *data, size_t size)
+int send_data(uint8_t *data, size_t size)
 {
+    if(size > LOGGER_BUF_SIZE){
+        return 1;
+    }
     DELIMITER_PACKET(tmp_buffer_out,size);
     tmp_buffer_out[DELIMITER_SIZE] = PROTOCOL_VERSION;//frame->protocol_version;
     //TODO check taht size <65536 .... or shorter than buf size
@@ -119,7 +107,7 @@ void send_data(uint8_t *data, size_t size)
     tmp_buffer_out[HEADER_SIZE + size + 1] = (chksum >> 8) & 0xff;
 
     send_buffer( tmp_buffer_out, HEADER_SIZE + size + FOOTER_SIZE);
-
+    return 0;
 }
 
 

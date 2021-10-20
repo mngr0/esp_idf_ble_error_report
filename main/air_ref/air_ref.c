@@ -184,21 +184,16 @@ void logger_init()
 void log_ar_conf(air_ref_conf_t *ar_conf)
 {
 
-    ESP_LOGI("LOG_AR_CONF", "serial_control : %d", ar_conf->serial_control);
+    ESP_LOGI("LOG_AR_CONF", "serial_control : %d", ar_conf->control_type);
     ESP_LOGI("LOG_AR_CONF", "fan_coeff_P : %d", ar_conf->fan_coeff_P);
     ESP_LOGI("LOG_AR_CONF", "fan_target_pressure : %d", ar_conf->fan_target_pressure);
     ESP_LOGI("LOG_AR_CONF", "fan_coeff_offset : %d", ar_conf->fan_coeff_offset);
     ESP_LOGI("LOG_AR_CONF", "fan_min_pressure : %d", ar_conf->fan_min_pressure);
     ESP_LOGI("LOG_AR_CONF", "fan_max_pressure : %d", ar_conf->fan_max_pressure);
     ESP_LOGI("LOG_AR_CONF", "compressor_target_pressure : %d", ar_conf->compressor_target_pressure);
-    ESP_LOGI("LOG_AR_CONF", "compressor_activation_offset : %d", ar_conf->compressor_activation_offset);
-    ESP_LOGI("LOG_AR_CONF", "compressor_action_delay : %d", ar_conf->compressor_action_delay);
+    ESP_LOGI("LOG_AR_CONF", "compressor_coeff_P : %d", ar_conf->compressor_coeff_P);
+    ESP_LOGI("LOG_AR_CONF", "compressor_coeff_I : %d", ar_conf->compressor_coeff_I);
     ESP_LOGI("LOG_AR_CONF", "compressor_start_interval : %d", ar_conf->compressor_start_interval);
-
-    for (int i = 0; i < 10; i++)
-    {
-        ESP_LOGI("LOG_AR_CONF", "compressor_speed(%d) : %d", i, ar_conf->compressor_speed[i]);
-    }
 }
 
 void log_m_state(machine_state_t *m_state)
