@@ -17,7 +17,7 @@
 
 
 
-void send_buffer(uint8_t* data, int lenght);
+int  send_buffer(uint8_t* data, int lenght);
 
 
 
