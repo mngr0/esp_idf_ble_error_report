@@ -12,7 +12,7 @@ int send_buffer(uint8_t* data, int lenght){
     }
      vTaskDelay(1 / portTICK_PERIOD_MS);// delay 1ms
 
-    ret=uart_wait_tx_done(uart_num, 100 / portTICK_PERIOD_MS);//12=ticktowait
+    ret=uart_wait_tx_done(uart_num, 100 / portTICK_PERIOD_MS);
     if(ret != ESP_OK){
         return ret;
     }
