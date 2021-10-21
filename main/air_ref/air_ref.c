@@ -1,15 +1,22 @@
 
-#include "logger_frame/logger_hw.h"
-#include "serial_logger/logger_air_ref.h"
-#include "logger_frame/logger_frame.h"
+#include "air_ref/serial_logger/logger_air_ref.h"
+#include "packet_manager/packet_manager.h"
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
 #include "esp_log.h"
 #include "driver/uart.h"
-extern const uart_port_t uart_num;
 
 #define AIR_REF_TAG "AIR_REF_TAG"
+
+
+#define RECEIVER_TASK_STACK_SIZE  (32800 / sizeof(portSTACK_TYPE))
+#define TASK_RECEIVCER_STACK_PRIORITY (tskIDLE_PRIORITY + 1)
+
+
+#define SENDER_TASK_STACK_SIZE  (32800 / sizeof(portSTACK_TYPE))
+#define TASK_SENDER_STACK_PRIORITY (tskIDLE_PRIORITY + 1)
+
 
 
 machine_state_t m_state;
@@ -146,7 +153,7 @@ static void receiver_task(void *arg)
 //TODO ADD USAGE OF HEAP MEMORY TO MANAGE MULTIPLE DEVICES CONNECTED
 
     int length;
-    logger_frame_t reply;
+    packet_received_t reply;
     uint8_t data[LOGGER_BUF_SIZE * 4];
 
     while (1)

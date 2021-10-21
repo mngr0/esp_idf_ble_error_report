@@ -20,7 +20,6 @@
 #include "air_ref/air_ref.h"
 #include "stdbool.h"
 
-#include "logger_frame/logger_frame.h"
 #include "air_ref/serial_logger/logger_air_ref.h"
 #include "air_ref/air_ref.h"
 

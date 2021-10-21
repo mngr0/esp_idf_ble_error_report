@@ -18,7 +18,7 @@
 
 #include "string.h"
 
-#include "esp_bt.h"
+
 #include "esp_log.h"
 #include "esp_system.h"
 #include "freertos/FreeRTOS.h"
@@ -26,14 +26,9 @@
 #include "freertos/task.h"
 #include "nvs_flash.h"
 
-#include "esp_bt_main.h"
-#include "esp_gap_ble_api.h"
-#include "esp_gatts_api.h"
-
 #include "driver/gpio.h"
 #include "driver/i2c.h"
 #include "driver/uart.h"
-#include "esp_gatt_common_api.h"
 
 #include "air_ref/air_ref.h"
 #include "ble/ble.h"
@@ -59,8 +54,9 @@
 #define SPI_DMA_CHAN 1
 
 ///////// I2C RTCC ///////////
-
-#include "rtcc/mcp7940.h"
+#include "i2c_ports/esp-idf/esp_idf_i2c_port.h"
+#include "i2c_common/i2c_common.h"
+#include "i2c_devices/rtc/MCP7940/mcp7940.h"
 
 #define I2C_MASTER_SCL_IO 22 /*!< GPIO number used for I2C master clock */
 #define I2C_MASTER_SDA_IO 21 /*!< GPIO number used for I2C master data  */
@@ -150,6 +146,28 @@ static esp_err_t i2c_master_init(void) {
                             I2C_MASTER_RX_BUF_DISABLE,
                             I2C_MASTER_TX_BUF_DISABLE, 0);
 }
+
+
+/////////////////////// UART
+
+
+int send_buffer(uint8_t* data, int lenght){
+    esp_err_t ret;
+    ret=uart_write_bytes(uart_num,data,lenght);
+    if (ret<0){
+        return ret;
+    }
+     vTaskDelay(1 / portTICK_PERIOD_MS);// delay 1ms
+
+    ret=uart_wait_tx_done(uart_num, 100 / portTICK_PERIOD_MS);
+    if(ret != ESP_OK){
+        return ret;
+    }
+    return 0;
+}
+
+//////////////////////////////////
+
 
 void do_test_spi_sd() {
   esp_err_t ret;
