@@ -1,0 +1,3 @@
+[submodule "components/I2C"]
+	path = components/I2C
+	url = https://github.com/mngr0/I2C

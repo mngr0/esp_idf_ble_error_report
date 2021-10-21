@@ -164,6 +164,7 @@ static void receiver_task(void *arg)
             if (receive_frame(&reply, data, length))
             {
                 //ADD TIMESTAMP TO PACKET
+                //reply.
                 access_message_buffer(reply.buffer);
                 //TODO SAVE RECEIVED FRAME TO SSD (AFTER REPLY)
             }
