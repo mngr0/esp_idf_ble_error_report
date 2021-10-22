@@ -16,6 +16,6 @@
 #define SPI_DMA_CHAN 1
 
 FILE* search_last();
-
+int search_file() ;
 
 #endif

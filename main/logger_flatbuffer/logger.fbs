@@ -1,0 +1,11 @@
+// Example IDL file for our monster's schema.
+
+namespace Logger;
+
+table Message{
+	logFiles: string[],
+}
+
+
+
+root_type Message;

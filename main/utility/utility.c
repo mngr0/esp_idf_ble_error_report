@@ -10,13 +10,6 @@
 
 #include "peripherals/spi_sd.h"
 
-#define PIN_NUM_MISO 2
-#define PIN_NUM_MOSI 15
-#define PIN_NUM_CLK 14
-#define PIN_NUM_CS 13
-#define MOUNT_POINT "/sdcard"
-#define SPI_DMA_CHAN 1
-
 #define TAG "UTILITY"
 
 FILE *file_pointer_to_last_used = NULL; //after first search it points to last file
@@ -97,6 +90,10 @@ void do_test_spi_sd() {
 
   // First create a file.
   const char *file_hello = MOUNT_POINT "/hello.txt";
+
+
+  search_file();
+
 
   ESP_LOGI(TAG, "Opening file %s", file_hello);
   FILE *f = fopen(file_hello, "w");

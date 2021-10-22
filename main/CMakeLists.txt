@@ -1,5 +1,5 @@
 set(SOURCES main.c)
-idf_component_register(SRC_DIRS . peripherals fb air_ref air_ref/serial_logger ble ble/services utility
+idf_component_register(SRC_DIRS . peripherals airref_flatbuffer air_ref air_ref/serial_logger ble ble/services utility
                     INCLUDE_DIRS .
                     REQUIRES nvs_flash mbedtls bt fatfs gel i2c flatcc)
 
