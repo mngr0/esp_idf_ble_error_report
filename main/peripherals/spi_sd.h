@@ -15,4 +15,7 @@
 #define MOUNT_POINT "/sdcard"
 #define SPI_DMA_CHAN 1
 
+FILE* search_last();
+
+
 #endif

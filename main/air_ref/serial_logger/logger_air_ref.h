@@ -2,7 +2,7 @@
 #define SERIAL_LOGGER_AIR_REF_H_
 
 #include "air_ref/air_ref.h"
-#include "airref_builder.h"
+#include "fb/airref_builder.h"
 
 int send_new_conf(air_ref_conf_t *ar_conf_new);
 

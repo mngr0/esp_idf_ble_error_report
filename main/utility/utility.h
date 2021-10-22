@@ -13,11 +13,7 @@
 
 //each line of log contains a packet. which is a complete set of frames, plus the date
 
-//add received message to log file (packet_received pkt)
-// - get last edited file (if file_pointer_to_last_used==NULL)
-// - check if size can be increased
-// - - create new file if necessary (check remaining disk space on SD card)
-// - append to file
+
 
 //init utility -> search for last used file
 
@@ -38,6 +34,12 @@
 
 
 void log_received_message(rtc_time_t *time, packet_received_t packet);
+//add received message to log file (packet_received pkt)
+// - get last edited file (if file_pointer_to_last_used==NULL)
+// - check if size can be increased
+// - - create new file if necessary (check remaining disk space on SD card)
+// - append to file
+
 
 void do_test_spi_sd();
 

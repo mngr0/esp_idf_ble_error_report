@@ -8,6 +8,8 @@
 #include <sys/stat.h>
 #include <sys/unistd.h>
 
+#include "peripherals/spi_sd.h"
+
 #define PIN_NUM_MISO 2
 #define PIN_NUM_MOSI 15
 #define PIN_NUM_CLK 14
@@ -19,6 +21,22 @@
 
 FILE *file_pointer_to_last_used = NULL; //after first search it points to last file
 
+
+
+void log_received_message(rtc_time_t *time, packet_received_t packet){
+  //search for valid file
+  if (file_pointer_to_last_used == NULL){
+    file_pointer_to_last_used = search_last();
+  }
+  //if last is full, create new one
+  //if stat. size > MAX_FILE_SIZE
+  //  create new file
+  //  check space left on SD
+
+  //open it
+  //append packet, with no idle space(in buffer)
+
+}
 
 
 void do_test_spi_sd() {
