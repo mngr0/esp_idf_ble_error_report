@@ -9,6 +9,11 @@
 #include "esp_log.h"
 #include "driver/uart.h"
 
+#include "i2c_devices/rtc/MCP7940/mcp7940.h"
+#include "peripherals/i2c_devices.h"
+
+#include "utility/utility.h"
+
 #define AIR_REF_TAG "AIR_REF_TAG"
 
 
@@ -153,7 +158,7 @@ static void logger_task(void *arg)
 static void receiver_task(void *arg)
 {
 //TODO ADD USAGE OF HEAP MEMORY TO MANAGE MULTIPLE DEVICES CONNECTED
-
+    rtc_time_t pTime;
     int length;
     packet_received_t reply;
     uint8_t data[LOGGER_BUF_SIZE * 4];
@@ -172,7 +177,9 @@ static void receiver_task(void *arg)
 
             if (packet_is_valid(&reply, data, length))
             {
+                mcp7940_get_time(rtc_driver,&pTime);
                 access_message_buffer(reply.buffer);
+
                 //TODO SAVE RECEIVED FRAME TO SSD (AFTER REPLY)
             }
         }

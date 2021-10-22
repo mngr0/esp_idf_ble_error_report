@@ -1,8 +1,12 @@
+#ifndef UTILITY_H_
+#define UTILITY_H_
 #include <stdio.h>
+
+#include "i2c_common/i2c_common.h"
+#include "packet_manager/packet_manager.h"
 
 #define MAX_FILE_SIZE  104876//Bytes //1 MiB
 
-FILE *file_pointer_to_last_used = NULL; //after first search it points to last file
 
 //filename:  DATA_LOG.TXT -> l' ordine alfabetico e' anche l' ordine temporale, se si scrivono i mesi come 03
 //example 202010161813_LOG.TXT 2020/10/16 18:13
@@ -31,3 +35,10 @@ FILE *file_pointer_to_last_used = NULL; //after first search it points to last f
 //BT riceve in chiaro credenziali Wifi, e le salva in flash
 //a boot cerca di collegarsi
 //riporta lo stato della connessione wifi via bt
+
+
+void log_received_message(rtc_time_t *time, packet_received_t packet);
+
+void do_test_spi_sd();
+
+#endif
