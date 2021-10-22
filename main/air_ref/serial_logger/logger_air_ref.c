@@ -1,9 +1,7 @@
-
+#include "logger_air_ref.h"
 #include "air_ref/air_ref.h"
 #include "airref_reader.h"
 #include "packet_manager/packet_manager.h"
-#include "logger_air_ref.h"
-
 
 extern machine_state_t m_state;
 extern air_ref_state_t ar_state;
@@ -209,7 +207,7 @@ int finalize_and_send_builder(flatcc_builder_t *builder) {
   void *buf;
   buf = flatcc_builder_finalize_buffer(builder, &size);
 
-  ret = send_data(buf, size);
+  ret = packet_manager_send_data(buf, size);
 
   flatcc_builder_aligned_free(buf);
   flatcc_builder_clear(builder);
@@ -291,13 +289,12 @@ int do_reply_ar_conf() {
   return finalize_and_send_builder(&builder);
 }
 
+int configuration_is_valid(air_ref_conf_t *ar_conf) {
 
-int configuration_is_valid(air_ref_conf_t *ar_conf){
-    
-    if(ar_conf->compressor_target_pressure < 0){
-        return 0;
-    }
-    //TODO do all tests
+  if (ar_conf->compressor_target_pressure < 0) {
+    return 0;
+  }
+  // TODO do all tests
 
-    return 1;
+  return 1;
 }

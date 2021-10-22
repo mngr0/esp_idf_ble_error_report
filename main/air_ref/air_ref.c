@@ -19,7 +19,7 @@
 #define SENDER_TASK_STACK_SIZE  (32800 / sizeof(portSTACK_TYPE))
 #define TASK_SENDER_STACK_PRIORITY (tskIDLE_PRIORITY + 1)
 
-
+packet_ringbuffer_t packet_structure;
 
 machine_state_t m_state;
 air_ref_conf_t ar_conf;
@@ -164,21 +164,16 @@ static void receiver_task(void *arg)
         length = uart_read_bytes(uart_num, data, LOGGER_BUF_SIZE, 20 / portTICK_RATE_MS);
         if (length > 0)
         {
-            add_to_ringbuffer(data, length);
+            packet_manager_put(&packet_structure,data, length);
         }
 
-        if ((length = take_frame(data)) > 0)
+        if ((length = packet_manager_pop(&packet_structure,data)) > 0)
         {
 
-            if (receive_frame(&reply, data, length))
+            if (packet_is_valid(&reply, data, length))
             {
-                //ADD TIMESTAMP TO PACKET
-                //reply.
                 access_message_buffer(reply.buffer);
                 //TODO SAVE RECEIVED FRAME TO SSD (AFTER REPLY)
-            }
-            else
-            {
             }
         }
     }
@@ -186,7 +181,7 @@ static void receiver_task(void *arg)
 
 void logger_init()
 {
-
+    packet_manager_init(&packet_structure);
     xTaskCreate(logger_task, "logger_task", SENDER_TASK_STACK_SIZE, NULL, TASK_SENDER_STACK_PRIORITY, &(xSenderTask));
     xTaskCreate(receiver_task, "receiver_task", RECEIVER_TASK_STACK_SIZE, NULL, TASK_RECEIVCER_STACK_PRIORITY, &(xReceiverTask));
 }
