@@ -9,6 +9,12 @@ enum ErrorState:int{
 	error_state_critical
 }
 
+enum ControlType:int{
+	control_type_manual_off=0,
+	control_type_manual_on,
+	control_type_auto
+}
+
 enum AirRefIndexError:int{
 	index_error_pressure_evap=0,
 	index_error_pressure_cond,
@@ -39,11 +45,6 @@ struct ErrorReport{
 	error_code:int;  
 }
 
-
-struct CompressorSpeed{
-  speed:[int:10];
-}
-
 struct ErrorList{
   errors:[ErrorReport:10];
 }
@@ -53,7 +54,7 @@ struct MotorStatus{
 }
 
 table AirRefConf{
-	serial_control:int =-1;
+	control_type:ControlType;
 	fan_target_pressure:int =-1;
 	fan_coeff_p:int =-1;
 	fan_coeff_offset:int =-1;
@@ -61,16 +62,17 @@ table AirRefConf{
 	fan_max_pressure:int =-1; //(milliBar)
 	
 	compressor_target_pressure:int =-1; //millibar
-	compressor_activation_offset:int =-1; //millbar
-	compressor_action_delay:int =-1; // milliseconds
-	compressor_speed:CompressorSpeed;
+	compressor_coeff_P: int =-1;
+	compressor_coeff_I: int =-1;
 	compressor_start_interval:int =-1;
+
+	low_pressure_limit:int = -1;
 }
 
 table AirRefState{
-	compressor_actual_speed_index:int=-1;
-	compressor_last_speed_change_time:int=-1;
+	compressor_calculated_speed:int=-1;
 	compressor_speed_to_command:int=-1;
+	compressor_I_value:int=-1;
 	compressor_last_stop:int=-1;
 	compressor_is_blocked:int=-1;
 	compressor_is_running:int=-1;

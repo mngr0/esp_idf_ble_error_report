@@ -1,15 +1,22 @@
 
-#include "logger_frame/logger_hw.h"
-#include "serial_logger/logger_air_ref.h"
-#include "logger_frame/logger_frame.h"
+#include "air_ref/serial_logger/logger_air_ref.h"
+#include "packet_manager/packet_manager.h"
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
 #include "esp_log.h"
 #include "driver/uart.h"
-extern const uart_port_t uart_num;
 
 #define AIR_REF_TAG "AIR_REF_TAG"
+
+
+#define RECEIVER_TASK_STACK_SIZE  (32800 / sizeof(portSTACK_TYPE))
+#define TASK_RECEIVCER_STACK_PRIORITY (tskIDLE_PRIORITY + 1)
+
+
+#define SENDER_TASK_STACK_SIZE  (32800 / sizeof(portSTACK_TYPE))
+#define TASK_SENDER_STACK_PRIORITY (tskIDLE_PRIORITY + 1)
+
 
 
 machine_state_t m_state;
@@ -143,9 +150,10 @@ static void logger_task(void *arg)
 
 static void receiver_task(void *arg)
 {
+//TODO ADD USAGE OF HEAP MEMORY TO MANAGE MULTIPLE DEVICES CONNECTED
 
     int length;
-    logger_frame_t reply;
+    packet_received_t reply;
     uint8_t data[LOGGER_BUF_SIZE * 4];
 
     while (1)
@@ -162,7 +170,10 @@ static void receiver_task(void *arg)
 
             if (receive_frame(&reply, data, length))
             {
+                //ADD TIMESTAMP TO PACKET
+                //reply.
                 access_message_buffer(reply.buffer);
+                //TODO SAVE RECEIVED FRAME TO SSD (AFTER REPLY)
             }
             else
             {
@@ -181,21 +192,16 @@ void logger_init()
 void log_ar_conf(air_ref_conf_t *ar_conf)
 {
 
-    ESP_LOGI("LOG_AR_CONF", "serial_control : %d", ar_conf->serial_control);
+    ESP_LOGI("LOG_AR_CONF", "serial_control : %d", ar_conf->control_type);
     ESP_LOGI("LOG_AR_CONF", "fan_coeff_P : %d", ar_conf->fan_coeff_P);
     ESP_LOGI("LOG_AR_CONF", "fan_target_pressure : %d", ar_conf->fan_target_pressure);
     ESP_LOGI("LOG_AR_CONF", "fan_coeff_offset : %d", ar_conf->fan_coeff_offset);
     ESP_LOGI("LOG_AR_CONF", "fan_min_pressure : %d", ar_conf->fan_min_pressure);
     ESP_LOGI("LOG_AR_CONF", "fan_max_pressure : %d", ar_conf->fan_max_pressure);
     ESP_LOGI("LOG_AR_CONF", "compressor_target_pressure : %d", ar_conf->compressor_target_pressure);
-    ESP_LOGI("LOG_AR_CONF", "compressor_activation_offset : %d", ar_conf->compressor_activation_offset);
-    ESP_LOGI("LOG_AR_CONF", "compressor_action_delay : %d", ar_conf->compressor_action_delay);
+    ESP_LOGI("LOG_AR_CONF", "compressor_coeff_P : %d", ar_conf->compressor_coeff_P);
+    ESP_LOGI("LOG_AR_CONF", "compressor_coeff_I : %d", ar_conf->compressor_coeff_I);
     ESP_LOGI("LOG_AR_CONF", "compressor_start_interval : %d", ar_conf->compressor_start_interval);
-
-    for (int i = 0; i < 10; i++)
-    {
-        ESP_LOGI("LOG_AR_CONF", "compressor_speed(%d) : %d", i, ar_conf->compressor_speed[i]);
-    }
 }
 
 void log_m_state(machine_state_t *m_state)

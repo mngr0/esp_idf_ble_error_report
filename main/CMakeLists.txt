@@ -1,20 +1,6 @@
-idf_component_register(SRCS "gatts_table_creat_demo.c" 
-                            "air_ref/serial_logger/logger_air_ref.c"
+set(SOURCES main.c)
+idf_component_register(SRC_DIRS . peripherals fb air_ref air_ref/serial_logger ble ble/services
+                    INCLUDE_DIRS . fb
+                    REQUIRES nvs_flash mbedtls bt fatfs gel i2c)
 
-                            "ble/ble.c" 
-                            "ble/ble_lib.c"
-
-                            "ble/services/gatt_ar_state.c" 
-                            "ble/services/gatt_m_state.c" 
-                            "ble/services/gatt_ar_conf.c"  
-                            "ble/services/gatt_log_state.c" 
-
-                            "air_ref/air_ref.c"
-                            "fb/builder.c"
-                            "fb/emitter.c"
-                            "fb/refmap.c"
-
-                            "logger_frame/logger_frame.c" 
-                            "logger_frame/logger_hw.c" 
-                    INCLUDE_DIRS "."
-                                 "fb")
+target_compile_definitions(${COMPONENT_LIB} PRIVATE LV_CONF_INCLUDE_SIMPLE=1)

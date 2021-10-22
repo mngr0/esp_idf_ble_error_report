@@ -23,7 +23,12 @@
 #include "esp_system.h"
 #include "esp_log.h"
 #include "nvs_flash.h"
+
 #include "esp_bt.h"
+#include "esp_gap_ble_api.h"
+#include "esp_gatts_api.h"
+#include "esp_bt_main.h"
+#include "esp_gatt_common_api.h"
 
 #include "esp_gap_ble_api.h"
 #include "esp_gatts_api.h"
@@ -33,6 +38,7 @@
 #include "driver/uart.h"
 
 #include "ble/ble.h"
+#include "ble/blufi.h"
 #include "air_ref/air_ref.h"
 
 #include "services/gatt_ar_conf.h"
@@ -60,25 +66,7 @@ static uint8_t adv_config_done = 0;
 
 static prepare_type_env_t prepare_write_env;
 
-#ifdef CONFIG_SET_RAW_ADV_DATA
-uint8_t raw_adv_data[] = {
-    /* flags */
-    0x02, 0x01, 0x06,
-    /* tx power*/
-    0x02, 0x0a, 0xeb,
-    /* service uuid */
-    0x03, 0x03, 0xFF, 0x00,
-    /* device name */
-    0x0f, 0x09, 'A', 'I', 'R', '_', 'R', 'E', 'F', '_', 'I', 'N', 'T', 'E', 'R', 'F'}; //, 'A', 'C', 'E'};
-uint8_t raw_scan_rsp_data[10] = {
-    /* flags */
-    0x02, 0x01, 0x06,
-    /* tx power */
-    0x02, 0x0a, 0xeb,
-    /* service uuid */
-    0x03, 0x03, 0xFF, 0x00};
 
-#else
 static uint8_t service_uuid[16] = {
     /* LSB <--------------------------------------------------------------------------------> MSB */
     //first uuid, 16bit, [12],[13] is the value
@@ -133,7 +121,6 @@ static esp_ble_adv_data_t scan_rsp_data = {
     .p_service_uuid = service_uuid,
     .flag = (ESP_BLE_ADV_FLAG_GEN_DISC | ESP_BLE_ADV_FLAG_BREDR_NOT_SPT),
 };
-#endif /* CONFIG_SET_RAW_ADV_DATA */
 
 static esp_ble_adv_params_t adv_params = {
     .adv_int_min = 0x20,
@@ -166,6 +153,13 @@ struct gatts_profile_inst heart_rate_profile_tab[PROFILE_NUM] = {
 
     },
 
+    [PROFILE_BLUEFI_IDX] = {
+        .gatts_cb = bluefi_event_handler,
+         .gatts_if = ESP_GATT_IF_NONE, /* Not get the gatt_if, so initial is ESP_GATT_IF_NONE */
+
+    },
+
+
     [PROFILE_LOG_STATE_IDX] = {
         .gatts_cb = log_state_event_handler,
          .gatts_if = ESP_GATT_IF_NONE, /* Not get the gatt_if, so initial is ESP_GATT_IF_NONE */
@@ -177,22 +171,7 @@ static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param
 {
     switch (event)
     {
-#ifdef CONFIG_SET_RAW_ADV_DATA
-    case ESP_GAP_BLE_ADV_DATA_RAW_SET_COMPLETE_EVT:
-        adv_config_done &= (~ADV_CONFIG_FLAG);
-        if (adv_config_done == 0)
-        {
-            esp_ble_gap_start_advertising(&adv_params);
-        }
-        break;
-    case ESP_GAP_BLE_SCAN_RSP_DATA_RAW_SET_COMPLETE_EVT:
-        adv_config_done &= (~SCAN_RSP_CONFIG_FLAG);
-        if (adv_config_done == 0)
-        {
-            esp_ble_gap_start_advertising(&adv_params);
-        }
-        break;
-#else
+
     case ESP_GAP_BLE_ADV_DATA_SET_COMPLETE_EVT:
         adv_config_done &= (~ADV_CONFIG_FLAG);
         if (adv_config_done == 0)
@@ -207,7 +186,6 @@ static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param
             esp_ble_gap_start_advertising(&adv_params);
         }
         break;
-#endif
     case ESP_GAP_BLE_ADV_START_COMPLETE_EVT:
         /* advertising start complete event to indicate advertising start successfully or failed */
         if (param->adv_start_cmpl.status != ESP_BT_STATUS_SUCCESS)
@@ -330,20 +308,6 @@ void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts
         {
             ESP_LOGE(GATTS_TABLE_TAG, "set device name failed, error code = %x", set_dev_name_ret);
         }
-#ifdef CONFIG_SET_RAW_ADV_DATA
-        esp_err_t raw_adv_ret = esp_ble_gap_config_adv_data_raw(raw_adv_data, sizeof(raw_adv_data));
-        if (raw_adv_ret)
-        {
-            ESP_LOGE(GATTS_TABLE_TAG, "config raw adv data failed, error code = %x ", raw_adv_ret);
-        }
-        adv_config_done |= ADV_CONFIG_FLAG;
-        esp_err_t raw_scan_ret = esp_ble_gap_config_scan_rsp_data_raw(raw_scan_rsp_data, sizeof(raw_scan_rsp_data));
-        if (raw_scan_ret)
-        {
-            ESP_LOGE(GATTS_TABLE_TAG, "config raw scan rsp data failed, error code = %x", raw_scan_ret);
-        }
-        adv_config_done |= SCAN_RSP_CONFIG_FLAG;
-#else
         //config adv data
         esp_err_t ret = esp_ble_gap_config_adv_data(&adv_data);
         if (ret)
@@ -358,7 +322,7 @@ void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts
             ESP_LOGE(GATTS_TABLE_TAG, "config scan response data failed, error code = %x", ret);
         }
         adv_config_done |= SCAN_RSP_CONFIG_FLAG;
-#endif
+
     }
     break;
     case ESP_GATTS_READ_EVT:
@@ -616,9 +580,17 @@ void BLE_init(void)
         return;
     }
 
+    ret = esp_ble_gatts_app_register(PROFILE_BLUEFI_IDX);
+    if (ret)
+    {
+        ESP_LOGE(GATTS_TABLE_TAG, "gatts app register error, error code = %x", ret);
+        return;
+    }
+
     esp_err_t local_mtu_ret = esp_ble_gatt_set_local_mtu(500);
     if (local_mtu_ret)
     {
         ESP_LOGE(GATTS_TABLE_TAG, "set local  MTU failed, error code = %x", local_mtu_ret);
     }
+    
 }

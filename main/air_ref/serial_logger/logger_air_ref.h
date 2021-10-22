@@ -4,15 +4,15 @@
 #include "air_ref/air_ref.h"
 #include "airref_builder.h"
 
-void send_new_conf(air_ref_conf_t *ar_conf_new);
+int send_new_conf(air_ref_conf_t *ar_conf_new);
 
-void do_request_m_state();
+int do_request_m_state();
 
-void do_reply_m_state();
+int do_reply_m_state();
 
-void do_request_ar_state();
+int do_request_ar_state();
 
-void do_request_ar_conf();
+int do_request_ar_conf();
 
 void load_ar_state(flatcc_builder_t *B, air_ref_state_t *ar_state);
 

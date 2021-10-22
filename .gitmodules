@@ -1,0 +1,6 @@
+[submodule "components/i2c"]
+	path = components/i2c
+	url = https://github.com/mngr0/I2C
+[submodule "components/gel"]
+	path = components/gel
+	url = https://github.com/mngr0/generic_embedded_libs

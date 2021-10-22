@@ -23,11 +23,6 @@ typedef const AirRef_ErrorReport_t *AirRef_ErrorReport_struct_t;
 typedef AirRef_ErrorReport_t *AirRef_ErrorReport_mutable_struct_t;
 typedef const AirRef_ErrorReport_t *AirRef_ErrorReport_vec_t;
 typedef AirRef_ErrorReport_t *AirRef_ErrorReport_mutable_vec_t;
-typedef struct AirRef_CompressorSpeed AirRef_CompressorSpeed_t;
-typedef const AirRef_CompressorSpeed_t *AirRef_CompressorSpeed_struct_t;
-typedef AirRef_CompressorSpeed_t *AirRef_CompressorSpeed_mutable_struct_t;
-typedef const AirRef_CompressorSpeed_t *AirRef_CompressorSpeed_vec_t;
-typedef AirRef_CompressorSpeed_t *AirRef_CompressorSpeed_mutable_vec_t;
 typedef struct AirRef_ErrorList AirRef_ErrorList_t;
 typedef const AirRef_ErrorList_t *AirRef_ErrorList_struct_t;
 typedef AirRef_ErrorList_t *AirRef_ErrorList_mutable_struct_t;
@@ -74,18 +69,6 @@ typedef flatbuffers_uoffset_t *AirRef_Message_mutable_vec_t;
 #define AirRef_ErrorReport_type_identifier "\x86\x24\xcc\x69"
 #ifndef AirRef_ErrorReport_file_extension
 #define AirRef_ErrorReport_file_extension "bin"
-#endif
-#ifndef AirRef_CompressorSpeed_file_identifier
-#define AirRef_CompressorSpeed_file_identifier 0
-#endif
-/* deprecated, use AirRef_CompressorSpeed_file_identifier */
-#ifndef AirRef_CompressorSpeed_identifier
-#define AirRef_CompressorSpeed_identifier 0
-#endif
-#define AirRef_CompressorSpeed_type_hash ((flatbuffers_thash_t)0xee84a55a)
-#define AirRef_CompressorSpeed_type_identifier "\x5a\xa5\x84\xee"
-#ifndef AirRef_CompressorSpeed_file_extension
-#define AirRef_CompressorSpeed_file_extension "bin"
 #endif
 #ifndef AirRef_ErrorList_file_identifier
 #define AirRef_ErrorList_file_identifier 0
@@ -206,6 +189,32 @@ static inline int AirRef_ErrorState_is_known_value(AirRef_ErrorState_enum_t valu
     case AirRef_ErrorState_error_state_none: return 1;
     case AirRef_ErrorState_error_state_warning: return 1;
     case AirRef_ErrorState_error_state_critical: return 1;
+    default: return 0;
+    }
+}
+
+typedef int32_t AirRef_ControlType_enum_t;
+__flatbuffers_define_integer_type(AirRef_ControlType, AirRef_ControlType_enum_t, 32)
+#define AirRef_ControlType_control_type_manual_off ((AirRef_ControlType_enum_t)INT32_C(0))
+#define AirRef_ControlType_control_type_manual_on ((AirRef_ControlType_enum_t)INT32_C(1))
+#define AirRef_ControlType_control_type_auto ((AirRef_ControlType_enum_t)INT32_C(2))
+
+static inline const char *AirRef_ControlType_name(AirRef_ControlType_enum_t value)
+{
+    switch (value) {
+    case AirRef_ControlType_control_type_manual_off: return "control_type_manual_off";
+    case AirRef_ControlType_control_type_manual_on: return "control_type_manual_on";
+    case AirRef_ControlType_control_type_auto: return "control_type_auto";
+    default: return "";
+    }
+}
+
+static inline int AirRef_ControlType_is_known_value(AirRef_ControlType_enum_t value)
+{
+    switch (value) {
+    case AirRef_ControlType_control_type_manual_off: return 1;
+    case AirRef_ControlType_control_type_manual_on: return 1;
+    case AirRef_ControlType_control_type_auto: return 1;
     default: return 0;
     }
 }
@@ -369,22 +378,6 @@ __flatbuffers_struct_as_root(AirRef_ErrorReport)
 __flatbuffers_define_struct_scalar_field(AirRef_ErrorReport, error_state, AirRef_ErrorState, AirRef_ErrorState_enum_t)
 __flatbuffers_define_struct_scalar_field(AirRef_ErrorReport, error_code, flatbuffers_int32, int32_t)
 
-struct AirRef_CompressorSpeed {
-    alignas(4) int32_t speed[10];
-};
-static_assert(sizeof(AirRef_CompressorSpeed_t) == 40, "struct size mismatch");
-
-static inline const AirRef_CompressorSpeed_t *AirRef_CompressorSpeed__const_ptr_add(const AirRef_CompressorSpeed_t *p, size_t i) { return p + i; }
-static inline AirRef_CompressorSpeed_t *AirRef_CompressorSpeed__ptr_add(AirRef_CompressorSpeed_t *p, size_t i) { return p + i; }
-static inline AirRef_CompressorSpeed_struct_t AirRef_CompressorSpeed_vec_at(AirRef_CompressorSpeed_vec_t vec, size_t i)
-__flatbuffers_struct_vec_at(vec, i)
-static inline size_t AirRef_CompressorSpeed__size(void) { return 40; }
-static inline size_t AirRef_CompressorSpeed_vec_len(AirRef_CompressorSpeed_vec_t vec)
-__flatbuffers_vec_len(vec)
-__flatbuffers_struct_as_root(AirRef_CompressorSpeed)
-
-__flatbuffers_define_struct_scalar_fixed_array_field(AirRef_CompressorSpeed, speed, flatbuffers_int32, int32_t, 10)
-
 struct AirRef_ErrorList {
     alignas(4) AirRef_ErrorReport_t errors[10];
 };
@@ -426,17 +419,17 @@ static inline AirRef_AirRefConf_table_t AirRef_AirRefConf_vec_at(AirRef_AirRefCo
 __flatbuffers_offset_vec_at(AirRef_AirRefConf_table_t, vec, i, 0)
 __flatbuffers_table_as_root(AirRef_AirRefConf)
 
-__flatbuffers_define_scalar_field(0, AirRef_AirRefConf, serial_control, flatbuffers_int32, int32_t, INT32_C(-1))
+__flatbuffers_define_scalar_field(0, AirRef_AirRefConf, control_type, AirRef_ControlType, AirRef_ControlType_enum_t, INT32_C(0))
 __flatbuffers_define_scalar_field(1, AirRef_AirRefConf, fan_target_pressure, flatbuffers_int32, int32_t, INT32_C(-1))
 __flatbuffers_define_scalar_field(2, AirRef_AirRefConf, fan_coeff_p, flatbuffers_int32, int32_t, INT32_C(-1))
 __flatbuffers_define_scalar_field(3, AirRef_AirRefConf, fan_coeff_offset, flatbuffers_int32, int32_t, INT32_C(-1))
 __flatbuffers_define_scalar_field(4, AirRef_AirRefConf, fan_min_pressure, flatbuffers_int32, int32_t, INT32_C(-1))
 __flatbuffers_define_scalar_field(5, AirRef_AirRefConf, fan_max_pressure, flatbuffers_int32, int32_t, INT32_C(-1))
 __flatbuffers_define_scalar_field(6, AirRef_AirRefConf, compressor_target_pressure, flatbuffers_int32, int32_t, INT32_C(-1))
-__flatbuffers_define_scalar_field(7, AirRef_AirRefConf, compressor_activation_offset, flatbuffers_int32, int32_t, INT32_C(-1))
-__flatbuffers_define_scalar_field(8, AirRef_AirRefConf, compressor_action_delay, flatbuffers_int32, int32_t, INT32_C(-1))
-__flatbuffers_define_struct_field(9, AirRef_AirRefConf, compressor_speed, AirRef_CompressorSpeed_struct_t, 0)
-__flatbuffers_define_scalar_field(10, AirRef_AirRefConf, compressor_start_interval, flatbuffers_int32, int32_t, INT32_C(-1))
+__flatbuffers_define_scalar_field(7, AirRef_AirRefConf, compressor_coeff_P, flatbuffers_int32, int32_t, INT32_C(-1))
+__flatbuffers_define_scalar_field(8, AirRef_AirRefConf, compressor_coeff_I, flatbuffers_int32, int32_t, INT32_C(-1))
+__flatbuffers_define_scalar_field(9, AirRef_AirRefConf, compressor_start_interval, flatbuffers_int32, int32_t, INT32_C(-1))
+__flatbuffers_define_scalar_field(10, AirRef_AirRefConf, low_pressure_limit, flatbuffers_int32, int32_t, INT32_C(-1))
 
 struct AirRef_AirRefState_table { uint8_t unused__; };
 
@@ -446,9 +439,9 @@ static inline AirRef_AirRefState_table_t AirRef_AirRefState_vec_at(AirRef_AirRef
 __flatbuffers_offset_vec_at(AirRef_AirRefState_table_t, vec, i, 0)
 __flatbuffers_table_as_root(AirRef_AirRefState)
 
-__flatbuffers_define_scalar_field(0, AirRef_AirRefState, compressor_actual_speed_index, flatbuffers_int32, int32_t, INT32_C(-1))
-__flatbuffers_define_scalar_field(1, AirRef_AirRefState, compressor_last_speed_change_time, flatbuffers_int32, int32_t, INT32_C(-1))
-__flatbuffers_define_scalar_field(2, AirRef_AirRefState, compressor_speed_to_command, flatbuffers_int32, int32_t, INT32_C(-1))
+__flatbuffers_define_scalar_field(0, AirRef_AirRefState, compressor_calculated_speed, flatbuffers_int32, int32_t, INT32_C(-1))
+__flatbuffers_define_scalar_field(1, AirRef_AirRefState, compressor_speed_to_command, flatbuffers_int32, int32_t, INT32_C(-1))
+__flatbuffers_define_scalar_field(2, AirRef_AirRefState, compressor_I_value, flatbuffers_int32, int32_t, INT32_C(-1))
 __flatbuffers_define_scalar_field(3, AirRef_AirRefState, compressor_last_stop, flatbuffers_int32, int32_t, INT32_C(-1))
 __flatbuffers_define_scalar_field(4, AirRef_AirRefState, compressor_is_blocked, flatbuffers_int32, int32_t, INT32_C(-1))
 __flatbuffers_define_scalar_field(5, AirRef_AirRefState, compressor_is_running, flatbuffers_int32, int32_t, INT32_C(-1))

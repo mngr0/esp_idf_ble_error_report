@@ -2,13 +2,17 @@
 #define BLE_H_
 
 #include "esp_bt.h"
+#include "esp_gap_ble_api.h"
+#include "esp_gatts_api.h"
+#include "esp_bt_main.h"
+#include "esp_gatt_common_api.h"
 
 #define ESP_APP_ID 0x55
 #define ESP_APP_ID_M_STATE 0x56
 #define ESP_APP_ID_AR_CONF 0x57
 #define ESP_APP_ID_AR_STATE 0x58
 
-#define CONFIG_SET_RAW_ADV_DATA
+//#define CONFIG_SET_RAW_ADV_DATA
 
 
 #define SAMPLE_DEVICE_NAME "AIR_REF_CONF"
@@ -29,7 +33,7 @@ typedef enum
     PROFILE_AR_STATE_IDX,
     PROFILE_AR_CONF_IDX,
     PROFILE_LOG_STATE_IDX,
-   // PROFILE_BLUEFI_IDX,
+    PROFILE_BLUEFI_IDX,
     PROFILE_NUM
 } PROFILE_NUMBERS;
 
