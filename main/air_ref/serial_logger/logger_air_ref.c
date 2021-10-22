@@ -290,3 +290,14 @@ int do_reply_ar_conf() {
   load_ar_conf(&builder, &ar_conf);
   return finalize_and_send_builder(&builder);
 }
+
+
+int configuration_is_valid(air_ref_conf_t *ar_conf){
+    
+    if(ar_conf->compressor_target_pressure < 0){
+        return 0;
+    }
+    //TODO do all tests
+
+    return 1;
+}

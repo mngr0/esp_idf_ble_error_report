@@ -58,6 +58,8 @@
 #include "i2c_common/i2c_common.h"
 #include "i2c_devices/rtc/MCP7940/mcp7940.h"
 
+#include "peripherals/i2c_devices.h"
+
 #define I2C_MASTER_SCL_IO 22 /*!< GPIO number used for I2C master clock */
 #define I2C_MASTER_SDA_IO 21 /*!< GPIO number used for I2C master data  */
 #define I2C_MASTER_NUM                                                         \
@@ -297,9 +299,9 @@ static void blink_task(void *arg) {
   } else {
     ESP_LOGI("TEST_CS", "i2c INIT GOOD/////////////////////////");
   }
-  //mcp7940_set_time(&pTime_set);
+  //mcp7940_set_time(rtc_driver,&pTime_set);
   // do_test_spi_sd();
-  if (mcp7940_init(1)) {
+  if (mcp7940_init(rtc_driver,1)) {
     ESP_LOGI("TEST_CS", "MCP INIT NOT GOOD ----------------------------");
   } else {
     ESP_LOGI("TEST_CS", "MCP INIT GOOD/////////////////////////");
@@ -318,7 +320,7 @@ static void blink_task(void *arg) {
     counter %= 8;
     ESP_LOGI("TEST_CS", "doing: %d %d %d", led_blink[counter][0],
              led_blink[counter][1], led_blink[counter][2]);
-    mcp7940_get_time(&pTime);
+    mcp7940_get_time(rtc_driver,&pTime);
     ESP_LOGI("TIME","%d/%d/%d - %d:%d:%d",pTime.day,pTime.month,pTime.year,pTime.hour, pTime.min,  pTime.sec);
   }
 }

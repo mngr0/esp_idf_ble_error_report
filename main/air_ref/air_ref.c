@@ -1,4 +1,6 @@
 
+#include <string.h>
+
 #include "air_ref/serial_logger/logger_air_ref.h"
 #include "packet_manager/packet_manager.h"
 

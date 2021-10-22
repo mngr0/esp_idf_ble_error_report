@@ -29,4 +29,7 @@ void parse_ar_conf(AirRef_AirRefConf_table_t airRefConf, air_ref_conf_t *ar_conf
 void parse_ar_state(AirRef_AirRefState_table_t airRefState, air_ref_state_t *ar_state);
 
 
+int configuration_is_valid(air_ref_conf_t *ar_conf);
+    
+
 #endif

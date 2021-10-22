@@ -3,7 +3,7 @@
 
 #include "infineonlib.h"
 #include "error.h"
-#include "airref_builder.h"
+//#include "airref_builder.h"
 
 typedef enum {
 	control_type_manual_off =0,
@@ -99,14 +99,9 @@ typedef struct{//public
 }machine_state_t;
 
 
-
-void send_m_state(flatcc_builder_t *B, machine_state_t *m_state);
 int access_message_buffer(const void *buffer);
 
-
-
 void logger_init();
-
 
 void routine_send_state(machine_state_t* m_state);
 
