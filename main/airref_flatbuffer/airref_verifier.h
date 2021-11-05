@@ -7,6 +7,12 @@
 #include "airref_reader.h"
 #endif
 #include "flatcc/flatcc_verifier.h"
+#ifndef BLUEFI_VERIFIER_H
+#include "bluefi_verifier.h"
+#endif
+#ifndef LOGGER_VERIFIER_H
+#include "logger_verifier.h"
+#endif
 #include "flatcc/flatcc_prologue.h"
 
 static int AirRef_AirRefConf_verify_table(flatcc_table_verifier_descriptor_t *td);
@@ -23,6 +29,10 @@ static int AirRef_Content_union_verifier(flatcc_union_verifier_descriptor_t *ud)
     case 2: return flatcc_verify_union_table(ud, AirRef_AirRefState_verify_table); /* AirRefState */
     case 3: return flatcc_verify_union_table(ud, AirRef_MachineState_verify_table); /* MachineState */
     case 4: return flatcc_verify_union_table(ud, AirRef_Request_verify_table); /* Request */
+    case 5: return flatcc_verify_union_table(ud, BluefiCommand_verify_table); /* BluefiCommand */
+    case 6: return flatcc_verify_union_table(ud, BluefiReply_verify_table); /* BluefiReply */
+    case 7: return flatcc_verify_union_table(ud, LoggerCommand_verify_table); /* LoggerCommand */
+    case 8: return flatcc_verify_union_table(ud, LoggerReply_verify_table); /* LoggerReply */
     default: return flatcc_verify_ok;
     }
 }

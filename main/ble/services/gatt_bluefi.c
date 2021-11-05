@@ -37,6 +37,8 @@
 #include "air_ref/air_ref.h"
 #include "ble/ble.h"
 
+#include "airref_flatbuffer/airref_builder.h"
+
 #define GATTS_BLUEFI_TAG "GATTS_BLUEFI"
 
 extern machine_state_t m_state;
@@ -49,7 +51,8 @@ extern struct gatts_profile_inst heart_rate_profile_tab[PROFILE_NUM];
 const uint16_t GATT_BLUEFI_UUID_SERVICE =
     (0xFF00 | GATT_BLUEFI_IDX_SERVICE) & (PROFILE_BLUEFI_IDX << 8);
 
-const uint16_t GATT_BLUEFI_UUID_VALUE = (0xFF00 | GATT_BLUEFI_STATE_IDX_VALUE) & (PROFILE_BLUEFI_IDX << 8);
+const uint16_t GATT_BLUEFI_UUID_VALUE =
+    (0xFF00 | GATT_BLUEFI_STATE_IDX_VALUE) & (PROFILE_BLUEFI_IDX << 8);
 
 const uint16_t primary_service_uuid = ESP_GATT_UUID_PRI_SERVICE;
 // static const uint16_t character_declaration_uuid =
@@ -67,137 +70,165 @@ const esp_gatts_attr_db_t gatt_bluefi_db[GATT_BLUEFI_NB] = {
 
 };
 
-
 static prepare_type_env_t b_prepare_write_env;
 static esp_gatt_char_prop_t b_property = 0;
 
+void bluefi_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if,
+                          esp_ble_gatts_cb_param_t *param) {
+  switch (event) {
+  case ESP_GATTS_REG_EVT:
+    ESP_LOGI(GATTS_BLUEFI_TAG, "REGISTER_APP_EVT, status %d, app_id %d\n",
+             param->reg.status, param->reg.app_id);
+    heart_rate_profile_tab[PROFILE_LOG_STATE_IDX].service_id.is_primary = true;
+    heart_rate_profile_tab[PROFILE_LOG_STATE_IDX].service_id.id.inst_id = 0x00;
+    heart_rate_profile_tab[PROFILE_LOG_STATE_IDX].service_id.id.uuid.len =
+        ESP_UUID_LEN_16;
+    heart_rate_profile_tab[PROFILE_LOG_STATE_IDX]
+        .service_id.id.uuid.uuid.uuid16 = GATT_BLUEFI_UUID_SERVICE;
 
+    esp_ble_gatts_create_service(
+        gatts_if, &heart_rate_profile_tab[PROFILE_LOG_STATE_IDX].service_id,
+        GATT_BLUEFI_NB);
+    break;
+  case ESP_GATTS_READ_EVT: { // READ bluefi command, reply with bluefireply
+    ESP_LOGI(GATTS_BLUEFI_TAG,
+             "GATT_READ_EVT, conn_id %d, trans_id %d, handle %d\n",
+             param->read.conn_id, param->read.trans_id, param->read.handle);
+    esp_gatt_rsp_t rsp;
+    if (!param->write.is_prep) {
+      ESP_LOGI(GATTS_BLUEFI_TAG,
+               "GATT_WRITE_EVT, value len %d, value :", param->write.len);
+      // esp_log_buffer_hex(GATTS_AR_CONF_TAG, param->write.value,
+      // param->write.len);
+      air_ref_conf_t ar_conf_new;
 
+      AirRef_Message_table_t message =
+          AirRef_Message_as_root(param->write.value);
+      if (message != 0) {
+        if (AirRef_Message_content_type(message) == AirRef_Content_AirRefConf) {
 
-void bluefi_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param)
-{
-    switch (event)
-    {
-    case ESP_GATTS_REG_EVT:
-        ESP_LOGI(GATTS_BLUEFI_TAG, "REGISTER_APP_EVT, status %d, app_id %d\n", param->reg.status, param->reg.app_id);
-        heart_rate_profile_tab[PROFILE_LOG_STATE_IDX].service_id.is_primary = true;
-        heart_rate_profile_tab[PROFILE_LOG_STATE_IDX].service_id.id.inst_id = 0x00;
-        heart_rate_profile_tab[PROFILE_LOG_STATE_IDX].service_id.id.uuid.len = ESP_UUID_LEN_16;
-        heart_rate_profile_tab[PROFILE_LOG_STATE_IDX].service_id.id.uuid.uuid.uuid16 = GATT_BLUEFI_UUID_SERVICE;
+          AirRef_AirRefConf_table_t airRefConf =
+              (AirRef_AirRefConf_table_t)AirRef_Message_content(message);
 
-        esp_ble_gatts_create_service(gatts_if, &heart_rate_profile_tab[PROFILE_LOG_STATE_IDX].service_id, GATT_BLUEFI_NB);
-        break;
-    case ESP_GATTS_READ_EVT:
-    { // READ MACHINE STATE
-        ESP_LOGI(GATTS_BLUEFI_TAG, "GATT_READ_EVT, conn_id %d, trans_id %d, handle %d\n", param->read.conn_id, param->read.trans_id, param->read.handle);
-        //esp_gatt_rsp_t rsp;
-
-    //     flatcc_builder_t builder;
-    //     size_t size;
-    //     void *buf;
-
-    //     memset(&rsp, 0, sizeof(esp_gatt_rsp_t));
-    //     rsp.attr_value.handle = param->read.handle;
-
-    //     flatcc_builder_init(&builder);
-    //    // load_log_state(&builder, &log_state);
-    //     buf = flatcc_builder_finalize_buffer(&builder, &size);
-    //     rsp.attr_value.len = size;
-    //     memcpy(rsp.attr_value.value, buf, size);
-    //     ESP_LOGI(GATTS_BLUEFI_TAG, "required size: %d\n", size);
-
-    //     flatcc_builder_aligned_free(buf);
-    //     flatcc_builder_clear(&builder);
-
-    //     esp_ble_gatts_send_response(gatts_if, param->read.conn_id, param->read.trans_id,
+          // parse_ar_conf(airRefConf, &ar_conf_new);
+          // log_ar_conf( &ar_conf_new);
+          // routine_send_new_conf(&ar_conf_new);
+        }
+      }
+    }
+    //     esp_ble_gatts_send_response(gatts_if, param->read.conn_id,
+    //     param->read.trans_id,
     //                                 ESP_GATT_OK, &rsp);
-        break;
+    break;
+  }
+  case ESP_GATTS_WRITE_EVT: { // EDIT CONF
+    ESP_LOGI(GATTS_BLUEFI_TAG,
+             "GATT_WRITE_EVT, conn_id %d, trans_id %d, handle %d\n",
+             param->write.conn_id, param->write.trans_id, param->write.handle);
+    if (!param->write.is_prep) {
+      ESP_LOGI(GATTS_BLUEFI_TAG,
+               "GATT_WRITE_EVT, value len %d, value :", param->write.len);
+      esp_log_buffer_hex(GATTS_BLUEFI_TAG, param->write.value,
+                         param->write.len);
     }
-    case ESP_GATTS_WRITE_EVT:
-    { //EDIT CONF
-        ESP_LOGI(GATTS_BLUEFI_TAG, "GATT_WRITE_EVT, conn_id %d, trans_id %d, handle %d\n", param->write.conn_id, param->write.trans_id, param->write.handle);
-        if (!param->write.is_prep)
-        {
-            ESP_LOGI(GATTS_BLUEFI_TAG, "GATT_WRITE_EVT, value len %d, value :", param->write.len);
-            esp_log_buffer_hex(GATTS_BLUEFI_TAG, param->write.value, param->write.len);
-        }
-        example_write_event_env(gatts_if, &b_prepare_write_env, param);
-        break;
-    }
-    case ESP_GATTS_EXEC_WRITE_EVT:
-        ESP_LOGI(GATTS_BLUEFI_TAG, "ESP_GATTS_EXEC_WRITE_EVT");
-        esp_ble_gatts_send_response(gatts_if, param->write.conn_id, param->write.trans_id, ESP_GATT_OK, NULL);
-        example_exec_write_event_env(&b_prepare_write_env, param);
-        break;
-    case ESP_GATTS_MTU_EVT:
-        ESP_LOGI(GATTS_BLUEFI_TAG, "ESP_GATTS_MTU_EVT, MTU %d", param->mtu.mtu);
-        break;
-    case ESP_GATTS_UNREG_EVT:
-        break;
-    case ESP_GATTS_CREATE_EVT:
-        ESP_LOGI(GATTS_BLUEFI_TAG, "CREATE_SERVICE_EVT, status %d,  service_handle %d\n", param->create.status, param->create.service_handle);
-        heart_rate_profile_tab[PROFILE_LOG_STATE_IDX].service_handle = param->create.service_handle;
-        heart_rate_profile_tab[PROFILE_LOG_STATE_IDX].char_uuid.len = ESP_UUID_LEN_16;
-        heart_rate_profile_tab[PROFILE_LOG_STATE_IDX].char_uuid.uuid.uuid16 = GATT_BLUEFI_UUID_VALUE;
+    example_write_event_env(gatts_if, &b_prepare_write_env, param);
+    break;
+  }
+  case ESP_GATTS_EXEC_WRITE_EVT:
+    ESP_LOGI(GATTS_BLUEFI_TAG, "ESP_GATTS_EXEC_WRITE_EVT");
+    esp_ble_gatts_send_response(gatts_if, param->write.conn_id,
+                                param->write.trans_id, ESP_GATT_OK, NULL);
+    example_exec_write_event_env(&b_prepare_write_env, param);
+    break;
+  case ESP_GATTS_MTU_EVT:
+    ESP_LOGI(GATTS_BLUEFI_TAG, "ESP_GATTS_MTU_EVT, MTU %d", param->mtu.mtu);
+    break;
+  case ESP_GATTS_UNREG_EVT:
+    break;
+  case ESP_GATTS_CREATE_EVT:
+    ESP_LOGI(GATTS_BLUEFI_TAG,
+             "CREATE_SERVICE_EVT, status %d,  service_handle %d\n",
+             param->create.status, param->create.service_handle);
+    heart_rate_profile_tab[PROFILE_LOG_STATE_IDX].service_handle =
+        param->create.service_handle;
+    heart_rate_profile_tab[PROFILE_LOG_STATE_IDX].char_uuid.len =
+        ESP_UUID_LEN_16;
+    heart_rate_profile_tab[PROFILE_LOG_STATE_IDX].char_uuid.uuid.uuid16 =
+        GATT_BLUEFI_UUID_VALUE;
 
-        esp_ble_gatts_start_service(heart_rate_profile_tab[PROFILE_LOG_STATE_IDX].service_handle);
-        b_property = ESP_GATT_CHAR_PROP_BIT_READ | ESP_GATT_CHAR_PROP_BIT_WRITE | ESP_GATT_CHAR_PROP_BIT_NOTIFY;
-        esp_err_t add_char_ret = esp_ble_gatts_add_char(heart_rate_profile_tab[PROFILE_LOG_STATE_IDX].service_handle, &heart_rate_profile_tab[PROFILE_LOG_STATE_IDX].char_uuid,
-                                                        ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE,
-                                                        b_property,
-                                                        NULL, NULL);
-        if (add_char_ret)
-        {
-            ESP_LOGE(GATTS_BLUEFI_TAG, "add char failed, error code =%x", add_char_ret);
-        }
-        break;
-    case ESP_GATTS_ADD_INCL_SRVC_EVT:
-        break;
-    case ESP_GATTS_ADD_CHAR_EVT:
-        ESP_LOGI(GATTS_BLUEFI_TAG, "ADD_CHAR_EVT, status %d,  attr_handle %d, service_handle %d\n",
-                 param->add_char.status, param->add_char.attr_handle, param->add_char.service_handle);
-
-        heart_rate_profile_tab[PROFILE_LOG_STATE_IDX].char_handle = param->add_char.attr_handle;
-        heart_rate_profile_tab[PROFILE_LOG_STATE_IDX].descr_uuid.len = ESP_UUID_LEN_16;
-        heart_rate_profile_tab[PROFILE_LOG_STATE_IDX].descr_uuid.uuid.uuid16 = ESP_GATT_UUID_CHAR_CLIENT_CONFIG;
-        esp_ble_gatts_add_char_descr(heart_rate_profile_tab[PROFILE_LOG_STATE_IDX].service_handle, &heart_rate_profile_tab[PROFILE_LOG_STATE_IDX].descr_uuid,
-                                     ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE,
-                                     NULL, NULL);
-        break;
-    case ESP_GATTS_ADD_CHAR_DESCR_EVT:
-        heart_rate_profile_tab[PROFILE_LOG_STATE_IDX].descr_handle = param->add_char_descr.attr_handle;
-        ESP_LOGI(GATTS_BLUEFI_TAG, "ADD_DESCR_EVT, status %d, attr_handle %d, service_handle %d\n",
-                 param->add_char_descr.status, param->add_char_descr.attr_handle, param->add_char_descr.service_handle);
-        break;
-    case ESP_GATTS_DELETE_EVT:
-        break;
-    case ESP_GATTS_START_EVT:
-        ESP_LOGI(GATTS_BLUEFI_TAG, "SERVICE_START_EVT, status %d, service_handle %d\n",
-                 param->start.status, param->start.service_handle);
-        break;
-    case ESP_GATTS_STOP_EVT:
-        break;
-    case ESP_GATTS_CONNECT_EVT:
-        ESP_LOGI(GATTS_BLUEFI_TAG, "CONNECT_EVT, conn_id %d, remote %02x:%02x:%02x:%02x:%02x:%02x:",
-                 param->connect.conn_id,
-                 param->connect.remote_bda[0], param->connect.remote_bda[1], param->connect.remote_bda[2],
-                 param->connect.remote_bda[3], param->connect.remote_bda[4], param->connect.remote_bda[5]);
-        heart_rate_profile_tab[PROFILE_LOG_STATE_IDX].conn_id = param->connect.conn_id;
-        break;
-    case ESP_GATTS_CONF_EVT:
-        ESP_LOGI(GATTS_BLUEFI_TAG, "ESP_GATTS_CONF_EVT status %d attr_handle %d", param->conf.status, param->conf.handle);
-        if (param->conf.status != ESP_GATT_OK)
-        {
-            esp_log_buffer_hex(GATTS_BLUEFI_TAG, param->conf.value, param->conf.len);
-        }
-        break;
-    case ESP_GATTS_DISCONNECT_EVT:
-    case ESP_GATTS_OPEN_EVT:
-    case ESP_GATTS_CANCEL_OPEN_EVT:
-    case ESP_GATTS_CLOSE_EVT:
-    case ESP_GATTS_LISTEN_EVT:
-    case ESP_GATTS_CONGEST_EVT:
-    default:
-        break;
+    esp_ble_gatts_start_service(
+        heart_rate_profile_tab[PROFILE_LOG_STATE_IDX].service_handle);
+    b_property = ESP_GATT_CHAR_PROP_BIT_READ | ESP_GATT_CHAR_PROP_BIT_WRITE |
+                 ESP_GATT_CHAR_PROP_BIT_NOTIFY;
+    esp_err_t add_char_ret = esp_ble_gatts_add_char(
+        heart_rate_profile_tab[PROFILE_LOG_STATE_IDX].service_handle,
+        &heart_rate_profile_tab[PROFILE_LOG_STATE_IDX].char_uuid,
+        ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE, b_property, NULL, NULL);
+    if (add_char_ret) {
+      ESP_LOGE(GATTS_BLUEFI_TAG, "add char failed, error code =%x",
+               add_char_ret);
     }
+    break;
+  case ESP_GATTS_ADD_INCL_SRVC_EVT:
+    break;
+  case ESP_GATTS_ADD_CHAR_EVT:
+    ESP_LOGI(GATTS_BLUEFI_TAG,
+             "ADD_CHAR_EVT, status %d,  attr_handle %d, service_handle %d\n",
+             param->add_char.status, param->add_char.attr_handle,
+             param->add_char.service_handle);
+
+    heart_rate_profile_tab[PROFILE_LOG_STATE_IDX].char_handle =
+        param->add_char.attr_handle;
+    heart_rate_profile_tab[PROFILE_LOG_STATE_IDX].descr_uuid.len =
+        ESP_UUID_LEN_16;
+    heart_rate_profile_tab[PROFILE_LOG_STATE_IDX].descr_uuid.uuid.uuid16 =
+        ESP_GATT_UUID_CHAR_CLIENT_CONFIG;
+    esp_ble_gatts_add_char_descr(
+        heart_rate_profile_tab[PROFILE_LOG_STATE_IDX].service_handle,
+        &heart_rate_profile_tab[PROFILE_LOG_STATE_IDX].descr_uuid,
+        ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE, NULL, NULL);
+    break;
+  case ESP_GATTS_ADD_CHAR_DESCR_EVT:
+    heart_rate_profile_tab[PROFILE_LOG_STATE_IDX].descr_handle =
+        param->add_char_descr.attr_handle;
+    ESP_LOGI(GATTS_BLUEFI_TAG,
+             "ADD_DESCR_EVT, status %d, attr_handle %d, service_handle %d\n",
+             param->add_char_descr.status, param->add_char_descr.attr_handle,
+             param->add_char_descr.service_handle);
+    break;
+  case ESP_GATTS_DELETE_EVT:
+    break;
+  case ESP_GATTS_START_EVT:
+    ESP_LOGI(GATTS_BLUEFI_TAG,
+             "SERVICE_START_EVT, status %d, service_handle %d\n",
+             param->start.status, param->start.service_handle);
+    break;
+  case ESP_GATTS_STOP_EVT:
+    break;
+  case ESP_GATTS_CONNECT_EVT:
+    ESP_LOGI(GATTS_BLUEFI_TAG,
+             "CONNECT_EVT, conn_id %d, remote %02x:%02x:%02x:%02x:%02x:%02x:",
+             param->connect.conn_id, param->connect.remote_bda[0],
+             param->connect.remote_bda[1], param->connect.remote_bda[2],
+             param->connect.remote_bda[3], param->connect.remote_bda[4],
+             param->connect.remote_bda[5]);
+    heart_rate_profile_tab[PROFILE_LOG_STATE_IDX].conn_id =
+        param->connect.conn_id;
+    break;
+  case ESP_GATTS_CONF_EVT:
+    ESP_LOGI(GATTS_BLUEFI_TAG, "ESP_GATTS_CONF_EVT status %d attr_handle %d",
+             param->conf.status, param->conf.handle);
+    if (param->conf.status != ESP_GATT_OK) {
+      esp_log_buffer_hex(GATTS_BLUEFI_TAG, param->conf.value, param->conf.len);
+    }
+    break;
+  case ESP_GATTS_DISCONNECT_EVT:
+  case ESP_GATTS_OPEN_EVT:
+  case ESP_GATTS_CANCEL_OPEN_EVT:
+  case ESP_GATTS_CLOSE_EVT:
+  case ESP_GATTS_LISTEN_EVT:
+  case ESP_GATTS_CONGEST_EVT:
+  default:
+    break;
+  }
 }

@@ -49,7 +49,7 @@ void log_state_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if,
         esp_ble_gatts_create_service(gatts_if, &heart_rate_profile_tab[PROFILE_LOG_STATE_IDX].service_id, GATT_LOG_STATE_NB);
         break;
     case ESP_GATTS_READ_EVT:
-    { // READ MACHINE STATE
+    { // READ log commands, send logreply
         ESP_LOGI(GATTS_LOG_STATE_TAG, "GATT_READ_EVT, conn_id %d, trans_id %d, handle %d\n", param->read.conn_id, param->read.trans_id, param->read.handle);
         esp_gatt_rsp_t rsp;
 

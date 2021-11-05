@@ -1,0 +1,16 @@
+
+
+table WifiCredentials{
+    ssid: string;
+    password: string;
+}
+
+
+table BluefiCommand{
+    wifiCredential: WifiCredentials;
+    doScan: int;
+}
+
+table BluefiReply{
+    wifiCredentials: [WifiCredentials];
+}

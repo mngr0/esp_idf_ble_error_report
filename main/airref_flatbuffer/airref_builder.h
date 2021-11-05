@@ -9,6 +9,12 @@
 #ifndef FLATBUFFERS_COMMON_BUILDER_H
 #include "flatbuffers_common_builder.h"
 #endif
+#ifndef BLUEFI_BUILDER_H
+#include "bluefi_builder.h"
+#endif
+#ifndef LOGGER_BUILDER_H
+#include "logger_builder.h"
+#endif
 #include "flatcc/flatcc_prologue.h"
 #ifndef flatbuffers_identifier
 #define flatbuffers_identifier 0
@@ -197,6 +203,14 @@ static inline AirRef_Content_union_ref_t AirRef_Content_as_MachineState(AirRef_M
 { AirRef_Content_union_ref_t uref; uref.type = AirRef_Content_MachineState; uref.value = ref; return uref; }
 static inline AirRef_Content_union_ref_t AirRef_Content_as_Request(AirRef_Request_ref_t ref)
 { AirRef_Content_union_ref_t uref; uref.type = AirRef_Content_Request; uref.value = ref; return uref; }
+static inline AirRef_Content_union_ref_t AirRef_Content_as_BluefiCommand(BluefiCommand_ref_t ref)
+{ AirRef_Content_union_ref_t uref; uref.type = AirRef_Content_BluefiCommand; uref.value = ref; return uref; }
+static inline AirRef_Content_union_ref_t AirRef_Content_as_BluefiReply(BluefiReply_ref_t ref)
+{ AirRef_Content_union_ref_t uref; uref.type = AirRef_Content_BluefiReply; uref.value = ref; return uref; }
+static inline AirRef_Content_union_ref_t AirRef_Content_as_LoggerCommand(LoggerCommand_ref_t ref)
+{ AirRef_Content_union_ref_t uref; uref.type = AirRef_Content_LoggerCommand; uref.value = ref; return uref; }
+static inline AirRef_Content_union_ref_t AirRef_Content_as_LoggerReply(LoggerReply_ref_t ref)
+{ AirRef_Content_union_ref_t uref; uref.type = AirRef_Content_LoggerReply; uref.value = ref; return uref; }
 __flatbuffers_build_union_vector(flatbuffers_, AirRef_Content)
 
 static AirRef_Content_union_ref_t AirRef_Content_clone(flatbuffers_builder_t *B, AirRef_Content_union_t u)
@@ -206,6 +220,10 @@ static AirRef_Content_union_ref_t AirRef_Content_clone(flatbuffers_builder_t *B,
     case 2: return AirRef_Content_as_AirRefState(AirRef_AirRefState_clone(B, (AirRef_AirRefState_table_t)u.value));
     case 3: return AirRef_Content_as_MachineState(AirRef_MachineState_clone(B, (AirRef_MachineState_table_t)u.value));
     case 4: return AirRef_Content_as_Request(AirRef_Request_clone(B, (AirRef_Request_table_t)u.value));
+    case 5: return AirRef_Content_as_BluefiCommand(BluefiCommand_clone(B, (BluefiCommand_table_t)u.value));
+    case 6: return AirRef_Content_as_BluefiReply(BluefiReply_clone(B, (BluefiReply_table_t)u.value));
+    case 7: return AirRef_Content_as_LoggerCommand(LoggerCommand_clone(B, (LoggerCommand_table_t)u.value));
+    case 8: return AirRef_Content_as_LoggerReply(LoggerReply_clone(B, (LoggerReply_table_t)u.value));
     default: return AirRef_Content_as_NONE();
     }
 }
@@ -413,6 +431,10 @@ __flatbuffers_build_union_table_value_field(flatbuffers_, AirRef_Message_content
 __flatbuffers_build_union_table_value_field(flatbuffers_, AirRef_Message_content, AirRef_Content, AirRefState, AirRef_AirRefState)
 __flatbuffers_build_union_table_value_field(flatbuffers_, AirRef_Message_content, AirRef_Content, MachineState, AirRef_MachineState)
 __flatbuffers_build_union_table_value_field(flatbuffers_, AirRef_Message_content, AirRef_Content, Request, AirRef_Request)
+__flatbuffers_build_union_table_value_field(flatbuffers_, AirRef_Message_content, AirRef_Content, BluefiCommand, BluefiCommand)
+__flatbuffers_build_union_table_value_field(flatbuffers_, AirRef_Message_content, AirRef_Content, BluefiReply, BluefiReply)
+__flatbuffers_build_union_table_value_field(flatbuffers_, AirRef_Message_content, AirRef_Content, LoggerCommand, LoggerCommand)
+__flatbuffers_build_union_table_value_field(flatbuffers_, AirRef_Message_content, AirRef_Content, LoggerReply, LoggerReply)
 
 static inline AirRef_Message_ref_t AirRef_Message_create(flatbuffers_builder_t *B __AirRef_Message_formal_args)
 {

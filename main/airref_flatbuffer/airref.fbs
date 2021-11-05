@@ -1,9 +1,11 @@
 // Example IDL file for our monster's schema.
 
+
+include "logger.fbs";
+include "bluefi.fbs";
+
 namespace AirRef;
 
-import "logger.fbs"
-import "bluefi.fbs"
 
 enum ErrorState:int{
 	error_state_none=0,

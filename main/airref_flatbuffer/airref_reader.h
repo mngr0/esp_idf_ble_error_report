@@ -6,6 +6,12 @@
 #ifndef FLATBUFFERS_COMMON_READER_H
 #include "flatbuffers_common_reader.h"
 #endif
+#ifndef BLUEFI_READER_H
+#include "bluefi_reader.h"
+#endif
+#ifndef LOGGER_READER_H
+#include "logger_reader.h"
+#endif
 #include "flatcc/flatcc_flatbuffers.h"
 #ifndef __alignas_is_defined
 #include <stdalign.h>
@@ -499,6 +505,10 @@ __flatbuffers_define_union(flatbuffers_, AirRef_Content)
 #define AirRef_Content_AirRefState ((AirRef_Content_union_type_t)UINT8_C(2))
 #define AirRef_Content_MachineState ((AirRef_Content_union_type_t)UINT8_C(3))
 #define AirRef_Content_Request ((AirRef_Content_union_type_t)UINT8_C(4))
+#define AirRef_Content_BluefiCommand ((AirRef_Content_union_type_t)UINT8_C(5))
+#define AirRef_Content_BluefiReply ((AirRef_Content_union_type_t)UINT8_C(6))
+#define AirRef_Content_LoggerCommand ((AirRef_Content_union_type_t)UINT8_C(7))
+#define AirRef_Content_LoggerReply ((AirRef_Content_union_type_t)UINT8_C(8))
 
 static inline const char *AirRef_Content_type_name(AirRef_Content_union_type_t type)
 {
@@ -508,6 +518,10 @@ static inline const char *AirRef_Content_type_name(AirRef_Content_union_type_t t
     case AirRef_Content_AirRefState: return "AirRefState";
     case AirRef_Content_MachineState: return "MachineState";
     case AirRef_Content_Request: return "Request";
+    case AirRef_Content_BluefiCommand: return "BluefiCommand";
+    case AirRef_Content_BluefiReply: return "BluefiReply";
+    case AirRef_Content_LoggerCommand: return "LoggerCommand";
+    case AirRef_Content_LoggerReply: return "LoggerReply";
     default: return "";
     }
 }
@@ -520,6 +534,10 @@ static inline int AirRef_Content_is_known_type(AirRef_Content_union_type_t type)
     case AirRef_Content_AirRefState: return 1;
     case AirRef_Content_MachineState: return 1;
     case AirRef_Content_Request: return 1;
+    case AirRef_Content_BluefiCommand: return 1;
+    case AirRef_Content_BluefiReply: return 1;
+    case AirRef_Content_LoggerCommand: return 1;
+    case AirRef_Content_LoggerReply: return 1;
     default: return 0;
     }
 }
