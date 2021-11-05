@@ -2,7 +2,6 @@
 #include "esp_log.h"
 #include "esp_vfs_fat.h"
 #include "sdmmc_cmd.h"
-#include <bits/types/struct_timespec.h>
 #include <dirent.h>
 #include <stdio.h>
 #include <string.h>
@@ -31,8 +30,7 @@ int search_file(char *directory_to_scan, char *file_path, bool newest) {
   struct dirent *dp;
   struct stat properties;
 
-  time_t last_found;
-
+  time_t last_found=0;
   if ((d = opendir(directory_to_scan)) == NULL) {
     // fprintf(stderr, "Cannot open %s directory\n", directory_to_scan);
     return -1;
@@ -55,12 +53,12 @@ int search_file(char *directory_to_scan, char *file_path, bool newest) {
       //          properties.st_size);
 
       if (newest) {
-        if (properties.st_mtime > last_found) {
+        if ((properties.st_mtime > last_found)|| (last_found==0)) {
           last_found = properties.st_mtime;
           strcpy(file_path, full_name);
         }
       } else {
-        if (properties.st_mtime < last_found) {
+        if ((properties.st_mtime < last_found)|| (last_found==0)) {
           last_found = properties.st_mtime;
           strcpy(file_path, full_name);
         }

@@ -38,7 +38,6 @@
 #include "driver/uart.h"
 
 #include "ble/ble.h"
-#include "ble/blufi.h"
 #include "air_ref/air_ref.h"
 
 #include "services/gatt_ar_conf.h"
