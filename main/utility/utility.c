@@ -3,6 +3,7 @@
 #include "utility/utility.h"
 
 #include "esp_vfs_fat.h"
+#include "i2c_common/i2c_common.h"
 #include "sdmmc_cmd.h"
 #include <string.h>
 #include <sys/stat.h>
@@ -12,88 +13,75 @@
 
 #define TAG "UTILITY"
 
-FILE *file_pointer_to_last_used = NULL; //after first search it points to last file
+#define MAX_FILENAME_SIZE 256
 
+char last_used_file_path[256] = {
+    0, 0}; // after first search it points to last file
+const char *dir_path = MOUNT_POINT "/PROVA/";
 
+int log_received_message(rtc_time_t *time, packet_received_t *packet) {
+  // search for valid file
 
-void log_received_message(rtc_time_t *time, packet_received_t packet){
-  //search for valid file
-  if (file_pointer_to_last_used == NULL){
-    file_pointer_to_last_used = search_last();
+  if (last_used_file_path[0] ==
+      0) { // if first time log, go search for last used
+    // check equals to string not empty
+    search_last(dir_path, &last_used_file_path);
   }
-  //if last is full, create new one
-  //if stat. size > MAX_FILE_SIZE
-  //  create new file
-  //  check space left on SD
 
-  //open it
-  //append packet, with no idle space(in buffer)
+  if (last_used_file_path[0] != 0) { // if something found, check if size is
+                                     // good
+    struct stat properties;
 
+    if (stat(last_used_file_path, &properties) < 0) {
+      // HOW TO MANAGE THIS ERROR?
+    }
+    if (properties.st_size > MAX_FILE_SIZE) {
+      last_used_file_path[0] = 0;
+    }
+  }
+
+  if (last_used_file_path[0] != 0) { // if no valid file exists, must create one
+    char new_file_name[MAX_FILENAME_SIZE];
+    snprintf(new_file_name, MAX_FILENAME_SIZE, "LOG_2%3d%2d%2d%2d%2d.TXT",
+             time->year, time->month, time->day, time->hour, time->min);
+    create_new_file((char *)dir_path, new_file_name);
+  }
+  FILE *f;
+  // now last_used_file_path is a valid filepath
+  f = fopen(last_used_file_path, "a");
+  if (f == NULL) {
+    return -1;
+  }
+
+  uint8_t separator[] = SEPARATOR_DEF;
+  fwrite((uint8_t *)separator, sizeof(uint8_t), sizeof(separator), f);
+  fwrite((uint8_t *)time, sizeof(uint8_t), sizeof(rtc_time_t), f);
+  fwrite((uint8_t *)packet, sizeof(uint8_t), HEADER_SIZE, f);
+  fwrite((uint8_t *)(&packet[HEADER_SIZE]), sizeof(uint8_t), packet->frame_size,
+         f);
+  fwrite((uint8_t *)(&packet[sizeof(packet_received_t) - FOOTER_SIZE]),
+         sizeof(uint8_t), FOOTER_SIZE, f);
+  fclose(f);
+  // TODO consider if putting the structure sizes on a separate file
+  return 0;
 }
 
-
 void do_test_spi_sd() {
-  esp_err_t ret;
-  esp_vfs_fat_sdmmc_mount_config_t mount_config = {
-      .format_if_mount_failed = true,
-      .max_files = 5,
-      .allocation_unit_size = 16 * 1024};
+  // esp_err_t ret;
   sdmmc_card_t *card;
-
   const char mount_point[] = MOUNT_POINT;
-  ESP_LOGI(TAG, "Initializing SD card");
   sdmmc_host_t host = SDSPI_HOST_DEFAULT();
-  spi_bus_config_t bus_cfg = {
-      .mosi_io_num = PIN_NUM_MOSI,
-      .miso_io_num = PIN_NUM_MISO,
-      .sclk_io_num = PIN_NUM_CLK,
-      .quadwp_io_num = -1,
-      .quadhd_io_num = -1,
-      .max_transfer_sz = 4000,
-  };
-  ret = spi_bus_initialize(host.slot, &bus_cfg, SPI_DMA_CHAN);
-  if (ret != ESP_OK) {
-    ESP_LOGE(TAG, "Failed to initialize bus.");
-    return;
-  }
-
-  // This initializes the slot without card detect (CD) and write protect (WP)
-  // signals. Modify slot_config.gpio_cd and slot_config.gpio_wp if your board
-  // has these signals.
-  sdspi_device_config_t slot_config = SDSPI_DEVICE_CONFIG_DEFAULT();
-  slot_config.gpio_cs = PIN_NUM_CS;
-  slot_config.host_id = host.slot;
-
-  ESP_LOGI(TAG, "Mounting filesystem");
-  ret = esp_vfs_fat_sdspi_mount(mount_point, &host, &slot_config, &mount_config,
-                                &card);
-
-  if (ret != ESP_OK) {
-    if (ret == ESP_FAIL) {
-      ESP_LOGE(TAG, "Failed to mount filesystem. "
-                    "If you want the card to be formatted, set the "
-                    "EXAMPLE_FORMAT_IF_MOUNT_FAILED menuconfig option.");
-    } else {
-      ESP_LOGE(TAG,
-               "Failed to initialize the card (%s). "
-               "Make sure SD card lines have pull-up resistors in place.",
-               esp_err_to_name(ret));
-    }
-    return;
-  }
-  ESP_LOGI(TAG, "Filesystem mounted");
+  spi_sd_init(&card);
 
   // Card has been initialized, print its properties
   sdmmc_card_print_info(stdout, card);
 
+  uint64_t out_total_bytes;
+  uint64_t out_free_bytes;
+  example_get_fatfs_usage(&out_total_bytes, &out_free_bytes);
   // Use POSIX and C standard library functions to work with files.
-
   // First create a file.
   const char *file_hello = MOUNT_POINT "/hello.txt";
-
-
-  search_file();
-
 
   ESP_LOGI(TAG, "Opening file %s", file_hello);
   FILE *f = fopen(file_hello, "w");
@@ -148,4 +136,4 @@ void do_test_spi_sd() {
   // deinitialize the bus after all devices are removed
   spi_bus_free(host.slot);
 }
-//https://gist.github.com/mws-rmain/2ba434cd2a3f32d6d343c1c60fbd65c8
+// https://gist.github.com/mws-rmain/2ba434cd2a3f32d6d343c1c60fbd65c8

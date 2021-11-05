@@ -15,7 +15,16 @@
 #define MOUNT_POINT "/sdcard"
 #define SPI_DMA_CHAN 1
 
+#define MAX_FILENAME_SIZE 256
+
 FILE* search_last();
-int search_file() ;
+int search_file(char *directory_to_scan ,char *file_path, bool newest) ; //newest ... XOR oldest
+
+void spi_sd_init(sdmmc_card_t **card);
+
+int create_new_file(char* dir_path, char *new_file_name);
+
+void example_get_fatfs_usage(uint64_t *out_total_bytes,
+                                    uint64_t *out_free_bytes);
 
 #endif

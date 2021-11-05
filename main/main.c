@@ -117,8 +117,8 @@ void app_main(void) {
 
   xTaskCreate(blink_task, "blink_task", SENDER_TASK_STACK_SIZE, NULL, 2, NULL);
 
-  configure_serial();
+  // configure_serial();
 
-  BLE_init();
-  logger_init();
+  // BLE_init();
+  // logger_init();
 }

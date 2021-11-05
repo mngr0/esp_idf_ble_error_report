@@ -7,6 +7,7 @@
 
 #define MAX_FILE_SIZE  104876//Bytes //1 MiB
 
+#define SEPARATOR_DEF {0xa4,0xa4,0xa4,0xa4,0xa4,0xa4,0xa4,0xa4,0xa4,0xa4,0xa4,0xa4,} 
 
 //filename:  DATA_LOG.TXT -> l' ordine alfabetico e' anche l' ordine temporale, se si scrivono i mesi come 03
 //example 202010161813_LOG.TXT 2020/10/16 18:13
@@ -33,7 +34,7 @@
 //riporta lo stato della connessione wifi via bt
 
 
-void log_received_message(rtc_time_t *time, packet_received_t packet);
+int log_received_message(rtc_time_t *time, packet_received_t* packet);
 //add received message to log file (packet_received pkt)
 // - get last edited file (if file_pointer_to_last_used==NULL)
 // - check if size can be increased
