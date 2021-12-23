@@ -139,7 +139,7 @@ int create_new_file(char *dir_path, char *new_file_name) {
   uint64_t out_free_bytes;
   char tmp_str[MAX_FILENAME_SIZE];
   example_get_fatfs_usage(&out_total_bytes, &out_free_bytes);
-  if (out_total_bytes < MAX_FILE_SIZE) {
+  if (out_free_bytes < MAX_FILE_SIZE) {
     search_file(dir_path, tmp_str, false);
     remove(tmp_str);
   }

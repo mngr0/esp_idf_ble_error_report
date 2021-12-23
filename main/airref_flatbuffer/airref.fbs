@@ -59,6 +59,14 @@ struct MotorStatus{
 
 table AirRefConf{
 	control_type:ControlType;
+
+	termostatica_surriscaldo_setpoint:int =-1;
+	termostatica_coeff_P:int =-1;
+	termostatica_coeff_I:int =-1;
+	termostatica_coeff_I_max:int =-1;
+	termostatica_max_step:int =-1;
+	
+
 	fan_target_pressure:int =-1;
 	fan_coeff_p:int =-1;
 	fan_coeff_offset:int =-1;
@@ -83,10 +91,16 @@ table AirRefState{
 
 	fan_speed_to_command:int=-1;
 	fan_time_last_command:int=-1;
+	
+	termostatica_I_value:int=-1;
+	termostatica_step_target:int=-1;
+	termostatica_step_current_position;:int=-1
+
 }
 
 table MachineState{
 	evaporation_pressure:int =0;
+	evaporation_temperature:int =0;
 	condensation_pressure:int =0;
 	temperature_gas_scarico:int =0;
 	temperature_environment:int =0;
