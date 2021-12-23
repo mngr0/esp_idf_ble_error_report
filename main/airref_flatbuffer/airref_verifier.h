@@ -101,16 +101,21 @@ static int AirRef_AirRefConf_verify_table(flatcc_table_verifier_descriptor_t *td
 {
     int ret;
     if ((ret = flatcc_verify_field(td, 0, 4, 4) /* control_type */)) return ret;
-    if ((ret = flatcc_verify_field(td, 1, 4, 4) /* fan_target_pressure */)) return ret;
-    if ((ret = flatcc_verify_field(td, 2, 4, 4) /* fan_coeff_p */)) return ret;
-    if ((ret = flatcc_verify_field(td, 3, 4, 4) /* fan_coeff_offset */)) return ret;
-    if ((ret = flatcc_verify_field(td, 4, 4, 4) /* fan_min_pressure */)) return ret;
-    if ((ret = flatcc_verify_field(td, 5, 4, 4) /* fan_max_pressure */)) return ret;
-    if ((ret = flatcc_verify_field(td, 6, 4, 4) /* compressor_target_pressure */)) return ret;
-    if ((ret = flatcc_verify_field(td, 7, 4, 4) /* compressor_coeff_P */)) return ret;
-    if ((ret = flatcc_verify_field(td, 8, 4, 4) /* compressor_coeff_I */)) return ret;
-    if ((ret = flatcc_verify_field(td, 9, 4, 4) /* compressor_start_interval */)) return ret;
-    if ((ret = flatcc_verify_field(td, 10, 4, 4) /* low_pressure_limit */)) return ret;
+    if ((ret = flatcc_verify_field(td, 1, 4, 4) /* termostatica_surriscaldo_setpoint */)) return ret;
+    if ((ret = flatcc_verify_field(td, 2, 4, 4) /* termostatica_coeff_P */)) return ret;
+    if ((ret = flatcc_verify_field(td, 3, 4, 4) /* termostatica_coeff_I */)) return ret;
+    if ((ret = flatcc_verify_field(td, 4, 4, 4) /* termostatica_coeff_I_max */)) return ret;
+    if ((ret = flatcc_verify_field(td, 5, 4, 4) /* termostatica_max_step */)) return ret;
+    if ((ret = flatcc_verify_field(td, 6, 4, 4) /* fan_target_pressure */)) return ret;
+    if ((ret = flatcc_verify_field(td, 7, 4, 4) /* fan_coeff_p */)) return ret;
+    if ((ret = flatcc_verify_field(td, 8, 4, 4) /* fan_coeff_offset */)) return ret;
+    if ((ret = flatcc_verify_field(td, 9, 4, 4) /* fan_min_pressure */)) return ret;
+    if ((ret = flatcc_verify_field(td, 10, 4, 4) /* fan_max_pressure */)) return ret;
+    if ((ret = flatcc_verify_field(td, 11, 4, 4) /* compressor_target_pressure */)) return ret;
+    if ((ret = flatcc_verify_field(td, 12, 4, 4) /* compressor_coeff_P */)) return ret;
+    if ((ret = flatcc_verify_field(td, 13, 4, 4) /* compressor_coeff_I */)) return ret;
+    if ((ret = flatcc_verify_field(td, 14, 4, 4) /* compressor_start_interval */)) return ret;
+    if ((ret = flatcc_verify_field(td, 15, 4, 4) /* low_pressure_limit */)) return ret;
     return flatcc_verify_ok;
 }
 
@@ -145,6 +150,9 @@ static int AirRef_AirRefState_verify_table(flatcc_table_verifier_descriptor_t *t
     if ((ret = flatcc_verify_field(td, 5, 4, 4) /* compressor_is_running */)) return ret;
     if ((ret = flatcc_verify_field(td, 6, 4, 4) /* fan_speed_to_command */)) return ret;
     if ((ret = flatcc_verify_field(td, 7, 4, 4) /* fan_time_last_command */)) return ret;
+    if ((ret = flatcc_verify_field(td, 8, 4, 4) /* termostatica_I_value */)) return ret;
+    if ((ret = flatcc_verify_field(td, 9, 4, 4) /* termostatica_step_target */)) return ret;
+    if ((ret = flatcc_verify_field(td, 10, 4, 4) /* termostatica_step_current_position */)) return ret;
     return flatcc_verify_ok;
 }
 
@@ -172,20 +180,21 @@ static int AirRef_MachineState_verify_table(flatcc_table_verifier_descriptor_t *
 {
     int ret;
     if ((ret = flatcc_verify_field(td, 0, 4, 4) /* evaporation_pressure */)) return ret;
-    if ((ret = flatcc_verify_field(td, 1, 4, 4) /* condensation_pressure */)) return ret;
-    if ((ret = flatcc_verify_field(td, 2, 4, 4) /* temperature_gas_scarico */)) return ret;
-    if ((ret = flatcc_verify_field(td, 3, 4, 4) /* temperature_environment */)) return ret;
-    if ((ret = flatcc_verify_field(td, 4, 4, 4) /* temperature_gas_ritorno */)) return ret;
-    if ((ret = flatcc_verify_field(td, 5, 4, 4) /* temperature_extra */)) return ret;
-    if ((ret = flatcc_verify_field(td, 6, 8, 4) /* imc102_communication */)) return ret;
-    if ((ret = flatcc_verify_field(td, 7, 8, 4) /* imc102_motor */)) return ret;
-    if ((ret = flatcc_verify_field(td, 8, 40, 4) /* imc102_status */)) return ret;
-    if ((ret = flatcc_verify_field(td, 9, 8, 4) /* imm101_communication */)) return ret;
-    if ((ret = flatcc_verify_field(td, 10, 8, 4) /* imm101_motor */)) return ret;
-    if ((ret = flatcc_verify_field(td, 11, 40, 4) /* imm101_status */)) return ret;
-    if ((ret = flatcc_verify_field(td, 12, 4, 4) /* pin_enable */)) return ret;
-    if ((ret = flatcc_verify_field(td, 13, 80, 4) /* ar_error */)) return ret;
-    if ((ret = flatcc_verify_field(td, 14, 4, 4) /* ar_status */)) return ret;
+    if ((ret = flatcc_verify_field(td, 1, 4, 4) /* evaporation_temperature */)) return ret;
+    if ((ret = flatcc_verify_field(td, 2, 4, 4) /* condensation_pressure */)) return ret;
+    if ((ret = flatcc_verify_field(td, 3, 4, 4) /* temperature_gas_scarico */)) return ret;
+    if ((ret = flatcc_verify_field(td, 4, 4, 4) /* temperature_environment */)) return ret;
+    if ((ret = flatcc_verify_field(td, 5, 4, 4) /* temperature_gas_ritorno */)) return ret;
+    if ((ret = flatcc_verify_field(td, 6, 4, 4) /* temperature_extra */)) return ret;
+    if ((ret = flatcc_verify_field(td, 7, 8, 4) /* imc102_communication */)) return ret;
+    if ((ret = flatcc_verify_field(td, 8, 8, 4) /* imc102_motor */)) return ret;
+    if ((ret = flatcc_verify_field(td, 9, 40, 4) /* imc102_status */)) return ret;
+    if ((ret = flatcc_verify_field(td, 10, 8, 4) /* imm101_communication */)) return ret;
+    if ((ret = flatcc_verify_field(td, 11, 8, 4) /* imm101_motor */)) return ret;
+    if ((ret = flatcc_verify_field(td, 12, 40, 4) /* imm101_status */)) return ret;
+    if ((ret = flatcc_verify_field(td, 13, 4, 4) /* pin_enable */)) return ret;
+    if ((ret = flatcc_verify_field(td, 14, 80, 4) /* ar_error */)) return ret;
+    if ((ret = flatcc_verify_field(td, 15, 4, 4) /* ar_status */)) return ret;
     return flatcc_verify_ok;
 }
 

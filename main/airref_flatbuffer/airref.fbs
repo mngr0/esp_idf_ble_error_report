@@ -94,7 +94,7 @@ table AirRefState{
 	
 	termostatica_I_value:int=-1;
 	termostatica_step_target:int=-1;
-	termostatica_step_current_position;:int=-1
+	termostatica_step_current_position:int=-1;
 
 }
 
