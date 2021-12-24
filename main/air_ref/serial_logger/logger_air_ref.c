@@ -1,5 +1,6 @@
 #include "logger_air_ref.h"
 #include "air_ref/air_ref.h"
+#include "airref_flatbuffer/airref_builder.h"
 #include "airref_flatbuffer/airref_reader.h"
 #include "packet_manager/packet_manager.h"
 
@@ -25,6 +26,15 @@ void load_ar_state(flatcc_builder_t *B, air_ref_state_t *ar_state) {
   AirRef_AirRefState_fan_time_last_command_add(B,
                                                ar_state->fan_time_last_command);
 
+  AirRef_AirRefState_termostatica_I_value_add(B,
+                                              ar_state->termostatica_I_value);
+
+  AirRef_AirRefState_termostatica_step_target_add(
+      B, ar_state->termostatica_step_target);
+
+  AirRef_AirRefState_termostatica_step_current_position_add(
+      B, ar_state->termostatica_step_current_position);
+
   AirRef_AirRefState_ref_t airRefState = AirRef_AirRefState_end(B);
   AirRef_Content_union_ref_t content =
       AirRef_Content_as_MachineState(airRefState);
@@ -49,6 +59,12 @@ void parse_ar_state(AirRef_AirRefState_table_t airRefState,
       AirRef_AirRefState_fan_speed_to_command(airRefState);
   ar_state->fan_time_last_command =
       AirRef_AirRefState_fan_time_last_command(airRefState);
+  ar_state->termostatica_I_value =
+      AirRef_AirRefState_termostatica_I_value(airRefState);
+  ar_state->termostatica_step_target =
+      AirRef_AirRefState_termostatica_step_target(airRefState);
+  ar_state->termostatica_step_current_position =
+      AirRef_AirRefState_termostatica_step_current_position(airRefState);
 }
 
 void load_ar_conf(flatcc_builder_t *B, air_ref_conf_t *ar_conf) {
@@ -68,6 +84,16 @@ void load_ar_conf(flatcc_builder_t *B, air_ref_conf_t *ar_conf) {
       B, ar_conf->compressor_start_interval);
 
   AirRef_AirRefConf_low_pressure_limit_add(B, ar_conf->LP_low_pressure_limit);
+
+  AirRef_AirRefConf_termostatica_surriscaldo_setpoint_add(
+      B, ar_conf->termostatica_surriscaldo_setpoint);
+  AirRef_AirRefConf_termostatica_coeff_P_add(B, ar_conf->termostatica_coeff_P);
+  AirRef_AirRefConf_termostatica_coeff_I_add(B, ar_conf->termostatica_coeff_I);
+  AirRef_AirRefConf_termostatica_coeff_I_max_add(
+      B, ar_conf->termostatica_coeff_I_max);
+  AirRef_AirRefConf_termostatica_max_step_add(B,
+                                              ar_conf->termostatica_max_step);
+
   AirRef_AirRefConf_ref_t airRefConf = AirRef_AirRefConf_end(B);
   AirRef_Content_union_ref_t content = AirRef_Content_as_AirRefConf(airRefConf);
   AirRef_Message_create_as_root(B, content);
@@ -93,6 +119,17 @@ void parse_ar_conf(AirRef_AirRefConf_table_t airRefConf,
       AirRef_AirRefConf_compressor_start_interval(airRefConf);
   ar_conf->LP_low_pressure_limit =
       AirRef_AirRefConf_low_pressure_limit(airRefConf);
+
+  ar_conf->termostatica_surriscaldo_setpoint =
+      AirRef_AirRefConf_termostatica_surriscaldo_setpoint(airRefConf);
+  ar_conf->termostatica_coeff_P =
+      AirRef_AirRefConf_termostatica_coeff_P(airRefConf);
+  ar_conf->termostatica_coeff_I =
+      AirRef_AirRefConf_termostatica_coeff_I(airRefConf);
+  ar_conf->termostatica_coeff_I_max =
+      AirRef_AirRefConf_termostatica_coeff_I_max(airRefConf);
+  ar_conf->termostatica_max_step =
+      AirRef_AirRefConf_termostatica_max_step(airRefConf);
 }
 
 void load_m_state(flatcc_builder_t *B, machine_state_t *m_state) {
@@ -128,6 +165,8 @@ void load_m_state(flatcc_builder_t *B, machine_state_t *m_state) {
   AirRef_MachineState_start(B);
   AirRef_MachineState_evaporation_pressure_add(B,
                                                m_state->evaporation_pressure);
+  AirRef_MachineState_evaporation_temperature_add(B,
+                                               m_state->evaporation_temperature);
   AirRef_MachineState_condensation_pressure_add(B,
                                                 m_state->condensation_pressure);
   AirRef_MachineState_temperature_gas_scarico_add(
@@ -157,6 +196,8 @@ void parse_m_state(AirRef_MachineState_table_t machineState,
       AirRef_MachineState_condensation_pressure(machineState);
   m_state->evaporation_pressure =
       AirRef_MachineState_evaporation_pressure(machineState);
+  m_state->evaporation_temperature =
+      AirRef_MachineState_evaporation_temperature(machineState);
   m_state->temperature_gas_scarico =
       AirRef_MachineState_temperature_gas_scarico(machineState);
   m_state->temperature_environment =

@@ -76,7 +76,7 @@ static void blink_task(void *arg) {
     ESP_LOGI("TEST_CS", "i2c INIT GOOD/////////////////////////");
   }
   //mcp7940_set_time(rtc_driver,&pTime_set);
-  do_test_spi_sd();
+
   if (mcp7940_init(rtc_driver,1)) {
     ESP_LOGI("TEST_CS", "MCP INIT NOT GOOD ----------------------------");
   } else {
@@ -117,8 +117,8 @@ void app_main(void) {
 
   xTaskCreate(blink_task, "blink_task", SENDER_TASK_STACK_SIZE, NULL, 2, NULL);
 
-  // configure_serial();
+  configure_serial();
 
-  // BLE_init();
-  // logger_init();
+  BLE_init();
+  logger_init();
 }

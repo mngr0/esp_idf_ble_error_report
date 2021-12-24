@@ -11,25 +11,33 @@ typedef enum {
 	control_type_auto,	
 }control_type_t;
 
-
 typedef struct { //public
 	control_type_t control_type;
+	
+	int32_t termostatica_surriscaldo_setpoint;
+	int32_t termostatica_coeff_P;
+	int32_t termostatica_coeff_I;
+	int32_t termostatica_coeff_I_max;
+	int32_t termostatica_max_step;
 	
 	int32_t fan_target_pressure; //(milliBar)
 	int32_t fan_coeff_P;
 	int32_t fan_coeff_offset;
 	int32_t fan_min_pressure; //(milliBar)
 	int32_t fan_max_pressure; //(milliBar)
+
+	
 	
 	int32_t compressor_target_pressure; //millibar
 	int32_t compressor_coeff_P;
 	int32_t compressor_coeff_I;
-
+	
+	//int32_t compressor_activation_offset; //millbar
+	//int32_t compressor_action_delay; // milliseconds
 	int32_t compressor_start_interval;
 
 	int32_t LP_low_pressure_limit;
 	//HP_MOP
-	
 }air_ref_conf_t;
 
 typedef enum {
@@ -73,11 +81,17 @@ typedef struct{//READONLY
 	
 	int32_t fan_speed_to_command;
 	int32_t fan_time_last_command;
+
+	int32_t termostatica_I_value;
+	int32_t termostatica_step_target;
+	int32_t termostatica_step_current_position;
+
 } air_ref_state_t;
 
 
 typedef struct{//public
 	int32_t evaporation_pressure;
+	int32_t evaporation_temperature;
 	int32_t condensation_pressure;
 	int32_t temperature_gas_scarico;
 	int32_t temperature_environment;
