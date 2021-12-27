@@ -8,11 +8,15 @@ int send_new_conf(air_ref_conf_t *ar_conf_new);
 
 int do_request_m_state();
 
-int do_reply_m_state();
+int do_reply_m_state(machine_state_t *m_state);
 
 int do_request_ar_state();
 
+int do_reply_ar_state(air_ref_state_t *ar_state);
+
 int do_request_ar_conf();
+
+int do_reply_ar_conf(air_ref_conf_t *ar_conf);
 
 void load_ar_state(flatcc_builder_t *B, air_ref_state_t *ar_state);
 

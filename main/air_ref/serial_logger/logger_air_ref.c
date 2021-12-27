@@ -4,11 +4,6 @@
 #include "airref_flatbuffer/airref_reader.h"
 #include "packet_manager/packet_manager.h"
 
-extern machine_state_t m_state;
-extern air_ref_state_t ar_state;
-extern air_ref_conf_t ar_conf;
-extern air_ref_conf_t ar_conf_old;
-
 void load_ar_state(flatcc_builder_t *B, air_ref_state_t *ar_state) {
   AirRef_AirRefState_start(B);
   AirRef_AirRefState_compressor_speed_to_command_add(
@@ -278,11 +273,11 @@ int do_request_m_state() {
   return finalize_and_send_builder(&builder);
 }
 
-int do_reply_m_state() {
+int do_reply_m_state(machine_state_t *m_state) {
   flatcc_builder_t builder;
 
   flatcc_builder_init(&builder);
-  load_m_state(&builder, &m_state);
+  load_m_state(&builder, m_state);
   return finalize_and_send_builder(&builder);
 }
 
@@ -300,11 +295,11 @@ int do_request_ar_state() {
   AirRef_Message_create_as_root(&builder, content);
   return finalize_and_send_builder(&builder);
 }
-int do_reply_ar_state() {
+int do_reply_ar_state(air_ref_state_t *ar_state) {
   flatcc_builder_t builder;
 
   flatcc_builder_init(&builder);
-  load_ar_state(&builder, &ar_state);
+  load_ar_state(&builder, ar_state);
   return finalize_and_send_builder(&builder);
 }
 
@@ -322,11 +317,11 @@ int do_request_ar_conf() {
   return finalize_and_send_builder(&builder);
 }
 
-int do_reply_ar_conf() {
+int do_reply_ar_conf(air_ref_conf_t *ar_conf) {
   flatcc_builder_t builder;
 
   flatcc_builder_init(&builder);
-  load_ar_conf(&builder, &ar_conf);
+  load_ar_conf(&builder, ar_conf);
   return finalize_and_send_builder(&builder);
 }
 
