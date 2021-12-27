@@ -65,27 +65,27 @@ static inline AirRef_ErrorReport_t *AirRef_ErrorReport_copy_from_pe(AirRef_Error
 __flatbuffers_build_struct(flatbuffers_, AirRef_ErrorReport, 8, 4, AirRef_ErrorReport_file_identifier, AirRef_ErrorReport_type_identifier)
 __flatbuffers_define_fixed_array_primitives(flatbuffers_, AirRef_ErrorReport, AirRef_ErrorReport_t)
 
-#define __AirRef_ErrorList_formal_args , const AirRef_ErrorReport_t v0[10]
+#define __AirRef_ErrorList_formal_args , const AirRef_ErrorReport_t v0[12]
 #define __AirRef_ErrorList_call_args , v0
-static inline AirRef_ErrorList_t *AirRef_ErrorList_assign(AirRef_ErrorList_t *p, const AirRef_ErrorReport_t v0[10])
-{ AirRef_ErrorReport_array_copy(p->errors, v0, 10);
+static inline AirRef_ErrorList_t *AirRef_ErrorList_assign(AirRef_ErrorList_t *p, const AirRef_ErrorReport_t v0[12])
+{ AirRef_ErrorReport_array_copy(p->errors, v0, 12);
   return p; }
 static inline AirRef_ErrorList_t *AirRef_ErrorList_copy(AirRef_ErrorList_t *p, const AirRef_ErrorList_t *p2)
-{ AirRef_ErrorReport_array_copy(p->errors, p2->errors, 10);
+{ AirRef_ErrorReport_array_copy(p->errors, p2->errors, 12);
   return p; }
-static inline AirRef_ErrorList_t *AirRef_ErrorList_assign_to_pe(AirRef_ErrorList_t *p, const AirRef_ErrorReport_t v0[10])
-{ AirRef_ErrorReport_array_copy_to_pe(p->errors, v0, 10);
+static inline AirRef_ErrorList_t *AirRef_ErrorList_assign_to_pe(AirRef_ErrorList_t *p, const AirRef_ErrorReport_t v0[12])
+{ AirRef_ErrorReport_array_copy_to_pe(p->errors, v0, 12);
   return p; }
 static inline AirRef_ErrorList_t *AirRef_ErrorList_copy_to_pe(AirRef_ErrorList_t *p, const AirRef_ErrorList_t *p2)
-{ AirRef_ErrorReport_array_copy_to_pe(p->errors, p2->errors, 10);
+{ AirRef_ErrorReport_array_copy_to_pe(p->errors, p2->errors, 12);
   return p; }
-static inline AirRef_ErrorList_t *AirRef_ErrorList_assign_from_pe(AirRef_ErrorList_t *p, const AirRef_ErrorReport_t v0[10])
-{ AirRef_ErrorReport_array_copy_from_pe(p->errors, v0, 10);
+static inline AirRef_ErrorList_t *AirRef_ErrorList_assign_from_pe(AirRef_ErrorList_t *p, const AirRef_ErrorReport_t v0[12])
+{ AirRef_ErrorReport_array_copy_from_pe(p->errors, v0, 12);
   return p; }
 static inline AirRef_ErrorList_t *AirRef_ErrorList_copy_from_pe(AirRef_ErrorList_t *p, const AirRef_ErrorList_t *p2)
-{ AirRef_ErrorReport_array_copy_from_pe(p->errors, p2->errors, 10);
+{ AirRef_ErrorReport_array_copy_from_pe(p->errors, p2->errors, 12);
   return p; }
-__flatbuffers_build_struct(flatbuffers_, AirRef_ErrorList, 80, 4, AirRef_ErrorList_file_identifier, AirRef_ErrorList_type_identifier)
+__flatbuffers_build_struct(flatbuffers_, AirRef_ErrorList, 96, 4, AirRef_ErrorList_file_identifier, AirRef_ErrorList_type_identifier)
 __flatbuffers_define_fixed_array_primitives(flatbuffers_, AirRef_ErrorList, AirRef_ErrorList_t)
 
 #define __AirRef_MotorStatus_formal_args , const int32_t v0[10]
@@ -363,7 +363,7 @@ __flatbuffers_build_struct_field(10, flatbuffers_, AirRef_MachineState_imm101_co
 __flatbuffers_build_struct_field(11, flatbuffers_, AirRef_MachineState_imm101_motor, AirRef_ErrorReport, 8, 4, AirRef_MachineState)
 __flatbuffers_build_struct_field(12, flatbuffers_, AirRef_MachineState_imm101_status, AirRef_MotorStatus, 40, 4, AirRef_MachineState)
 __flatbuffers_build_scalar_field(13, flatbuffers_, AirRef_MachineState_pin_enable, flatbuffers_int32, int32_t, 4, 4, INT32_C(-1), AirRef_MachineState)
-__flatbuffers_build_struct_field(14, flatbuffers_, AirRef_MachineState_ar_error, AirRef_ErrorList, 80, 4, AirRef_MachineState)
+__flatbuffers_build_struct_field(14, flatbuffers_, AirRef_MachineState_ar_error, AirRef_ErrorList, 96, 4, AirRef_MachineState)
 __flatbuffers_build_scalar_field(15, flatbuffers_, AirRef_MachineState_ar_status, AirRef_AirRefStatus, AirRef_AirRefStatus_enum_t, 4, 4, INT32_C(0), AirRef_MachineState)
 
 static inline AirRef_MachineState_ref_t AirRef_MachineState_create(flatbuffers_builder_t *B __AirRef_MachineState_formal_args)

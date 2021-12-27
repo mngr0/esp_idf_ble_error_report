@@ -113,7 +113,7 @@ typedef struct{//public
 }machine_state_t;
 
 
-int access_message_buffer(const void *buffer);
+int access_message_buffer(const void *buffer, int buff_len);
 
 void logger_init();
 

@@ -385,20 +385,20 @@ __flatbuffers_define_struct_scalar_field(AirRef_ErrorReport, error_state, AirRef
 __flatbuffers_define_struct_scalar_field(AirRef_ErrorReport, error_code, flatbuffers_int32, int32_t)
 
 struct AirRef_ErrorList {
-    alignas(4) AirRef_ErrorReport_t errors[10];
+    alignas(4) AirRef_ErrorReport_t errors[12];
 };
-static_assert(sizeof(AirRef_ErrorList_t) == 80, "struct size mismatch");
+static_assert(sizeof(AirRef_ErrorList_t) == 96, "struct size mismatch");
 
 static inline const AirRef_ErrorList_t *AirRef_ErrorList__const_ptr_add(const AirRef_ErrorList_t *p, size_t i) { return p + i; }
 static inline AirRef_ErrorList_t *AirRef_ErrorList__ptr_add(AirRef_ErrorList_t *p, size_t i) { return p + i; }
 static inline AirRef_ErrorList_struct_t AirRef_ErrorList_vec_at(AirRef_ErrorList_vec_t vec, size_t i)
 __flatbuffers_struct_vec_at(vec, i)
-static inline size_t AirRef_ErrorList__size(void) { return 80; }
+static inline size_t AirRef_ErrorList__size(void) { return 96; }
 static inline size_t AirRef_ErrorList_vec_len(AirRef_ErrorList_vec_t vec)
 __flatbuffers_vec_len(vec)
 __flatbuffers_struct_as_root(AirRef_ErrorList)
 
-__flatbuffers_define_struct_struct_fixed_array_field(AirRef_ErrorList, errors, AirRef_ErrorReport_struct_t, 10)
+__flatbuffers_define_struct_struct_fixed_array_field(AirRef_ErrorList, errors, AirRef_ErrorReport_struct_t, 12)
 
 struct AirRef_MotorStatus {
     alignas(4) int32_t state[10];

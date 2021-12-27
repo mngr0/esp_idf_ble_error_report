@@ -59,22 +59,22 @@ static inline int AirRef_ErrorReport_verify_as_root_with_identifier(const void *
 
 static inline int AirRef_ErrorList_verify_as_root(const void *buf, size_t bufsiz)
 {
-    return flatcc_verify_struct_as_root(buf, bufsiz, AirRef_ErrorList_identifier, 80, 4);
+    return flatcc_verify_struct_as_root(buf, bufsiz, AirRef_ErrorList_identifier, 96, 4);
 }
 
 static inline int AirRef_ErrorList_verify_as_typed_root(const void *buf, size_t bufsiz)
 {
-    return flatcc_verify_struct_as_typed_root(buf, bufsiz, AirRef_ErrorList_type_hash, 80, 4);
+    return flatcc_verify_struct_as_typed_root(buf, bufsiz, AirRef_ErrorList_type_hash, 96, 4);
 }
 
 static inline int AirRef_ErrorList_verify_as_root_with_type_hash(const void *buf, size_t bufsiz, flatbuffers_thash_t thash)
 {
-    return flatcc_verify_struct_as_typed_root(buf, bufsiz, thash, 80, 4);
+    return flatcc_verify_struct_as_typed_root(buf, bufsiz, thash, 96, 4);
 }
 
 static inline int AirRef_ErrorList_verify_as_root_with_identifier(const void *buf, size_t bufsiz, const char *fid)
 {
-    return flatcc_verify_struct_as_root(buf, bufsiz, fid, 80, 4);
+    return flatcc_verify_struct_as_root(buf, bufsiz, fid, 96, 4);
 }
 
 static inline int AirRef_MotorStatus_verify_as_root(const void *buf, size_t bufsiz)
@@ -193,7 +193,7 @@ static int AirRef_MachineState_verify_table(flatcc_table_verifier_descriptor_t *
     if ((ret = flatcc_verify_field(td, 11, 8, 4) /* imm101_motor */)) return ret;
     if ((ret = flatcc_verify_field(td, 12, 40, 4) /* imm101_status */)) return ret;
     if ((ret = flatcc_verify_field(td, 13, 4, 4) /* pin_enable */)) return ret;
-    if ((ret = flatcc_verify_field(td, 14, 80, 4) /* ar_error */)) return ret;
+    if ((ret = flatcc_verify_field(td, 14, 96, 4) /* ar_error */)) return ret;
     if ((ret = flatcc_verify_field(td, 15, 4, 4) /* ar_status */)) return ret;
     return flatcc_verify_ok;
 }

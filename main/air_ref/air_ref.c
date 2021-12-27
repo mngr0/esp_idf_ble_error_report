@@ -41,13 +41,14 @@ extern const uart_port_t uart_num;
 static bool conf_received;
 static bool sending_new_conf;
 
-int access_message_buffer(const void *buffer)
+int access_message_buffer(const void *buffer, int buff_len)
 {
 
     AirRef_Message_table_t message = AirRef_Message_as_root(buffer);
 
     if (message != 0)
     {
+
 
         if (AirRef_Message_content_type(message) == AirRef_Content_MachineState)
         {
@@ -80,7 +81,7 @@ int access_message_buffer(const void *buffer)
 
             if (AirRef_Request_request_type_get(request) == AirRef_RequestType_AirRefConfReceived)
             {
-                ESP_LOGI("DECODED", "RICEVUTA CONFERMA DI CONFIGURAZIONE\n");
+                ESP_LOGI("DECODED", "RICEVUTA CONFERMA DI CONFIGURAZIONE");
 
                 if (sending_new_conf)
                 {
@@ -94,6 +95,9 @@ int access_message_buffer(const void *buffer)
                 }
             }
             //if request is air_ref_conf_received -> reset state to idle
+        }
+        else{
+            ESP_LOGI("DECODED", "UNRECOGNIZED");
         }
     }
     return 0;
@@ -171,16 +175,17 @@ static void receiver_task(void *arg)
         {
             packet_manager_put(&packet_structure,data, length);
         }
-
+        //TODO use variable with different name
         if ((length = packet_manager_pop(&packet_structure,data)) > 0)
         {
 
             if (packet_is_valid(&reply, data, length))
             {
+                ESP_LOG_BUFFER_HEX("BUFFER", data, length);
                 mcp7940_get_time(rtc_driver,&pTime);
-                access_message_buffer(reply.buffer);
+                access_message_buffer(reply.buffer,length);
 
-                //TODO SAVE RECEIVED FRAME TO SSD (AFTER REPLY)
+                //TODO SAVE RECEIVED FRAME TO SD (AFTER REPLY)
             }
         }
     }
@@ -212,9 +217,9 @@ void log_m_state(machine_state_t *m_state)
 {
 
     ESP_LOGI("LOG_M_STATE", "evaporation_pressure : %d", m_state->evaporation_pressure);
-    ESP_LOGI("LOG_AR_CONF", "condensation_pressure : %d", m_state->condensation_pressure);
-    ESP_LOGI("LOG_AR_CONF", "temperature_gas_scarico : %d", m_state->temperature_gas_scarico);
-    ESP_LOGI("LOG_AR_CONF", "temperature_environment : %d", m_state->temperature_environment);
-    ESP_LOGI("LOG_AR_CONF", "temperature_gas_ritorno : %d", m_state->temperature_gas_ritorno);
-    ESP_LOGI("LOG_AR_CONF", "temperature_extra : %d", m_state->temperature_extra);
+    ESP_LOGI("LOG_M_STATE", "condensation_pressure : %d", m_state->condensation_pressure);
+    ESP_LOGI("LOG_M_STATE", "temperature_gas_scarico : %d", m_state->temperature_gas_scarico);
+    ESP_LOGI("LOG_M_STATE", "temperature_environment : %d", m_state->temperature_environment);
+    ESP_LOGI("LOG_M_STATE", "temperature_gas_ritorno : %d", m_state->temperature_gas_ritorno);
+    ESP_LOGI("LOG_M_STATE", "temperature_extra : %d", m_state->temperature_extra);
 }

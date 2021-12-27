@@ -50,7 +50,7 @@ struct ErrorReport{
 }
 
 struct ErrorList{
-  errors:[ErrorReport:10];
+  errors:[ErrorReport:12];
 }
 
 struct MotorStatus{

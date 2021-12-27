@@ -37,7 +37,7 @@ void load_ar_state(flatcc_builder_t *B, air_ref_state_t *ar_state) {
 
   AirRef_AirRefState_ref_t airRefState = AirRef_AirRefState_end(B);
   AirRef_Content_union_ref_t content =
-      AirRef_Content_as_MachineState(airRefState);
+      AirRef_Content_as_AirRefState(airRefState);
   AirRef_Message_create_as_root(B, content);
 }
 
@@ -258,7 +258,7 @@ int finalize_and_send_builder(flatcc_builder_t *builder) {
 int send_new_conf(air_ref_conf_t *ar_conf_new) {
   flatcc_builder_t builder;
   flatcc_builder_init(&builder);
-  load_ar_conf(&builder, &ar_conf);
+  load_ar_conf(&builder, ar_conf_new);
   return finalize_and_send_builder(&builder);
 }
 
