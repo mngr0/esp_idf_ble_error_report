@@ -20,9 +20,11 @@
 
 #define TAG "SD_SPI"
 
+void search_last(char* dir_path, char* last_used_file_path){}
+
 // scan_dir
 // search more recent
-int search_file(char *directory_to_scan, char *file_path, bool newest) {
+int search_file(const char *directory_to_scan, char *file_path, bool most_recent) {//if most_recent is false this will get the least recent
 
   // IT MUST START WITH LOG
   ESP_LOGI(TAG, "STARTED SEARCH FILE in %s", directory_to_scan);
@@ -52,7 +54,7 @@ int search_file(char *directory_to_scan, char *file_path, bool newest) {
       //          properties.st_atime, properties.st_mtime, properties.st_ctime,
       //          properties.st_size);
 
-      if (newest) {
+      if (most_recent) {
         if ((properties.st_mtime > last_found)|| (last_found==0)) {
           last_found = properties.st_mtime;
           strcpy(file_path, full_name);

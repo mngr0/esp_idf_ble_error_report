@@ -17,8 +17,9 @@
 
 #define MAX_FILENAME_SIZE 256
 
-FILE* search_last();
-int search_file(char *directory_to_scan ,char *file_path, bool newest) ; //newest ... XOR oldest
+void search_last(char* dir_path, char* last_used_file_path);
+
+int search_file(const char *directory_to_scan ,char *file_path, bool newest) ; //newest ... XOR oldest
 
 void spi_sd_init(sdmmc_card_t **card);
 

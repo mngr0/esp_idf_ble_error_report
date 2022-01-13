@@ -35,9 +35,13 @@ enum AirRefIndexError:int{
 }
 
 enum AirRefStatus :int{
-	status_idle=0,
-	status_running,
-	status_critical_error
+	air_ref_status_idle=0,
+	air_ref_status_run_start,
+	air_ref_status_run_full,
+	air_ref_status_run_pre_sbrinamento,
+	air_ref_status_run_sbrinamento,
+	air_ref_status_run_post_sbrinamento,
+	air_ref_status_critical_error
 }
 
 
@@ -57,6 +61,8 @@ struct MotorStatus{
 table AirRefConf{
 	control_type:ControlType;
 
+	air_ref_start_interval: int = -1;
+
 	termostatica_surriscaldo_setpoint:int =-1;
 	termostatica_coeff_P:int =-1;
 	termostatica_coeff_I:int =-1;
@@ -74,11 +80,21 @@ table AirRefConf{
 	compressor_coeff_P: int =-1;
 	compressor_coeff_I: int =-1;
 	compressor_start_interval:int =-1;
+	compressor_speed:int =-1;
+	compressor_start_speed:int =-1;
+	compressor_pressure_spike:int =-1;
 
-	low_pressure_limit:int = -1;
+	period_log:int=-1;
+
+	LP_low_pressure_limit:int = -1;
+	LP_low_pressure_recover:int = -1;
 }
 
 table AirRefState{
+
+	air_ref_start_timestamp:int=-1;
+	air_ref_status:AirRefStatus;
+
 	compressor_calculated_speed:int=-1;
 	compressor_speed_to_command:int=-1;
 	compressor_I_value:int=-1;
@@ -93,6 +109,8 @@ table AirRefState{
 	termostatica_step_target:int=-1;
 	termostatica_step_current_position:int=-1;
 
+	debounce_input_timestamp:int =-1;
+	debounce_input_current_state:int=-1;
 }
 
 table MachineState{
@@ -104,19 +122,14 @@ table MachineState{
 	temperature_gas_ritorno:int =0;
 	temperature_extra:int =0;
 
-
-	imc102_communication:ErrorReport;
 	imc102_motor:ErrorReport;
 	imc102_status:MotorStatus;
-	
-	imm101_communication:ErrorReport;
+
 	imm101_motor:ErrorReport;
 	imm101_status:MotorStatus;
 	
 	pin_enable:int=-1;
 	ar_error:ErrorList;
-	
-	ar_status:AirRefStatus;
 }
 
 enum RequestType: int{

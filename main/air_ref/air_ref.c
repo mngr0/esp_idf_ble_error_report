@@ -1,4 +1,5 @@
 
+#include <stdio.h>
 #include <string.h>
 
 #include "air_ref/serial_logger/logger_air_ref.h"
@@ -74,6 +75,7 @@ int access_message_buffer(const void *buffer, int buff_len)
             ESP_LOGI("DECODED", "AirRefState");
             AirRef_AirRefState_table_t airRefState = (AirRef_AirRefState_table_t)AirRef_Message_content(message);
             parse_ar_state(airRefState, &ar_state);
+            log_ar_state(&ar_state);
         }
         else if (AirRef_Message_content_type(message) == AirRef_Content_Request)
         {
@@ -182,9 +184,8 @@ static void receiver_task(void *arg)
             if (packet_is_valid(&reply, data, length))
             {
                 ESP_LOG_BUFFER_HEX("BUFFER", data, length);
-                mcp7940_get_time(rtc_driver,&pTime);
+                //mcp7940_get_time(rtc_driver,&pTime);
                 access_message_buffer(reply.buffer,length);
-
                 //TODO SAVE RECEIVED FRAME TO SD (AFTER REPLY)
             }
         }
@@ -200,6 +201,12 @@ void logger_init()
 
 void log_ar_conf(air_ref_conf_t *ar_conf)
 {
+    rtc_time_t pTime;
+    mcp7940_get_time(rtc_driver,&pTime);
+    char message[2048];
+    sprintf(message, "serial_control:%d", ar_conf->control_type);
+    log_received_messageHR(&pTime,message);
+    ESP_LOGI("LOG_AR_CONF","%s", message);
 
     ESP_LOGI("LOG_AR_CONF", "serial_control : %d", ar_conf->control_type);
     ESP_LOGI("LOG_AR_CONF", "fan_coeff_P : %d", ar_conf->fan_coeff_P);
@@ -211,10 +218,18 @@ void log_ar_conf(air_ref_conf_t *ar_conf)
     ESP_LOGI("LOG_AR_CONF", "compressor_coeff_P : %d", ar_conf->compressor_coeff_P);
     ESP_LOGI("LOG_AR_CONF", "compressor_coeff_I : %d", ar_conf->compressor_coeff_I);
     ESP_LOGI("LOG_AR_CONF", "compressor_start_interval : %d", ar_conf->compressor_start_interval);
+
 }
 
 void log_m_state(machine_state_t *m_state)
 {
+    rtc_time_t pTime;
+    mcp7940_get_time(rtc_driver,&pTime);
+    char message[2048];
+    sprintf(message, "evaporation_pressure:%d", m_state->evaporation_pressure);
+    log_received_messageHR(&pTime,message);
+    ESP_LOGI("LOG_AR_CONF","%s", message);
+
 
     ESP_LOGI("LOG_M_STATE", "evaporation_pressure : %d", m_state->evaporation_pressure);
     ESP_LOGI("LOG_M_STATE", "condensation_pressure : %d", m_state->condensation_pressure);
@@ -223,3 +238,15 @@ void log_m_state(machine_state_t *m_state)
     ESP_LOGI("LOG_M_STATE", "temperature_gas_ritorno : %d", m_state->temperature_gas_ritorno);
     ESP_LOGI("LOG_M_STATE", "temperature_extra : %d", m_state->temperature_extra);
 }
+
+
+void log_ar_state(air_ref_state_t *ar_state)
+{
+    rtc_time_t pTime;
+    mcp7940_get_time(rtc_driver,&pTime);
+    char message[2048];
+    sprintf(message, "fan_speed_to_command:%d", ar_state->fan_speed_to_command);
+    log_received_messageHR(&pTime,message);
+    ESP_LOGI("LOG_AR_CONF","%s", message);
+}
+

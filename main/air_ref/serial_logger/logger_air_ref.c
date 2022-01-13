@@ -6,40 +6,30 @@
 
 void load_ar_state(flatcc_builder_t *B, air_ref_state_t *ar_state) {
   AirRef_AirRefState_start(B);
-  AirRef_AirRefState_compressor_speed_to_command_add(
-      B, ar_state->compressor_speed_to_command);
-  AirRef_AirRefState_compressor_calculated_speed_add(
-      B, ar_state->compressor_calculated_speed);
-  AirRef_AirRefState_compressor_last_stop_add(B,
-                                              ar_state->compressor_last_stop);
-  AirRef_AirRefState_compressor_is_blocked_add(B,
-                                               ar_state->compressor_is_blocked);
-  AirRef_AirRefState_compressor_is_running_add(B,
-                                               ar_state->compressor_is_running);
-  AirRef_AirRefState_fan_speed_to_command_add(B,
-                                              ar_state->fan_speed_to_command);
-  AirRef_AirRefState_fan_time_last_command_add(B,
-                                               ar_state->fan_time_last_command);
+  AirRef_AirRefState_compressor_speed_to_command_add(B, ar_state->compressor_speed_to_command);
+  AirRef_AirRefState_compressor_calculated_speed_add(B, ar_state->compressor_calculated_speed);
+  AirRef_AirRefState_compressor_last_stop_add(B,ar_state->compressor_last_stop);
+  AirRef_AirRefState_compressor_is_blocked_add(B,ar_state->compressor_is_blocked);
+  AirRef_AirRefState_compressor_is_running_add(B,ar_state->compressor_is_running);
 
-  AirRef_AirRefState_termostatica_I_value_add(B,
-                                              ar_state->termostatica_I_value);
+  AirRef_AirRefState_fan_speed_to_command_add(B,ar_state->fan_speed_to_command);
+  AirRef_AirRefState_fan_time_last_command_add(B,ar_state->fan_time_last_command);
 
-  AirRef_AirRefState_termostatica_step_target_add(
-      B, ar_state->termostatica_step_target);
+  AirRef_AirRefState_termostatica_I_value_add(B,ar_state->termostatica_I_value);
+  AirRef_AirRefState_termostatica_step_target_add(B, ar_state->termostatica_step_target);
+  AirRef_AirRefState_termostatica_step_current_position_add(B, ar_state->termostatica_step_current_position);
 
-  AirRef_AirRefState_termostatica_step_current_position_add(
-      B, ar_state->termostatica_step_current_position);
+  AirRef_AirRefState_debounce_input_timestamp_add(B,ar_state->debounce_input_timestamp);
+  AirRef_AirRefState_debounce_input_current_state_add(B,ar_state->debounce_input_current_state);
 
   AirRef_AirRefState_ref_t airRefState = AirRef_AirRefState_end(B);
-  AirRef_Content_union_ref_t content =
-      AirRef_Content_as_AirRefState(airRefState);
+  AirRef_Content_union_ref_t content = AirRef_Content_as_AirRefState(airRefState);
   AirRef_Message_create_as_root(B, content);
 }
 
 void parse_ar_state(AirRef_AirRefState_table_t airRefState,
                     air_ref_state_t *ar_state) {
-  ar_state->compressor_speed_to_command =
-      AirRef_AirRefState_compressor_speed_to_command(airRefState);
+  ar_state->compressor_speed_to_command = AirRef_AirRefState_compressor_speed_to_command(airRefState);
   ar_state->compressor_calculated_speed =
       AirRef_AirRefState_compressor_calculated_speed(airRefState);
   ar_state->compressor_last_stop =
@@ -78,7 +68,7 @@ void load_ar_conf(flatcc_builder_t *B, air_ref_conf_t *ar_conf) {
   AirRef_AirRefConf_compressor_start_interval_add(
       B, ar_conf->compressor_start_interval);
 
-  AirRef_AirRefConf_low_pressure_limit_add(B, ar_conf->LP_low_pressure_limit);
+  AirRef_AirRefConf_LP_low_pressure_limit_add(B, ar_conf->LP_low_pressure_limit);
 
   AirRef_AirRefConf_termostatica_surriscaldo_setpoint_add(
       B, ar_conf->termostatica_surriscaldo_setpoint);
@@ -113,7 +103,7 @@ void parse_ar_conf(AirRef_AirRefConf_table_t airRefConf,
   ar_conf->compressor_start_interval =
       AirRef_AirRefConf_compressor_start_interval(airRefConf);
   ar_conf->LP_low_pressure_limit =
-      AirRef_AirRefConf_low_pressure_limit(airRefConf);
+      AirRef_AirRefConf_LP_low_pressure_limit(airRefConf);
 
   ar_conf->termostatica_surriscaldo_setpoint =
       AirRef_AirRefConf_termostatica_surriscaldo_setpoint(airRefConf);
@@ -160,8 +150,8 @@ void load_m_state(flatcc_builder_t *B, machine_state_t *m_state) {
   AirRef_MachineState_start(B);
   AirRef_MachineState_evaporation_pressure_add(B,
                                                m_state->evaporation_pressure);
-  AirRef_MachineState_evaporation_temperature_add(B,
-                                               m_state->evaporation_temperature);
+  AirRef_MachineState_evaporation_temperature_add(
+      B, m_state->evaporation_temperature);
   AirRef_MachineState_condensation_pressure_add(B,
                                                 m_state->condensation_pressure);
   AirRef_MachineState_temperature_gas_scarico_add(
@@ -171,10 +161,8 @@ void load_m_state(flatcc_builder_t *B, machine_state_t *m_state) {
   AirRef_MachineState_temperature_gas_ritorno_add(
       B, m_state->temperature_gas_ritorno);
   AirRef_MachineState_temperature_extra_add(B, m_state->temperature_extra);
-  AirRef_MachineState_imc102_communication_add(B, &imc102_communication);
   AirRef_MachineState_imc102_motor_add(B, &imc102_motor);
   AirRef_MachineState_imc102_status_add(B, &imc102_status);
-  AirRef_MachineState_imm101_communication_add(B, &imm101_communication);
   AirRef_MachineState_imm101_motor_add(B, &imm101_motor);
   AirRef_MachineState_imm101_status_add(B, &imm101_status);
   AirRef_MachineState_ref_t machineState = AirRef_MachineState_end(B);
@@ -202,22 +190,15 @@ void parse_m_state(AirRef_MachineState_table_t machineState,
   m_state->temperature_extra =
       AirRef_MachineState_temperature_extra(machineState);
 
-  const AirRef_ErrorReport_t *imc102_communication =
-      AirRef_MachineState_imc102_communication(machineState);
   const AirRef_ErrorReport_t *imc102_motor =
       AirRef_MachineState_imc102_motor(machineState);
   const AirRef_MotorStatus_t *imc102_status =
       AirRef_MachineState_imc102_status(machineState);
 
-  const AirRef_ErrorReport_t *imm101_communication =
-      AirRef_MachineState_imm101_communication(machineState);
   const AirRef_ErrorReport_t *imm101_motor =
       AirRef_MachineState_imm101_motor(machineState);
   const AirRef_MotorStatus_t *imm101_status =
       AirRef_MachineState_imm101_status(machineState);
-
-  m_state->imm101_communication.error_code = imm101_communication->error_code;
-  m_state->imm101_communication.error_state = imm101_communication->error_state;
 
   m_state->imm101_communication.error_code = imm101_motor->error_code;
   m_state->imm101_communication.error_state = imm101_motor->error_state;
@@ -225,9 +206,6 @@ void parse_m_state(AirRef_MachineState_table_t machineState,
   for (int i = 0; i < INDEX_MOTOR_SIZE; i++) {
     m_state->imm101_status[i] = imm101_status->state[i];
   }
-
-  m_state->imc102_communication.error_code = imc102_communication->error_code;
-  m_state->imc102_communication.error_state = imc102_communication->error_state;
 
   m_state->imc102_communication.error_code = imc102_motor->error_code;
   m_state->imc102_communication.error_state = imc102_motor->error_state;

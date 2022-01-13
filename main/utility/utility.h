@@ -41,6 +41,7 @@ int log_received_message(rtc_time_t *time, packet_received_t* packet);
 // - - create new file if necessary (check remaining disk space on SD card)
 // - append to file
 
+int log_received_messageHR(rtc_time_t *time, const char *message);
 
 void do_test_spi_sd();
 

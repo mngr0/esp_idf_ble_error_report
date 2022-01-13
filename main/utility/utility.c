@@ -5,6 +5,7 @@
 #include "esp_vfs_fat.h"
 #include "i2c_common/i2c_common.h"
 #include "sdmmc_cmd.h"
+#include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/unistd.h>
@@ -24,7 +25,7 @@ int log_received_message(rtc_time_t *time, packet_received_t *packet) {
 
   if (last_used_file_path[0] == 0) { // if first time log, go search for last used
     // check equals to string not empty
-    search_last(dir_path, &last_used_file_path);
+    search_file(dir_path, last_used_file_path, true);//if most_recent is false this will get the least recent
   }
 
   if (last_used_file_path[0] != 0) { 
@@ -66,12 +67,12 @@ int log_received_message(rtc_time_t *time, packet_received_t *packet) {
 }
 
 
-int log_received_messageHR(rtc_time_t *time, packet_received_t *packet) {
+int log_received_messageHR(rtc_time_t *time, const char *message) {
   // search for valid file
 
   if (last_used_file_path[0] == 0) { // if first time log, go search for last used
     // check equals to string not empty
-    search_last(dir_path, &last_used_file_path);
+    search_file(dir_path, last_used_file_path, true);//if most_recent is false this will get the least recent
   }
 
   if (last_used_file_path[0] != 0) { 
@@ -100,10 +101,9 @@ int log_received_messageHR(rtc_time_t *time, packet_received_t *packet) {
   }
 
   //
-
-  uint8_t separator[] = SEPARATOR_DEF;
-  fwrite((uint8_t *)separator, sizeof(uint8_t), sizeof(separator), f);
-
+  fprintf(f, "[2%3d/%2d/%2d-%2d:%2d]:", time->year, time->month, time->day, time->hour, time->min);
+  fprintf(f, message);
+  fprintf(f, "\n");
   fclose(f);
   // TODO consider if putting the structure sizes on a separate file
   return 0;
