@@ -230,7 +230,6 @@ void log_m_state(machine_state_t *m_state)
     log_received_messageHR(&pTime,message);
     ESP_LOGI("LOG_AR_CONF","%s", message);
 
-
     ESP_LOGI("LOG_M_STATE", "evaporation_pressure : %d", m_state->evaporation_pressure);
     ESP_LOGI("LOG_M_STATE", "condensation_pressure : %d", m_state->condensation_pressure);
     ESP_LOGI("LOG_M_STATE", "temperature_gas_scarico : %d", m_state->temperature_gas_scarico);
