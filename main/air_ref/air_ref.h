@@ -3,16 +3,35 @@
 
 #include "infineonlib.h"
 #include "error.h"
-//#include "airref_builder.h"
 
 typedef enum {
 	control_type_manual_off =0,
-	control_type_manual_on,	
-	control_type_auto,	
+	control_type_manual_on,
+	control_type_auto,
 }control_type_t;
+
+typedef enum {
+	error_sonda_none=0,
+	error_sonda_scollegata,
+	error_sonda_corto
+}error_sonda_t;
+
+typedef enum {
+	air_ref_status_idle=0,
+	air_ref_status_run_start,
+	air_ref_status_run_full,
+	air_ref_status_run_pre_sbrinamento,
+	air_ref_status_run_sbrinamento,
+	air_ref_status_run_post_sbrinamento,
+	air_ref_status_critical_error
+} air_ref_status_t;
+
+
 
 typedef struct { //public
 	control_type_t control_type;
+	
+	int32_t air_ref_start_interval;
 	
 	int32_t termostatica_surriscaldo_setpoint;
 	int32_t termostatica_coeff_P;
@@ -26,31 +45,44 @@ typedef struct { //public
 	int32_t fan_min_pressure; //(milliBar)
 	int32_t fan_max_pressure; //(milliBar)
 
-	
-	
 	int32_t compressor_target_pressure; //millibar
 	int32_t compressor_coeff_P;
 	int32_t compressor_coeff_I;
-	
-	//int32_t compressor_activation_offset; //millbar
-	//int32_t compressor_action_delay; // milliseconds
+	int32_t compressor_speed;
+	int32_t compressor_start_speed;
 	int32_t compressor_start_interval;
-
+	int32_t compressor_pressure_spike;
+	
+	int32_t period_log;
 	int32_t LP_low_pressure_limit;
+	int32_t LP_low_pressure_recover;
 	//HP_MOP
 }air_ref_conf_t;
 
-typedef enum {
-	error_sonda_none=0,
-	error_sonda_scollegata,
-	error_sonda_corto
-}error_sonda_t;
+typedef struct{//READONLY
 
-typedef enum {
-	status_idle=0,
-	status_running,
-	status_critical_error
-} air_ref_status_t;
+	int32_t air_ref_start_timestamp;
+	air_ref_status_t air_ref_status;
+	//int32_t compressor_last_speed_change_time;
+	int32_t compressor_I_value;
+	int32_t compressor_speed_to_command;
+	int32_t compressor_calculated_speed;
+	int32_t compressor_last_stop;
+	int32_t compressor_is_blocked;
+	int32_t compressor_is_running;
+
+	int32_t fan_speed_to_command;
+	int32_t fan_time_last_command;
+	
+	int32_t termostatica_I_value;
+	int32_t termostatica_step_target;
+	int32_t termostatica_step_current_position;
+	
+	int32_t debounce_input_timestamp;
+	int32_t debounce_input_current_state;
+} air_ref_state_t;
+
+
 
 typedef enum {
 	index_error_pressure_evap=0,
@@ -69,24 +101,6 @@ typedef enum {
 	index_low_pressure_protection,
 	index_error_size
 } air_ref_index_error_t;
-
-
-typedef struct{//READONLY
-	int32_t compressor_I_value;
-	int32_t compressor_speed_to_command;
-	int32_t compressor_calculated_speed;
-	int32_t compressor_last_stop;
-	int32_t compressor_is_blocked;
-	int32_t compressor_is_running;
-	
-	int32_t fan_speed_to_command;
-	int32_t fan_time_last_command;
-
-	int32_t termostatica_I_value;
-	int32_t termostatica_step_target;
-	int32_t termostatica_step_current_position;
-
-} air_ref_state_t;
 
 
 typedef struct{//public

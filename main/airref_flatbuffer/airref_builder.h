@@ -9,12 +9,6 @@
 #ifndef FLATBUFFERS_COMMON_BUILDER_H
 #include "flatbuffers_common_builder.h"
 #endif
-#ifndef BLUEFI_BUILDER_H
-#include "bluefi_builder.h"
-#endif
-#ifndef LOGGER_BUILDER_H
-#include "logger_builder.h"
-#endif
 #include "flatcc/flatcc_prologue.h"
 #ifndef flatbuffers_identifier
 #define flatbuffers_identifier 0
@@ -41,6 +35,9 @@ __flatbuffers_build_scalar(flatbuffers_, AirRef_RequestType, AirRef_RequestType_
 #define __AirRef_LoggerCommunicationState_formal_args , AirRef_LoggerCommunicationState_enum_t v0
 #define __AirRef_LoggerCommunicationState_call_args , v0
 __flatbuffers_build_scalar(flatbuffers_, AirRef_LoggerCommunicationState, AirRef_LoggerCommunicationState_enum_t)
+#define __AirRef_LoggerCommandType_formal_args , AirRef_LoggerCommandType_enum_t v0
+#define __AirRef_LoggerCommandType_call_args , v0
+__flatbuffers_build_scalar(flatbuffers_, AirRef_LoggerCommandType, AirRef_LoggerCommandType_enum_t)
 
 #define __AirRef_ErrorReport_formal_args , AirRef_ErrorState_enum_t v0, int32_t v1
 #define __AirRef_ErrorReport_call_args , v0, v1
@@ -140,6 +137,31 @@ typedef flatbuffers_ref_t AirRef_LoggerState_ref_t;
 static AirRef_LoggerState_ref_t AirRef_LoggerState_clone(flatbuffers_builder_t *B, AirRef_LoggerState_table_t t);
 __flatbuffers_build_table(flatbuffers_, AirRef_LoggerState, 1)
 
+static const flatbuffers_voffset_t __AirRef_LoggerCommand_required[] = { 0 };
+typedef flatbuffers_ref_t AirRef_LoggerCommand_ref_t;
+static AirRef_LoggerCommand_ref_t AirRef_LoggerCommand_clone(flatbuffers_builder_t *B, AirRef_LoggerCommand_table_t t);
+__flatbuffers_build_table(flatbuffers_, AirRef_LoggerCommand, 2)
+
+static const flatbuffers_voffset_t __AirRef_LoggerReply_required[] = { 0 };
+typedef flatbuffers_ref_t AirRef_LoggerReply_ref_t;
+static AirRef_LoggerReply_ref_t AirRef_LoggerReply_clone(flatbuffers_builder_t *B, AirRef_LoggerReply_table_t t);
+__flatbuffers_build_table(flatbuffers_, AirRef_LoggerReply, 2)
+
+static const flatbuffers_voffset_t __AirRef_WifiCredentials_required[] = { 0 };
+typedef flatbuffers_ref_t AirRef_WifiCredentials_ref_t;
+static AirRef_WifiCredentials_ref_t AirRef_WifiCredentials_clone(flatbuffers_builder_t *B, AirRef_WifiCredentials_table_t t);
+__flatbuffers_build_table(flatbuffers_, AirRef_WifiCredentials, 2)
+
+static const flatbuffers_voffset_t __AirRef_BluefiCommand_required[] = { 0 };
+typedef flatbuffers_ref_t AirRef_BluefiCommand_ref_t;
+static AirRef_BluefiCommand_ref_t AirRef_BluefiCommand_clone(flatbuffers_builder_t *B, AirRef_BluefiCommand_table_t t);
+__flatbuffers_build_table(flatbuffers_, AirRef_BluefiCommand, 2)
+
+static const flatbuffers_voffset_t __AirRef_BluefiReply_required[] = { 0 };
+typedef flatbuffers_ref_t AirRef_BluefiReply_ref_t;
+static AirRef_BluefiReply_ref_t AirRef_BluefiReply_clone(flatbuffers_builder_t *B, AirRef_BluefiReply_table_t t);
+__flatbuffers_build_table(flatbuffers_, AirRef_BluefiReply, 1)
+
 static const flatbuffers_voffset_t __AirRef_Message_required[] = { 0 };
 typedef flatbuffers_ref_t AirRef_Message_ref_t;
 static AirRef_Message_ref_t AirRef_Message_clone(flatbuffers_builder_t *B, AirRef_Message_table_t t);
@@ -192,6 +214,31 @@ __flatbuffers_build_table_prolog(flatbuffers_, AirRef_Request, AirRef_Request_fi
 static inline AirRef_LoggerState_ref_t AirRef_LoggerState_create(flatbuffers_builder_t *B __AirRef_LoggerState_formal_args);
 __flatbuffers_build_table_prolog(flatbuffers_, AirRef_LoggerState, AirRef_LoggerState_file_identifier, AirRef_LoggerState_type_identifier)
 
+#define __AirRef_LoggerCommand_formal_args , AirRef_LoggerCommandType_enum_t v0, flatbuffers_string_ref_t v1
+#define __AirRef_LoggerCommand_call_args , v0, v1
+static inline AirRef_LoggerCommand_ref_t AirRef_LoggerCommand_create(flatbuffers_builder_t *B __AirRef_LoggerCommand_formal_args);
+__flatbuffers_build_table_prolog(flatbuffers_, AirRef_LoggerCommand, AirRef_LoggerCommand_file_identifier, AirRef_LoggerCommand_type_identifier)
+
+#define __AirRef_LoggerReply_formal_args , flatbuffers_string_vec_ref_t v0, flatbuffers_string_ref_t v1
+#define __AirRef_LoggerReply_call_args , v0, v1
+static inline AirRef_LoggerReply_ref_t AirRef_LoggerReply_create(flatbuffers_builder_t *B __AirRef_LoggerReply_formal_args);
+__flatbuffers_build_table_prolog(flatbuffers_, AirRef_LoggerReply, AirRef_LoggerReply_file_identifier, AirRef_LoggerReply_type_identifier)
+
+#define __AirRef_WifiCredentials_formal_args , flatbuffers_string_ref_t v0, flatbuffers_string_ref_t v1
+#define __AirRef_WifiCredentials_call_args , v0, v1
+static inline AirRef_WifiCredentials_ref_t AirRef_WifiCredentials_create(flatbuffers_builder_t *B __AirRef_WifiCredentials_formal_args);
+__flatbuffers_build_table_prolog(flatbuffers_, AirRef_WifiCredentials, AirRef_WifiCredentials_file_identifier, AirRef_WifiCredentials_type_identifier)
+
+#define __AirRef_BluefiCommand_formal_args , AirRef_WifiCredentials_ref_t v0, int32_t v1
+#define __AirRef_BluefiCommand_call_args , v0, v1
+static inline AirRef_BluefiCommand_ref_t AirRef_BluefiCommand_create(flatbuffers_builder_t *B __AirRef_BluefiCommand_formal_args);
+__flatbuffers_build_table_prolog(flatbuffers_, AirRef_BluefiCommand, AirRef_BluefiCommand_file_identifier, AirRef_BluefiCommand_type_identifier)
+
+#define __AirRef_BluefiReply_formal_args , AirRef_WifiCredentials_vec_ref_t v0
+#define __AirRef_BluefiReply_call_args , v0
+static inline AirRef_BluefiReply_ref_t AirRef_BluefiReply_create(flatbuffers_builder_t *B __AirRef_BluefiReply_formal_args);
+__flatbuffers_build_table_prolog(flatbuffers_, AirRef_BluefiReply, AirRef_BluefiReply_file_identifier, AirRef_BluefiReply_type_identifier)
+
 #define __AirRef_Message_formal_args , AirRef_Content_union_ref_t v1
 #define __AirRef_Message_call_args , v1
 static inline AirRef_Message_ref_t AirRef_Message_create(flatbuffers_builder_t *B __AirRef_Message_formal_args);
@@ -207,13 +254,13 @@ static inline AirRef_Content_union_ref_t AirRef_Content_as_MachineState(AirRef_M
 { AirRef_Content_union_ref_t uref; uref.type = AirRef_Content_MachineState; uref.value = ref; return uref; }
 static inline AirRef_Content_union_ref_t AirRef_Content_as_Request(AirRef_Request_ref_t ref)
 { AirRef_Content_union_ref_t uref; uref.type = AirRef_Content_Request; uref.value = ref; return uref; }
-static inline AirRef_Content_union_ref_t AirRef_Content_as_BluefiCommand(BluefiCommand_ref_t ref)
+static inline AirRef_Content_union_ref_t AirRef_Content_as_BluefiCommand(AirRef_BluefiCommand_ref_t ref)
 { AirRef_Content_union_ref_t uref; uref.type = AirRef_Content_BluefiCommand; uref.value = ref; return uref; }
-static inline AirRef_Content_union_ref_t AirRef_Content_as_BluefiReply(BluefiReply_ref_t ref)
+static inline AirRef_Content_union_ref_t AirRef_Content_as_BluefiReply(AirRef_BluefiReply_ref_t ref)
 { AirRef_Content_union_ref_t uref; uref.type = AirRef_Content_BluefiReply; uref.value = ref; return uref; }
-static inline AirRef_Content_union_ref_t AirRef_Content_as_LoggerCommand(LoggerCommand_ref_t ref)
+static inline AirRef_Content_union_ref_t AirRef_Content_as_LoggerCommand(AirRef_LoggerCommand_ref_t ref)
 { AirRef_Content_union_ref_t uref; uref.type = AirRef_Content_LoggerCommand; uref.value = ref; return uref; }
-static inline AirRef_Content_union_ref_t AirRef_Content_as_LoggerReply(LoggerReply_ref_t ref)
+static inline AirRef_Content_union_ref_t AirRef_Content_as_LoggerReply(AirRef_LoggerReply_ref_t ref)
 { AirRef_Content_union_ref_t uref; uref.type = AirRef_Content_LoggerReply; uref.value = ref; return uref; }
 __flatbuffers_build_union_vector(flatbuffers_, AirRef_Content)
 
@@ -224,10 +271,10 @@ static AirRef_Content_union_ref_t AirRef_Content_clone(flatbuffers_builder_t *B,
     case 2: return AirRef_Content_as_AirRefState(AirRef_AirRefState_clone(B, (AirRef_AirRefState_table_t)u.value));
     case 3: return AirRef_Content_as_MachineState(AirRef_MachineState_clone(B, (AirRef_MachineState_table_t)u.value));
     case 4: return AirRef_Content_as_Request(AirRef_Request_clone(B, (AirRef_Request_table_t)u.value));
-    case 5: return AirRef_Content_as_BluefiCommand(BluefiCommand_clone(B, (BluefiCommand_table_t)u.value));
-    case 6: return AirRef_Content_as_BluefiReply(BluefiReply_clone(B, (BluefiReply_table_t)u.value));
-    case 7: return AirRef_Content_as_LoggerCommand(LoggerCommand_clone(B, (LoggerCommand_table_t)u.value));
-    case 8: return AirRef_Content_as_LoggerReply(LoggerReply_clone(B, (LoggerReply_table_t)u.value));
+    case 5: return AirRef_Content_as_BluefiCommand(AirRef_BluefiCommand_clone(B, (AirRef_BluefiCommand_table_t)u.value));
+    case 6: return AirRef_Content_as_BluefiReply(AirRef_BluefiReply_clone(B, (AirRef_BluefiReply_table_t)u.value));
+    case 7: return AirRef_Content_as_LoggerCommand(AirRef_LoggerCommand_clone(B, (AirRef_LoggerCommand_table_t)u.value));
+    case 8: return AirRef_Content_as_LoggerReply(AirRef_LoggerReply_clone(B, (AirRef_LoggerReply_table_t)u.value));
     default: return AirRef_Content_as_NONE();
     }
 }
@@ -457,15 +504,132 @@ static AirRef_LoggerState_ref_t AirRef_LoggerState_clone(flatbuffers_builder_t *
     __flatbuffers_memoize_end(B, t, AirRef_LoggerState_end(B));
 }
 
+__flatbuffers_build_scalar_field(0, flatbuffers_, AirRef_LoggerCommand_loggerCommandType, AirRef_LoggerCommandType, AirRef_LoggerCommandType_enum_t, 4, 4, INT32_C(0), AirRef_LoggerCommand)
+__flatbuffers_build_string_field(1, flatbuffers_, AirRef_LoggerCommand_parameter, AirRef_LoggerCommand)
+
+static inline AirRef_LoggerCommand_ref_t AirRef_LoggerCommand_create(flatbuffers_builder_t *B __AirRef_LoggerCommand_formal_args)
+{
+    if (AirRef_LoggerCommand_start(B)
+        || AirRef_LoggerCommand_loggerCommandType_add(B, v0)
+        || AirRef_LoggerCommand_parameter_add(B, v1)) {
+        return 0;
+    }
+    return AirRef_LoggerCommand_end(B);
+}
+
+static AirRef_LoggerCommand_ref_t AirRef_LoggerCommand_clone(flatbuffers_builder_t *B, AirRef_LoggerCommand_table_t t)
+{
+    __flatbuffers_memoize_begin(B, t);
+    if (AirRef_LoggerCommand_start(B)
+        || AirRef_LoggerCommand_loggerCommandType_pick(B, t)
+        || AirRef_LoggerCommand_parameter_pick(B, t)) {
+        return 0;
+    }
+    __flatbuffers_memoize_end(B, t, AirRef_LoggerCommand_end(B));
+}
+
+__flatbuffers_build_string_vector_field(0, flatbuffers_, AirRef_LoggerReply_fileList, AirRef_LoggerReply)
+__flatbuffers_build_string_field(1, flatbuffers_, AirRef_LoggerReply_fileContent, AirRef_LoggerReply)
+
+static inline AirRef_LoggerReply_ref_t AirRef_LoggerReply_create(flatbuffers_builder_t *B __AirRef_LoggerReply_formal_args)
+{
+    if (AirRef_LoggerReply_start(B)
+        || AirRef_LoggerReply_fileList_add(B, v0)
+        || AirRef_LoggerReply_fileContent_add(B, v1)) {
+        return 0;
+    }
+    return AirRef_LoggerReply_end(B);
+}
+
+static AirRef_LoggerReply_ref_t AirRef_LoggerReply_clone(flatbuffers_builder_t *B, AirRef_LoggerReply_table_t t)
+{
+    __flatbuffers_memoize_begin(B, t);
+    if (AirRef_LoggerReply_start(B)
+        || AirRef_LoggerReply_fileList_pick(B, t)
+        || AirRef_LoggerReply_fileContent_pick(B, t)) {
+        return 0;
+    }
+    __flatbuffers_memoize_end(B, t, AirRef_LoggerReply_end(B));
+}
+
+__flatbuffers_build_string_field(0, flatbuffers_, AirRef_WifiCredentials_ssid, AirRef_WifiCredentials)
+__flatbuffers_build_string_field(1, flatbuffers_, AirRef_WifiCredentials_password, AirRef_WifiCredentials)
+
+static inline AirRef_WifiCredentials_ref_t AirRef_WifiCredentials_create(flatbuffers_builder_t *B __AirRef_WifiCredentials_formal_args)
+{
+    if (AirRef_WifiCredentials_start(B)
+        || AirRef_WifiCredentials_ssid_add(B, v0)
+        || AirRef_WifiCredentials_password_add(B, v1)) {
+        return 0;
+    }
+    return AirRef_WifiCredentials_end(B);
+}
+
+static AirRef_WifiCredentials_ref_t AirRef_WifiCredentials_clone(flatbuffers_builder_t *B, AirRef_WifiCredentials_table_t t)
+{
+    __flatbuffers_memoize_begin(B, t);
+    if (AirRef_WifiCredentials_start(B)
+        || AirRef_WifiCredentials_ssid_pick(B, t)
+        || AirRef_WifiCredentials_password_pick(B, t)) {
+        return 0;
+    }
+    __flatbuffers_memoize_end(B, t, AirRef_WifiCredentials_end(B));
+}
+
+__flatbuffers_build_table_field(0, flatbuffers_, AirRef_BluefiCommand_wifiCredential, AirRef_WifiCredentials, AirRef_BluefiCommand)
+__flatbuffers_build_scalar_field(1, flatbuffers_, AirRef_BluefiCommand_doScan, flatbuffers_int32, int32_t, 4, 4, INT32_C(0), AirRef_BluefiCommand)
+
+static inline AirRef_BluefiCommand_ref_t AirRef_BluefiCommand_create(flatbuffers_builder_t *B __AirRef_BluefiCommand_formal_args)
+{
+    if (AirRef_BluefiCommand_start(B)
+        || AirRef_BluefiCommand_wifiCredential_add(B, v0)
+        || AirRef_BluefiCommand_doScan_add(B, v1)) {
+        return 0;
+    }
+    return AirRef_BluefiCommand_end(B);
+}
+
+static AirRef_BluefiCommand_ref_t AirRef_BluefiCommand_clone(flatbuffers_builder_t *B, AirRef_BluefiCommand_table_t t)
+{
+    __flatbuffers_memoize_begin(B, t);
+    if (AirRef_BluefiCommand_start(B)
+        || AirRef_BluefiCommand_wifiCredential_pick(B, t)
+        || AirRef_BluefiCommand_doScan_pick(B, t)) {
+        return 0;
+    }
+    __flatbuffers_memoize_end(B, t, AirRef_BluefiCommand_end(B));
+}
+
+__flatbuffers_build_table_vector_field(0, flatbuffers_, AirRef_BluefiReply_wifiCredentials, AirRef_WifiCredentials, AirRef_BluefiReply)
+
+static inline AirRef_BluefiReply_ref_t AirRef_BluefiReply_create(flatbuffers_builder_t *B __AirRef_BluefiReply_formal_args)
+{
+    if (AirRef_BluefiReply_start(B)
+        || AirRef_BluefiReply_wifiCredentials_add(B, v0)) {
+        return 0;
+    }
+    return AirRef_BluefiReply_end(B);
+}
+
+static AirRef_BluefiReply_ref_t AirRef_BluefiReply_clone(flatbuffers_builder_t *B, AirRef_BluefiReply_table_t t)
+{
+    __flatbuffers_memoize_begin(B, t);
+    if (AirRef_BluefiReply_start(B)
+        || AirRef_BluefiReply_wifiCredentials_pick(B, t)) {
+        return 0;
+    }
+    __flatbuffers_memoize_end(B, t, AirRef_BluefiReply_end(B));
+}
+
 __flatbuffers_build_union_field(1, flatbuffers_, AirRef_Message_content, AirRef_Content, AirRef_Message)
 __flatbuffers_build_union_table_value_field(flatbuffers_, AirRef_Message_content, AirRef_Content, AirRefConf, AirRef_AirRefConf)
 __flatbuffers_build_union_table_value_field(flatbuffers_, AirRef_Message_content, AirRef_Content, AirRefState, AirRef_AirRefState)
 __flatbuffers_build_union_table_value_field(flatbuffers_, AirRef_Message_content, AirRef_Content, MachineState, AirRef_MachineState)
 __flatbuffers_build_union_table_value_field(flatbuffers_, AirRef_Message_content, AirRef_Content, Request, AirRef_Request)
-__flatbuffers_build_union_table_value_field(flatbuffers_, AirRef_Message_content, AirRef_Content, BluefiCommand, BluefiCommand)
-__flatbuffers_build_union_table_value_field(flatbuffers_, AirRef_Message_content, AirRef_Content, BluefiReply, BluefiReply)
-__flatbuffers_build_union_table_value_field(flatbuffers_, AirRef_Message_content, AirRef_Content, LoggerCommand, LoggerCommand)
-__flatbuffers_build_union_table_value_field(flatbuffers_, AirRef_Message_content, AirRef_Content, LoggerReply, LoggerReply)
+__flatbuffers_build_union_table_value_field(flatbuffers_, AirRef_Message_content, AirRef_Content, BluefiCommand, AirRef_BluefiCommand)
+__flatbuffers_build_union_table_value_field(flatbuffers_, AirRef_Message_content, AirRef_Content, BluefiReply, AirRef_BluefiReply)
+__flatbuffers_build_union_table_value_field(flatbuffers_, AirRef_Message_content, AirRef_Content, LoggerCommand, AirRef_LoggerCommand)
+__flatbuffers_build_union_table_value_field(flatbuffers_, AirRef_Message_content, AirRef_Content, LoggerReply, AirRef_LoggerReply)
 
 static inline AirRef_Message_ref_t AirRef_Message_create(flatbuffers_builder_t *B __AirRef_Message_formal_args)
 {

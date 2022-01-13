@@ -6,12 +6,6 @@
 #ifndef FLATBUFFERS_COMMON_READER_H
 #include "flatbuffers_common_reader.h"
 #endif
-#ifndef BLUEFI_READER_H
-#include "bluefi_reader.h"
-#endif
-#ifndef LOGGER_READER_H
-#include "logger_reader.h"
-#endif
 #include "flatcc/flatcc_flatbuffers.h"
 #ifndef __alignas_is_defined
 #include <stdalign.h>
@@ -60,6 +54,26 @@ typedef const struct AirRef_LoggerState_table *AirRef_LoggerState_table_t;
 typedef struct AirRef_LoggerState_table *AirRef_LoggerState_mutable_table_t;
 typedef const flatbuffers_uoffset_t *AirRef_LoggerState_vec_t;
 typedef flatbuffers_uoffset_t *AirRef_LoggerState_mutable_vec_t;
+typedef const struct AirRef_LoggerCommand_table *AirRef_LoggerCommand_table_t;
+typedef struct AirRef_LoggerCommand_table *AirRef_LoggerCommand_mutable_table_t;
+typedef const flatbuffers_uoffset_t *AirRef_LoggerCommand_vec_t;
+typedef flatbuffers_uoffset_t *AirRef_LoggerCommand_mutable_vec_t;
+typedef const struct AirRef_LoggerReply_table *AirRef_LoggerReply_table_t;
+typedef struct AirRef_LoggerReply_table *AirRef_LoggerReply_mutable_table_t;
+typedef const flatbuffers_uoffset_t *AirRef_LoggerReply_vec_t;
+typedef flatbuffers_uoffset_t *AirRef_LoggerReply_mutable_vec_t;
+typedef const struct AirRef_WifiCredentials_table *AirRef_WifiCredentials_table_t;
+typedef struct AirRef_WifiCredentials_table *AirRef_WifiCredentials_mutable_table_t;
+typedef const flatbuffers_uoffset_t *AirRef_WifiCredentials_vec_t;
+typedef flatbuffers_uoffset_t *AirRef_WifiCredentials_mutable_vec_t;
+typedef const struct AirRef_BluefiCommand_table *AirRef_BluefiCommand_table_t;
+typedef struct AirRef_BluefiCommand_table *AirRef_BluefiCommand_mutable_table_t;
+typedef const flatbuffers_uoffset_t *AirRef_BluefiCommand_vec_t;
+typedef flatbuffers_uoffset_t *AirRef_BluefiCommand_mutable_vec_t;
+typedef const struct AirRef_BluefiReply_table *AirRef_BluefiReply_table_t;
+typedef struct AirRef_BluefiReply_table *AirRef_BluefiReply_mutable_table_t;
+typedef const flatbuffers_uoffset_t *AirRef_BluefiReply_vec_t;
+typedef flatbuffers_uoffset_t *AirRef_BluefiReply_mutable_vec_t;
 typedef const struct AirRef_Message_table *AirRef_Message_table_t;
 typedef struct AirRef_Message_table *AirRef_Message_mutable_table_t;
 typedef const flatbuffers_uoffset_t *AirRef_Message_vec_t;
@@ -159,6 +173,66 @@ typedef flatbuffers_uoffset_t *AirRef_Message_mutable_vec_t;
 #define AirRef_LoggerState_type_identifier "\xb3\x0a\x6a\xe3"
 #ifndef AirRef_LoggerState_file_extension
 #define AirRef_LoggerState_file_extension "bin"
+#endif
+#ifndef AirRef_LoggerCommand_file_identifier
+#define AirRef_LoggerCommand_file_identifier 0
+#endif
+/* deprecated, use AirRef_LoggerCommand_file_identifier */
+#ifndef AirRef_LoggerCommand_identifier
+#define AirRef_LoggerCommand_identifier 0
+#endif
+#define AirRef_LoggerCommand_type_hash ((flatbuffers_thash_t)0x54fc139f)
+#define AirRef_LoggerCommand_type_identifier "\x9f\x13\xfc\x54"
+#ifndef AirRef_LoggerCommand_file_extension
+#define AirRef_LoggerCommand_file_extension "bin"
+#endif
+#ifndef AirRef_LoggerReply_file_identifier
+#define AirRef_LoggerReply_file_identifier 0
+#endif
+/* deprecated, use AirRef_LoggerReply_file_identifier */
+#ifndef AirRef_LoggerReply_identifier
+#define AirRef_LoggerReply_identifier 0
+#endif
+#define AirRef_LoggerReply_type_hash ((flatbuffers_thash_t)0x2f5b7912)
+#define AirRef_LoggerReply_type_identifier "\x12\x79\x5b\x2f"
+#ifndef AirRef_LoggerReply_file_extension
+#define AirRef_LoggerReply_file_extension "bin"
+#endif
+#ifndef AirRef_WifiCredentials_file_identifier
+#define AirRef_WifiCredentials_file_identifier 0
+#endif
+/* deprecated, use AirRef_WifiCredentials_file_identifier */
+#ifndef AirRef_WifiCredentials_identifier
+#define AirRef_WifiCredentials_identifier 0
+#endif
+#define AirRef_WifiCredentials_type_hash ((flatbuffers_thash_t)0xd1a1bb0f)
+#define AirRef_WifiCredentials_type_identifier "\x0f\xbb\xa1\xd1"
+#ifndef AirRef_WifiCredentials_file_extension
+#define AirRef_WifiCredentials_file_extension "bin"
+#endif
+#ifndef AirRef_BluefiCommand_file_identifier
+#define AirRef_BluefiCommand_file_identifier 0
+#endif
+/* deprecated, use AirRef_BluefiCommand_file_identifier */
+#ifndef AirRef_BluefiCommand_identifier
+#define AirRef_BluefiCommand_identifier 0
+#endif
+#define AirRef_BluefiCommand_type_hash ((flatbuffers_thash_t)0x6ea1ecc)
+#define AirRef_BluefiCommand_type_identifier "\xcc\x1e\xea\x06"
+#ifndef AirRef_BluefiCommand_file_extension
+#define AirRef_BluefiCommand_file_extension "bin"
+#endif
+#ifndef AirRef_BluefiReply_file_identifier
+#define AirRef_BluefiReply_file_identifier 0
+#endif
+/* deprecated, use AirRef_BluefiReply_file_identifier */
+#ifndef AirRef_BluefiReply_identifier
+#define AirRef_BluefiReply_identifier 0
+#endif
+#define AirRef_BluefiReply_type_hash ((flatbuffers_thash_t)0x46a6a149)
+#define AirRef_BluefiReply_type_identifier "\x49\xa1\xa6\x46"
+#ifndef AirRef_BluefiReply_file_extension
+#define AirRef_BluefiReply_file_extension "bin"
 #endif
 #ifndef AirRef_Message_file_identifier
 #define AirRef_Message_file_identifier 0
@@ -365,6 +439,32 @@ static inline int AirRef_LoggerCommunicationState_is_known_value(AirRef_LoggerCo
     }
 }
 
+typedef int32_t AirRef_LoggerCommandType_enum_t;
+__flatbuffers_define_integer_type(AirRef_LoggerCommandType, AirRef_LoggerCommandType_enum_t, 32)
+#define AirRef_LoggerCommandType_list_files ((AirRef_LoggerCommandType_enum_t)INT32_C(0))
+#define AirRef_LoggerCommandType_delete_file ((AirRef_LoggerCommandType_enum_t)INT32_C(1))
+#define AirRef_LoggerCommandType_download_file ((AirRef_LoggerCommandType_enum_t)INT32_C(2))
+
+static inline const char *AirRef_LoggerCommandType_name(AirRef_LoggerCommandType_enum_t value)
+{
+    switch (value) {
+    case AirRef_LoggerCommandType_list_files: return "list_files";
+    case AirRef_LoggerCommandType_delete_file: return "delete_file";
+    case AirRef_LoggerCommandType_download_file: return "download_file";
+    default: return "";
+    }
+}
+
+static inline int AirRef_LoggerCommandType_is_known_value(AirRef_LoggerCommandType_enum_t value)
+{
+    switch (value) {
+    case AirRef_LoggerCommandType_list_files: return 1;
+    case AirRef_LoggerCommandType_delete_file: return 1;
+    case AirRef_LoggerCommandType_download_file: return 1;
+    default: return 0;
+    }
+}
+
 
 struct AirRef_ErrorReport {
     alignas(4) AirRef_ErrorState_enum_t error_state;
@@ -506,6 +606,60 @@ __flatbuffers_offset_vec_at(AirRef_LoggerState_table_t, vec, i, 0)
 __flatbuffers_table_as_root(AirRef_LoggerState)
 
 __flatbuffers_define_scalar_field(0, AirRef_LoggerState, state, AirRef_LoggerCommunicationState, AirRef_LoggerCommunicationState_enum_t, INT32_C(0))
+
+struct AirRef_LoggerCommand_table { uint8_t unused__; };
+
+static inline size_t AirRef_LoggerCommand_vec_len(AirRef_LoggerCommand_vec_t vec)
+__flatbuffers_vec_len(vec)
+static inline AirRef_LoggerCommand_table_t AirRef_LoggerCommand_vec_at(AirRef_LoggerCommand_vec_t vec, size_t i)
+__flatbuffers_offset_vec_at(AirRef_LoggerCommand_table_t, vec, i, 0)
+__flatbuffers_table_as_root(AirRef_LoggerCommand)
+
+__flatbuffers_define_scalar_field(0, AirRef_LoggerCommand, loggerCommandType, AirRef_LoggerCommandType, AirRef_LoggerCommandType_enum_t, INT32_C(0))
+__flatbuffers_define_string_field(1, AirRef_LoggerCommand, parameter, 0)
+
+struct AirRef_LoggerReply_table { uint8_t unused__; };
+
+static inline size_t AirRef_LoggerReply_vec_len(AirRef_LoggerReply_vec_t vec)
+__flatbuffers_vec_len(vec)
+static inline AirRef_LoggerReply_table_t AirRef_LoggerReply_vec_at(AirRef_LoggerReply_vec_t vec, size_t i)
+__flatbuffers_offset_vec_at(AirRef_LoggerReply_table_t, vec, i, 0)
+__flatbuffers_table_as_root(AirRef_LoggerReply)
+
+__flatbuffers_define_vector_field(0, AirRef_LoggerReply, fileList, flatbuffers_string_vec_t, 0)
+__flatbuffers_define_string_field(1, AirRef_LoggerReply, fileContent, 0)
+
+struct AirRef_WifiCredentials_table { uint8_t unused__; };
+
+static inline size_t AirRef_WifiCredentials_vec_len(AirRef_WifiCredentials_vec_t vec)
+__flatbuffers_vec_len(vec)
+static inline AirRef_WifiCredentials_table_t AirRef_WifiCredentials_vec_at(AirRef_WifiCredentials_vec_t vec, size_t i)
+__flatbuffers_offset_vec_at(AirRef_WifiCredentials_table_t, vec, i, 0)
+__flatbuffers_table_as_root(AirRef_WifiCredentials)
+
+__flatbuffers_define_string_field(0, AirRef_WifiCredentials, ssid, 0)
+__flatbuffers_define_string_field(1, AirRef_WifiCredentials, password, 0)
+
+struct AirRef_BluefiCommand_table { uint8_t unused__; };
+
+static inline size_t AirRef_BluefiCommand_vec_len(AirRef_BluefiCommand_vec_t vec)
+__flatbuffers_vec_len(vec)
+static inline AirRef_BluefiCommand_table_t AirRef_BluefiCommand_vec_at(AirRef_BluefiCommand_vec_t vec, size_t i)
+__flatbuffers_offset_vec_at(AirRef_BluefiCommand_table_t, vec, i, 0)
+__flatbuffers_table_as_root(AirRef_BluefiCommand)
+
+__flatbuffers_define_table_field(0, AirRef_BluefiCommand, wifiCredential, AirRef_WifiCredentials_table_t, 0)
+__flatbuffers_define_scalar_field(1, AirRef_BluefiCommand, doScan, flatbuffers_int32, int32_t, INT32_C(0))
+
+struct AirRef_BluefiReply_table { uint8_t unused__; };
+
+static inline size_t AirRef_BluefiReply_vec_len(AirRef_BluefiReply_vec_t vec)
+__flatbuffers_vec_len(vec)
+static inline AirRef_BluefiReply_table_t AirRef_BluefiReply_vec_at(AirRef_BluefiReply_vec_t vec, size_t i)
+__flatbuffers_offset_vec_at(AirRef_BluefiReply_table_t, vec, i, 0)
+__flatbuffers_table_as_root(AirRef_BluefiReply)
+
+__flatbuffers_define_vector_field(0, AirRef_BluefiReply, wifiCredentials, AirRef_WifiCredentials_vec_t, 0)
 typedef uint8_t AirRef_Content_union_type_t;
 __flatbuffers_define_integer_type(AirRef_Content, AirRef_Content_union_type_t, 8)
 __flatbuffers_define_union(flatbuffers_, AirRef_Content)

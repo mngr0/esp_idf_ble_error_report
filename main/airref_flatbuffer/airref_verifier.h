@@ -7,12 +7,6 @@
 #include "airref_reader.h"
 #endif
 #include "flatcc/flatcc_verifier.h"
-#ifndef BLUEFI_VERIFIER_H
-#include "bluefi_verifier.h"
-#endif
-#ifndef LOGGER_VERIFIER_H
-#include "logger_verifier.h"
-#endif
 #include "flatcc/flatcc_prologue.h"
 
 static int AirRef_AirRefConf_verify_table(flatcc_table_verifier_descriptor_t *td);
@@ -20,6 +14,11 @@ static int AirRef_AirRefState_verify_table(flatcc_table_verifier_descriptor_t *t
 static int AirRef_MachineState_verify_table(flatcc_table_verifier_descriptor_t *td);
 static int AirRef_Request_verify_table(flatcc_table_verifier_descriptor_t *td);
 static int AirRef_LoggerState_verify_table(flatcc_table_verifier_descriptor_t *td);
+static int AirRef_LoggerCommand_verify_table(flatcc_table_verifier_descriptor_t *td);
+static int AirRef_LoggerReply_verify_table(flatcc_table_verifier_descriptor_t *td);
+static int AirRef_WifiCredentials_verify_table(flatcc_table_verifier_descriptor_t *td);
+static int AirRef_BluefiCommand_verify_table(flatcc_table_verifier_descriptor_t *td);
+static int AirRef_BluefiReply_verify_table(flatcc_table_verifier_descriptor_t *td);
 static int AirRef_Message_verify_table(flatcc_table_verifier_descriptor_t *td);
 
 static int AirRef_Content_union_verifier(flatcc_union_verifier_descriptor_t *ud)
@@ -29,10 +28,10 @@ static int AirRef_Content_union_verifier(flatcc_union_verifier_descriptor_t *ud)
     case 2: return flatcc_verify_union_table(ud, AirRef_AirRefState_verify_table); /* AirRefState */
     case 3: return flatcc_verify_union_table(ud, AirRef_MachineState_verify_table); /* MachineState */
     case 4: return flatcc_verify_union_table(ud, AirRef_Request_verify_table); /* Request */
-    case 5: return flatcc_verify_union_table(ud, BluefiCommand_verify_table); /* BluefiCommand */
-    case 6: return flatcc_verify_union_table(ud, BluefiReply_verify_table); /* BluefiReply */
-    case 7: return flatcc_verify_union_table(ud, LoggerCommand_verify_table); /* LoggerCommand */
-    case 8: return flatcc_verify_union_table(ud, LoggerReply_verify_table); /* LoggerReply */
+    case 5: return flatcc_verify_union_table(ud, AirRef_BluefiCommand_verify_table); /* BluefiCommand */
+    case 6: return flatcc_verify_union_table(ud, AirRef_BluefiReply_verify_table); /* BluefiReply */
+    case 7: return flatcc_verify_union_table(ud, AirRef_LoggerCommand_verify_table); /* LoggerCommand */
+    case 8: return flatcc_verify_union_table(ud, AirRef_LoggerReply_verify_table); /* LoggerReply */
     default: return flatcc_verify_ok;
     }
 }
@@ -270,6 +269,145 @@ static inline int AirRef_LoggerState_verify_as_root_with_identifier(const void *
 static inline int AirRef_LoggerState_verify_as_root_with_type_hash(const void *buf, size_t bufsiz, flatbuffers_thash_t thash)
 {
     return flatcc_verify_table_as_typed_root(buf, bufsiz, thash, &AirRef_LoggerState_verify_table);
+}
+
+static int AirRef_LoggerCommand_verify_table(flatcc_table_verifier_descriptor_t *td)
+{
+    int ret;
+    if ((ret = flatcc_verify_field(td, 0, 4, 4) /* loggerCommandType */)) return ret;
+    if ((ret = flatcc_verify_string_field(td, 1, 0) /* parameter */)) return ret;
+    return flatcc_verify_ok;
+}
+
+static inline int AirRef_LoggerCommand_verify_as_root(const void *buf, size_t bufsiz)
+{
+    return flatcc_verify_table_as_root(buf, bufsiz, AirRef_LoggerCommand_identifier, &AirRef_LoggerCommand_verify_table);
+}
+
+static inline int AirRef_LoggerCommand_verify_as_typed_root(const void *buf, size_t bufsiz)
+{
+    return flatcc_verify_table_as_root(buf, bufsiz, AirRef_LoggerCommand_type_identifier, &AirRef_LoggerCommand_verify_table);
+}
+
+static inline int AirRef_LoggerCommand_verify_as_root_with_identifier(const void *buf, size_t bufsiz, const char *fid)
+{
+    return flatcc_verify_table_as_root(buf, bufsiz, fid, &AirRef_LoggerCommand_verify_table);
+}
+
+static inline int AirRef_LoggerCommand_verify_as_root_with_type_hash(const void *buf, size_t bufsiz, flatbuffers_thash_t thash)
+{
+    return flatcc_verify_table_as_typed_root(buf, bufsiz, thash, &AirRef_LoggerCommand_verify_table);
+}
+
+static int AirRef_LoggerReply_verify_table(flatcc_table_verifier_descriptor_t *td)
+{
+    int ret;
+    if ((ret = flatcc_verify_string_vector_field(td, 0, 0) /* fileList */)) return ret;
+    if ((ret = flatcc_verify_string_field(td, 1, 0) /* fileContent */)) return ret;
+    return flatcc_verify_ok;
+}
+
+static inline int AirRef_LoggerReply_verify_as_root(const void *buf, size_t bufsiz)
+{
+    return flatcc_verify_table_as_root(buf, bufsiz, AirRef_LoggerReply_identifier, &AirRef_LoggerReply_verify_table);
+}
+
+static inline int AirRef_LoggerReply_verify_as_typed_root(const void *buf, size_t bufsiz)
+{
+    return flatcc_verify_table_as_root(buf, bufsiz, AirRef_LoggerReply_type_identifier, &AirRef_LoggerReply_verify_table);
+}
+
+static inline int AirRef_LoggerReply_verify_as_root_with_identifier(const void *buf, size_t bufsiz, const char *fid)
+{
+    return flatcc_verify_table_as_root(buf, bufsiz, fid, &AirRef_LoggerReply_verify_table);
+}
+
+static inline int AirRef_LoggerReply_verify_as_root_with_type_hash(const void *buf, size_t bufsiz, flatbuffers_thash_t thash)
+{
+    return flatcc_verify_table_as_typed_root(buf, bufsiz, thash, &AirRef_LoggerReply_verify_table);
+}
+
+static int AirRef_WifiCredentials_verify_table(flatcc_table_verifier_descriptor_t *td)
+{
+    int ret;
+    if ((ret = flatcc_verify_string_field(td, 0, 0) /* ssid */)) return ret;
+    if ((ret = flatcc_verify_string_field(td, 1, 0) /* password */)) return ret;
+    return flatcc_verify_ok;
+}
+
+static inline int AirRef_WifiCredentials_verify_as_root(const void *buf, size_t bufsiz)
+{
+    return flatcc_verify_table_as_root(buf, bufsiz, AirRef_WifiCredentials_identifier, &AirRef_WifiCredentials_verify_table);
+}
+
+static inline int AirRef_WifiCredentials_verify_as_typed_root(const void *buf, size_t bufsiz)
+{
+    return flatcc_verify_table_as_root(buf, bufsiz, AirRef_WifiCredentials_type_identifier, &AirRef_WifiCredentials_verify_table);
+}
+
+static inline int AirRef_WifiCredentials_verify_as_root_with_identifier(const void *buf, size_t bufsiz, const char *fid)
+{
+    return flatcc_verify_table_as_root(buf, bufsiz, fid, &AirRef_WifiCredentials_verify_table);
+}
+
+static inline int AirRef_WifiCredentials_verify_as_root_with_type_hash(const void *buf, size_t bufsiz, flatbuffers_thash_t thash)
+{
+    return flatcc_verify_table_as_typed_root(buf, bufsiz, thash, &AirRef_WifiCredentials_verify_table);
+}
+
+static int AirRef_BluefiCommand_verify_table(flatcc_table_verifier_descriptor_t *td)
+{
+    int ret;
+    if ((ret = flatcc_verify_table_field(td, 0, 0, &AirRef_WifiCredentials_verify_table) /* wifiCredential */)) return ret;
+    if ((ret = flatcc_verify_field(td, 1, 4, 4) /* doScan */)) return ret;
+    return flatcc_verify_ok;
+}
+
+static inline int AirRef_BluefiCommand_verify_as_root(const void *buf, size_t bufsiz)
+{
+    return flatcc_verify_table_as_root(buf, bufsiz, AirRef_BluefiCommand_identifier, &AirRef_BluefiCommand_verify_table);
+}
+
+static inline int AirRef_BluefiCommand_verify_as_typed_root(const void *buf, size_t bufsiz)
+{
+    return flatcc_verify_table_as_root(buf, bufsiz, AirRef_BluefiCommand_type_identifier, &AirRef_BluefiCommand_verify_table);
+}
+
+static inline int AirRef_BluefiCommand_verify_as_root_with_identifier(const void *buf, size_t bufsiz, const char *fid)
+{
+    return flatcc_verify_table_as_root(buf, bufsiz, fid, &AirRef_BluefiCommand_verify_table);
+}
+
+static inline int AirRef_BluefiCommand_verify_as_root_with_type_hash(const void *buf, size_t bufsiz, flatbuffers_thash_t thash)
+{
+    return flatcc_verify_table_as_typed_root(buf, bufsiz, thash, &AirRef_BluefiCommand_verify_table);
+}
+
+static int AirRef_BluefiReply_verify_table(flatcc_table_verifier_descriptor_t *td)
+{
+    int ret;
+    if ((ret = flatcc_verify_table_vector_field(td, 0, 0, &AirRef_WifiCredentials_verify_table) /* wifiCredentials */)) return ret;
+    return flatcc_verify_ok;
+}
+
+static inline int AirRef_BluefiReply_verify_as_root(const void *buf, size_t bufsiz)
+{
+    return flatcc_verify_table_as_root(buf, bufsiz, AirRef_BluefiReply_identifier, &AirRef_BluefiReply_verify_table);
+}
+
+static inline int AirRef_BluefiReply_verify_as_typed_root(const void *buf, size_t bufsiz)
+{
+    return flatcc_verify_table_as_root(buf, bufsiz, AirRef_BluefiReply_type_identifier, &AirRef_BluefiReply_verify_table);
+}
+
+static inline int AirRef_BluefiReply_verify_as_root_with_identifier(const void *buf, size_t bufsiz, const char *fid)
+{
+    return flatcc_verify_table_as_root(buf, bufsiz, fid, &AirRef_BluefiReply_verify_table);
+}
+
+static inline int AirRef_BluefiReply_verify_as_root_with_type_hash(const void *buf, size_t bufsiz, flatbuffers_thash_t thash)
+{
+    return flatcc_verify_table_as_typed_root(buf, bufsiz, thash, &AirRef_BluefiReply_verify_table);
 }
 
 static int AirRef_Message_verify_table(flatcc_table_verifier_descriptor_t *td)

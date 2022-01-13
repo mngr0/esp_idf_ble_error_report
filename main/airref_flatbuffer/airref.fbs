@@ -1,9 +1,6 @@
 // Example IDL file for our monster's schema.
 
 
-include "logger.fbs";
-include "bluefi.fbs";
-
 namespace AirRef;
 
 
@@ -144,6 +141,48 @@ enum LoggerCommunicationState: int{
 table LoggerState{
 	state: LoggerCommunicationState;
 }
+
+
+
+
+
+enum LoggerCommandType:int{
+	list_files=0,
+	delete_file,
+	download_file
+}
+
+
+table LoggerCommand{
+	loggerCommandType : LoggerCommandType;
+    parameter: string;
+}
+
+table LoggerReply{
+    fileList: [string];
+    fileContent: string;
+}
+
+
+table WifiCredentials{
+    ssid: string;
+    password: string;
+}
+
+
+table BluefiCommand{
+    wifiCredential: WifiCredentials;
+    doScan: int;
+}
+
+table BluefiReply{
+    wifiCredentials: [WifiCredentials];
+}
+
+
+
+
+
 
 
 union Content{
