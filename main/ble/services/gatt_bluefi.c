@@ -37,8 +37,6 @@
 #include "air_ref/air_ref.h"
 #include "ble/ble.h"
 
-#include "airref_flatbuffer/airref_builder.h"
-
 #define GATTS_BLUEFI_TAG "GATTS_BLUEFI"
 
 extern machine_state_t m_state;
@@ -100,21 +98,21 @@ void bluefi_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if,
                "GATT_WRITE_EVT, value len %d, value :", param->write.len);
       // esp_log_buffer_hex(GATTS_AR_CONF_TAG, param->write.value,
       // param->write.len);
-      air_ref_conf_t ar_conf_new;
+      // air_ref_conf_t ar_conf_new;
 
-      AirRef_Message_table_t message =
-          AirRef_Message_as_root(param->write.value);
-      if (message != 0) {
-        if (AirRef_Message_content_type(message) == AirRef_Content_AirRefConf) {
+      // AirRef_Message_table_t message =
+      //     AirRef_Message_as_root(param->write.value);
+      // if (message != 0) {
+      //   if (AirRef_Message_content_type(message) == AirRef_Content_AirRefConf) {
 
-          AirRef_AirRefConf_table_t airRefConf =
-              (AirRef_AirRefConf_table_t)AirRef_Message_content(message);
+      //     AirRef_AirRefConf_table_t airRefConf =
+      //         (AirRef_AirRefConf_table_t)AirRef_Message_content(message);
 
           // parse_ar_conf(airRefConf, &ar_conf_new);
           // log_ar_conf( &ar_conf_new);
           // routine_send_new_conf(&ar_conf_new);
-        }
-      }
+      //  }
+     // }
     }
     //     esp_ble_gatts_send_response(gatts_if, param->read.conn_id,
     //     param->read.trans_id,

@@ -35,8 +35,6 @@
 #include "ble/ble.h"
 #include "air_ref/air_ref.h"
 
-#include "air_ref/serial_logger/logger_air_ref.h"
-
 #define GATTS_AR_CONF_TAG "GATTS_AR_CONF"
 
 static machine_state_t m_state;
@@ -89,22 +87,22 @@ void ar_conf_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, e
         ESP_LOGI(GATTS_AR_CONF_TAG, "GATT_READ_EVT, conn_id %d, trans_id %d, handle %d\n", param->read.conn_id, param->read.trans_id, param->read.handle);
         esp_gatt_rsp_t rsp;
 
-        flatcc_builder_t builder;
-        size_t size;
-        void *buf;
+        // flatcc_builder_t builder;
+        // size_t size;
+        // void *buf;
 
-        memset(&rsp, 0, sizeof(esp_gatt_rsp_t));
-        rsp.attr_value.handle = param->read.handle;
+        // memset(&rsp, 0, sizeof(esp_gatt_rsp_t));
+        // rsp.attr_value.handle = param->read.handle;
 
-        flatcc_builder_init(&builder);
-        load_ar_conf(&builder, &ar_conf);
-        buf = flatcc_builder_finalize_buffer(&builder, &size);
-        rsp.attr_value.len = size;
-        memcpy(rsp.attr_value.value, buf, size);
-        ESP_LOGI(GATTS_AR_CONF_TAG, "required size: %d\n", size);
+        // flatcc_builder_init(&builder);
+        // load_ar_conf(&builder, &ar_conf);
+        // buf = flatcc_builder_finalize_buffer(&builder, &size);
+        // rsp.attr_value.len = size;
+        // memcpy(rsp.attr_value.value, buf, size);
+        // ESP_LOGI(GATTS_AR_CONF_TAG, "required size: %d\n", size);
 
-        flatcc_builder_aligned_free(buf);
-        flatcc_builder_clear(&builder);
+        // flatcc_builder_aligned_free(buf);
+        // flatcc_builder_clear(&builder);
 
         esp_ble_gatts_send_response(gatts_if, param->read.conn_id, param->read.trans_id,
                                     ESP_GATT_OK, &rsp);
@@ -118,20 +116,20 @@ void ar_conf_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, e
         {
             ESP_LOGI(GATTS_AR_CONF_TAG, "GATT_WRITE_EVT, value len %d, value :", param->write.len);
             //esp_log_buffer_hex(GATTS_AR_CONF_TAG, param->write.value, param->write.len);
-            air_ref_conf_t ar_conf_new;
+            // air_ref_conf_t ar_conf_new;
 
-            AirRef_Message_table_t message = AirRef_Message_as_root(param->write.value);
-            if(message !=0 ){
-                if (AirRef_Message_content_type(message) == AirRef_Content_AirRefConf)
-                {
+            // AirRef_Message_table_t message = AirRef_Message_as_root(param->write.value);
+            // if(message !=0 ){
+            //     if (AirRef_Message_content_type(message) == AirRef_Content_AirRefConf)
+            //     {
 
-                    AirRef_AirRefConf_table_t airRefConf = (AirRef_AirRefConf_table_t)AirRef_Message_content(message);
+            //         AirRef_AirRefConf_table_t airRefConf = (AirRef_AirRefConf_table_t)AirRef_Message_content(message);
 
-                    parse_ar_conf(airRefConf, &ar_conf_new);
-                    //log_ar_conf( &ar_conf_new);
-                    //routine_send_new_conf(&ar_conf_new);
-                }
-            }
+            //         parse_ar_conf(airRefConf, &ar_conf_new);
+            //         //log_ar_conf( &ar_conf_new);
+            //         //routine_send_new_conf(&ar_conf_new);
+            //     }
+            // }
         }
         example_write_event_env(gatts_if, &b_prepare_write_env, param);
         break;

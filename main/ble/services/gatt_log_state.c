@@ -20,7 +20,6 @@
 #include "air_ref/air_ref.h"
 #include "stdbool.h"
 
-#include "air_ref/serial_logger/logger_air_ref.h"
 #include "air_ref/air_ref.h"
 
 #define GATTS_LOG_STATE_TAG "GATTS_LOG_STATE"
