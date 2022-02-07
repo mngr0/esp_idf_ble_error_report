@@ -33,7 +33,7 @@ void configure_serial() {
 
 
 int send_buffer(uint8_t* data, int lenght){
-    ESP_LOG_BUFFER_HEX("BUFFER SENT", data,lenght);
+    //ESP_LOG_BUFFER_HEX("BUFFER SENT", data,lenght);
     esp_err_t ret;
     ret=uart_write_bytes(uart_num,data,lenght);
     if (ret<0){

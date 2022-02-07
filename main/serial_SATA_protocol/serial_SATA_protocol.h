@@ -3,7 +3,7 @@
 
 typedef enum{
 	read_routine_conf_parameter=0,
-	read_routine_status_paramater,
+	read_routine_status_parameter,
 	read_machine_conf_parameter,
 	read_machine_status_parameter,
 	
