@@ -156,9 +156,6 @@ table LoggerState{
 }
 
 
-
-
-
 enum LoggerCommandType:int{
 	list_files=0,
 	delete_file,
@@ -191,11 +188,6 @@ table BluefiCommand{
 table BluefiReply{
     wifiCredentials: [WifiCredentials];
 }
-
-
-
-
-
 
 
 union Content{

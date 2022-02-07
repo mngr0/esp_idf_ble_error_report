@@ -39,9 +39,9 @@
 
 #define GATTS_AR_STATE_TAG "GATTS_AR_STATE"
 
-extern machine_state_t m_state;
-extern air_ref_conf_t ar_conf;
-extern air_ref_state_t ar_state;
+static machine_state_t m_state;
+static air_ref_conf_t ar_conf;
+static air_ref_state_t ar_state;
 
 uint16_t ar_state_handle_table[GATT_AR_STATE_NB];
 

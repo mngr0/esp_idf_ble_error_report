@@ -39,9 +39,9 @@
 
 #define GATTS_AR_CONF_TAG "GATTS_AR_CONF"
 
-extern machine_state_t m_state;
-extern air_ref_conf_t ar_conf;
-extern air_ref_state_t ar_state;
+static machine_state_t m_state;
+static air_ref_conf_t ar_conf;
+static air_ref_state_t ar_state;
 
 extern uint8_t raw_scan_rsp_data[10];
 extern uint8_t raw_adv_data[26];
@@ -128,8 +128,8 @@ void ar_conf_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, e
                     AirRef_AirRefConf_table_t airRefConf = (AirRef_AirRefConf_table_t)AirRef_Message_content(message);
 
                     parse_ar_conf(airRefConf, &ar_conf_new);
-                    log_ar_conf( &ar_conf_new);
-                    routine_send_new_conf(&ar_conf_new);
+                    //log_ar_conf( &ar_conf_new);
+                    //routine_send_new_conf(&ar_conf_new);
                 }
             }
         }

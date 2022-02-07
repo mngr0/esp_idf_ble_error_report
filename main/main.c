@@ -17,8 +17,6 @@
  ****************************************************************************/
 
 #include <string.h>
-
-
 #include "esp_log.h"
 #include "esp_system.h"
 #include "freertos/FreeRTOS.h"
@@ -49,7 +47,7 @@
 #include "i2c_common/i2c_common.h"
 #include "i2c_devices/rtc/MCP7940/mcp7940.h"
 
-
+#include "cJSON.h"
 
 #include "utility/utility.h"
 
@@ -60,6 +58,8 @@ uint8_t led_blink[8][3] = {{0, 0, 0}, {0, 0, 1}, {0, 1, 1},
                            {1, 0, 1}, {1, 0, 0}
 
 };
+
+
 
 static void blink_task(void *arg) {
   rtc_time_t pTime;
@@ -119,6 +119,6 @@ void app_main(void) {
 
   configure_serial();
 
-  BLE_init();
+  //BLE_init();
   logger_init();
 }

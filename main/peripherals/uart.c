@@ -2,6 +2,7 @@
 #include "driver/uart.h"
 #include "driver/gpio.h"
 
+#include "esp_log.h"
 const uart_port_t uart_num = UART_NUM_2;
 // status
 #define BUF_SIZE 1024
@@ -32,6 +33,7 @@ void configure_serial() {
 
 
 int send_buffer(uint8_t* data, int lenght){
+    ESP_LOG_BUFFER_HEX("BUFFER SENT", data,lenght);
     esp_err_t ret;
     ret=uart_write_bytes(uart_num,data,lenght);
     if (ret<0){

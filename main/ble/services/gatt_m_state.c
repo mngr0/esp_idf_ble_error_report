@@ -43,9 +43,9 @@
 
 #define GATTS_M_STATE_TAG "GATTS_M_STATE"
 
-extern machine_state_t m_state;
-extern air_ref_conf_t ar_conf;
-extern air_ref_state_t ar_state;
+static machine_state_t m_state;
+static air_ref_conf_t ar_conf;
+static air_ref_state_t ar_state;
 
 extern uint8_t raw_scan_rsp_data[10];
 extern uint8_t raw_adv_data[26];

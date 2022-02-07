@@ -131,14 +131,14 @@ int access_message_buffer(const void *buffer, int buff_len);
 
 void logger_init();
 
-void routine_send_state(machine_state_t* m_state);
+// void routine_send_state(machine_state_t* m_state);
 
-void routine_send_new_conf(air_ref_conf_t *ar_conf_new);
+// void routine_send_new_conf(air_ref_conf_t *ar_conf_new);
 
-void log_ar_conf( air_ref_conf_t *ar_conf);
+// void log_ar_conf( air_ref_conf_t *ar_conf);
 
-void log_m_state( machine_state_t *m_state);
+// void log_m_state( machine_state_t *m_state);
 
-void log_ar_state(air_ref_state_t *ar_state);
+// void log_ar_state(air_ref_state_t *ar_state);
 
 #endif /* AIR_REF_H_ */
