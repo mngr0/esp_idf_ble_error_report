@@ -17,10 +17,7 @@
 #include "gatt_log_state.h"
 
 #include "ble/ble.h"
-#include "air_ref/air_ref.h"
 #include "stdbool.h"
-
-#include "air_ref/air_ref.h"
 
 #define GATTS_LOG_STATE_TAG "GATTS_LOG_STATE"
 

@@ -33,13 +33,12 @@
 
 #include "gatt_ar_conf.h"
 #include "ble/ble.h"
-#include "air_ref/air_ref.h"
 
 #define GATTS_AR_CONF_TAG "GATTS_AR_CONF"
 
-static machine_state_t m_state;
-static air_ref_conf_t ar_conf;
-static air_ref_state_t ar_state;
+// static machine_state_t m_state;
+// static air_ref_conf_t ar_conf;
+// static air_ref_state_t ar_state;
 
 extern uint8_t raw_scan_rsp_data[10];
 extern uint8_t raw_adv_data[26];
@@ -65,7 +64,7 @@ const esp_gatts_attr_db_t gatt_ar_conf_db[GATT_AR_CONF_NB] =
             {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&character_declaration_uuid, ESP_GATT_PERM_READ, CHAR_DECLARATION_SIZE, CHAR_DECLARATION_SIZE, (uint8_t *)&char_prop_read_notify}},
 
         [GATT_AR_CONF_IDX_VALUE] =
-            {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&GATT_AR_CONF_UUID_VALUE, ESP_GATT_PERM_READ, GATTS_DEMO_CHAR_VAL_LEN_MAX, sizeof(air_ref_conf_t), (uint8_t *)&ar_conf}},
+            {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&GATT_AR_CONF_UUID_VALUE, ESP_GATT_PERM_READ, GATTS_DEMO_CHAR_VAL_LEN_MAX, 300,0}},//sizeof(air_ref_conf_t), (uint8_t *)&ar_conf}},
 
 };
 
@@ -86,6 +85,8 @@ void ar_conf_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, e
     {
         ESP_LOGI(GATTS_AR_CONF_TAG, "GATT_READ_EVT, conn_id %d, trans_id %d, handle %d\n", param->read.conn_id, param->read.trans_id, param->read.handle);
         esp_gatt_rsp_t rsp;
+        //TODO send ar_conf as json
+
 
         // flatcc_builder_t builder;
         // size_t size;
@@ -115,6 +116,10 @@ void ar_conf_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, e
         if (!param->write.is_prep)
         {
             ESP_LOGI(GATTS_AR_CONF_TAG, "GATT_WRITE_EVT, value len %d, value :", param->write.len);
+            //TODO receive ar_conf as json, 
+            //read again conf, communicate different values.
+            //jsonify
+
             //esp_log_buffer_hex(GATTS_AR_CONF_TAG, param->write.value, param->write.len);
             // air_ref_conf_t ar_conf_new;
 

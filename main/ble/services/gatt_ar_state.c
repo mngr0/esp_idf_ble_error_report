@@ -35,13 +35,12 @@
 
 #include "gatt_ar_state.h"
 #include "ble/ble.h"
-#include "air_ref/air_ref.h"
 
 #define GATTS_AR_STATE_TAG "GATTS_AR_STATE"
 
-static machine_state_t m_state;
-static air_ref_conf_t ar_conf;
-static air_ref_state_t ar_state;
+// static machine_state_t m_state;
+// static air_ref_conf_t ar_conf;
+// static air_ref_state_t ar_state;
 
 uint16_t ar_state_handle_table[GATT_AR_STATE_NB];
 
@@ -68,7 +67,7 @@ const esp_gatts_attr_db_t gatt_ar_state_db[GATT_AR_STATE_NB] =
             {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&character_declaration_uuid, ESP_GATT_PERM_READ, CHAR_DECLARATION_SIZE, CHAR_DECLARATION_SIZE, (uint8_t *)&char_prop_read_notify}},
 
         [GATT_AR_STATE_IDX_VALUE] =
-            {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&GATT_AR_STATE_UUID_VALUE, ESP_GATT_PERM_READ, GATTS_DEMO_CHAR_VAL_LEN_MAX, sizeof(air_ref_state_t), (uint8_t *)&ar_state}},
+            {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&GATT_AR_STATE_UUID_VALUE, ESP_GATT_PERM_READ, GATTS_DEMO_CHAR_VAL_LEN_MAX, 100,0}},//sizeof(air_ref_state_t), (uint8_t *)&ar_state}},
 
 };
 

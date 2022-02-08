@@ -34,14 +34,9 @@
 
 #include "gatt_bluefi.h"
 
-#include "air_ref/air_ref.h"
 #include "ble/ble.h"
 
 #define GATTS_BLUEFI_TAG "GATTS_BLUEFI"
-
-extern machine_state_t m_state;
-extern air_ref_conf_t ar_conf;
-extern air_ref_state_t ar_state;
 
 extern uint8_t raw_scan_rsp_data[10];
 extern uint8_t raw_adv_data[26];

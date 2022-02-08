@@ -37,7 +37,6 @@
 #include "esp_gatt_common_api.h"
 #include "esp_gatts_api.h"
 
-#include "air_ref/air_ref.h"
 #include "ble/ble.h"
 
 #include "services/gatt_ar_conf.h"
@@ -53,9 +52,9 @@
 #define BLINK_GPIO3 13
 #define BTN_GPIO 3
 
-extern machine_state_t m_state;
-extern air_ref_conf_t ar_conf;
-extern air_ref_state_t ar_state;
+// extern machine_state_t m_state;
+// extern air_ref_conf_t ar_conf;
+// extern air_ref_state_t ar_state;
 
 void gatts_profile_event_handler(esp_gatts_cb_event_t event,
                                  esp_gatt_if_t gatts_if,
