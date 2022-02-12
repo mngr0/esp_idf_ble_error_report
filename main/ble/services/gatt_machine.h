@@ -40,8 +40,8 @@ typedef enum
 
 char* get_str_pnt_diocane();
 
-void gatt_machine_send_status_update_to_client(char* json_status);
-void gatt_machine_send_logger_update_to_client(char* json_status);
+bool gatt_machine_send_status_update_to_client(char* json_status);
+bool gatt_machine_send_logger_update_to_client(char* json_status);
 
 uint16_t machine_handle_table[GATT_MACHINE_NB];
 

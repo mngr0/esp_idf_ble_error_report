@@ -1,3 +1,4 @@
+
 #include <stdint.h>
 #include <string.h>
 
@@ -60,6 +61,8 @@ char memory_machine_conf[1024];
 char diocane3[1024]={'c','a','a','a'};
 char diocane4[1024]={'d','a','a','a'};
 
+int mtu_size= 20;
+
 
 char* get_str_pnt_diocane(){
     return memory_machine_conf;
@@ -95,7 +98,7 @@ const esp_gatts_attr_db_t gatt_machine_db[GATT_MACHINE_NB] =
              CHAR_DECLARATION_SIZE, CHAR_DECLARATION_SIZE, (uint8_t *)&char_prop_write}},
 
         [GATT_MACHINE_IDX_COMMAND_VALUE] =
-            {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&GATT_MACHINE_COMMAND_VALUE, ESP_GATT_PERM_WRITE,
+            {{ESP_GATT_RSP_BY_APP}, {ESP_UUID_LEN_16, (uint8_t *)&GATT_MACHINE_COMMAND_VALUE, ESP_GATT_PERM_WRITE,
              GATTS_DEMO_CHAR_VAL_LEN_MAX, 64, (uint8_t*)diocane3}},//sizeof(machine_state_t), (uint8_t *)&m_state}},
 
 
@@ -116,44 +119,64 @@ static uint8_t find_char_and_desr_index(uint16_t handle)
         if(handle == machine_handle_table[i]){
             return i;
         }
-        ESP_LOGI(GATTS_MACHINE_TAG, " handle discarded %d",machine_handle_table[i] );
+        //ESP_LOGI(GATTS_MACHINE_TAG, " handle discarded %d",machine_handle_table[i] );
     }
     return error;
 }
 
-#define mtu_size 20
 
 #define min(a,b) (a<b ? a:b)
 
-void gatt_machine_send_status_update_to_client(char* json_status){
+
+uint8_t tmp_buffer[2048];
+uint16_t current_idx=0;
+uint16_t current_size_sent=0;
+uint16_t current_len=0;
+
+
+
+bool gatt_machine_send_status_update_to_client(char* json_status){
     if(ble_is_connected()){
-        ESP_LOGI(GATTS_MACHINE_TAG, " INDICATING " );
-        uint16_t i=0;
-        uint16_t partial_size=0;
-        while(i< strlen(json_status)){
-            partial_size = min(mtu_size, strlen(json_status) - i);
+        if(current_len == 0){
+            ESP_LOGI(GATTS_MACHINE_TAG, " INDICATING " );
+            strcpy((char*)tmp_buffer, json_status);
+            current_idx=0;
+            current_len=strlen(json_status);
+            current_size_sent = min(mtu_size-5, strlen(json_status));
             esp_ble_gatts_send_indicate(heart_rate_profile_tab[PROFILE_MACHINE_IDX].gatts_if, spp_conn_id, machine_handle_table[GATT_MACHINE_IDX_STATUS_VALUE],
-                        partial_size, (uint8_t*)&json_status[i], false);
-            i+=partial_size;
-            vTaskDelay(10 / portTICK_PERIOD_MS);
+                            current_size_sent, (uint8_t*)json_status, true);
+            return true;
+        }
+        else{
+            ESP_LOGI(GATTS_MACHINE_TAG, "NOTIFICATION DISCARTED BUSY %d",current_len);
+            return false;
         }
     }
+    ESP_LOGI(GATTS_MACHINE_TAG, "NOTIFICATION DISCARTED DISCONNECTED");
+    return false;
 }
 
-void gatt_machine_send_logger_update_to_client(char* json_status){
-if(ble_is_connected()){
-        ESP_LOGI(GATTS_MACHINE_TAG, " INDICATING " );
-        uint16_t i=0;
-        uint16_t partial_size=0;
-        while(i< strlen(json_status)){
-            partial_size = min(mtu_size, strlen(json_status) - i);
+bool gatt_machine_send_logger_update_to_client(char* json_status){
+    if(ble_is_connected()){
+        if(current_len == 0){
+            ESP_LOGI(GATTS_MACHINE_TAG, " INDICATING " );
+            strcpy((char*)tmp_buffer, json_status);
+            current_idx=0;
+            current_len=strlen(json_status);
+            current_size_sent = min(mtu_size-5, strlen(json_status));
             esp_ble_gatts_send_indicate(heart_rate_profile_tab[PROFILE_MACHINE_IDX].gatts_if, spp_conn_id, machine_handle_table[GATT_MACHINE_IDX_LOGGER_STATUS_VALUE],
-                        partial_size, (uint8_t*)&json_status[i], false);
-            i+=partial_size;
-            vTaskDelay(10 / portTICK_PERIOD_MS);
+                            current_size_sent, (uint8_t*)json_status, true);
+            return true;
+        }
+        else{
+            ESP_LOGI(GATTS_MACHINE_TAG, "NOTIFICATION DISCARTED BUSY %d",current_len);
+            return false;
         }
     }
+    ESP_LOGI(GATTS_MACHINE_TAG, "NOTIFICATION DISCARTED DISCONNECTED");
+    return false;
 }
+
 
 
 
@@ -164,23 +187,6 @@ void machine_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, e
     switch (event)
     {
     case ESP_GATTS_REG_EVT:{
-        //TODO lo devo mettere?
-        // esp_err_t set_dev_name_ret = esp_ble_gap_set_device_name(SAMPLE_DEVICE_NAME);
-        // if (set_dev_name_ret){
-        //     ESP_LOGE(GATTS_MACHINE_TAG, "set device name failed, error code = %x", set_dev_name_ret);
-        // }
-        // esp_err_t ret = esp_ble_gap_config_adv_data(&adv_data);
-        // if (ret){
-        //     ESP_LOGE(GATTS_MACHINE_TAG, "config adv data failed, error code = %x", ret);
-        // }
-        // adv_config_done |= ADV_CONFIG_FLAG;
-        // //config scan response data
-        // ret = esp_ble_gap_config_adv_data(&scan_rsp_data);
-        // if (ret){
-        //     ESP_LOGE(GATTS_MACHINE_TAG, "config scan response data failed, error code = %x", ret);
-        // }
-        // adv_config_done |= SCAN_RSP_CONFIG_FLAG;
-
         ESP_LOGI(GATTS_MACHINE_TAG, "REGISTER_APP_EVT, status %d, app_id %d\n", param->reg.status, param->reg.app_id);
 
         esp_err_t create_attr_ret = esp_ble_gatts_create_attr_tab(gatt_machine_db, gatts_if, GATT_MACHINE_NB, PROFILE_MACHINE_IDX);//ultimo parametro modificato
@@ -193,8 +199,7 @@ void machine_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, e
     case ESP_GATTS_READ_EVT:
     { // READ MACHINE STATE
     res = find_char_and_desr_index(p_data->read.handle);
-        ESP_LOGI(GATTS_MACHINE_TAG, "GATT_READ_EVT, conn_id %d, trans_id %d, handle %d res=%d\n", param->read.conn_id, param->read.trans_id, param->read.handle,res);
-        esp_gatt_rsp_t rsp;
+        ESP_LOGI(GATTS_MACHINE_TAG, "GATT_READ_EVT, conn_id %d, trans_id %d, handle %d res=%d", param->read.conn_id, param->read.trans_id, param->read.handle,res);
         //sned m_state as json
         //res = find_char_and_desr_index(p_data->read.handle);
         switch(res){
@@ -203,32 +208,23 @@ void machine_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, e
                 break;
             }
             case GATT_MACHINE_IDX_CONFIG_VALUE:{
-                ESP_LOGI(GATTS_MACHINE_TAG, "GATT_MACHINE_IDX_CONFIG_VALUE");
+
+                ESP_LOGI(GATTS_MACHINE_TAG, "GATT_MACHINE_IDX_CONFIG_VALUE   OFFSET=%d, IS_LONG=%d, NEED_RS=%d",param->read.offset,param->read.is_long,param->read.need_rsp);
                 esp_gatt_rsp_t rsp;
+                //if(strlen(memory_machine_conf)  > param->read.offset   ){
 
-                 memset(&rsp, 0, sizeof(esp_gatt_rsp_t));
-                rsp.attr_value.handle = param->read.handle;
+                    memset(&rsp, 0, sizeof(esp_gatt_rsp_t));
+                    rsp.attr_value.handle = param->read.handle;
+                    rsp.attr_value.offset = param->read.offset;
+                    memcpy(rsp.attr_value.value, &memory_machine_conf[param->read.offset], min(mtu_size-1 ,strlen(memory_machine_conf)-param->read.offset   ) );
+                    rsp.attr_value.len = strlen(memory_machine_conf);
+                    
 
-                ESP_LOGI(GATTS_MACHINE_TAG, "RESPONSE LEN %d", strlen(memory_machine_conf) );
-                rsp.attr_value.len = strlen(memory_machine_conf);
-                memcpy(rsp.attr_value.value, memory_machine_conf, strlen(memory_machine_conf));
-                esp_ble_gatts_send_response(gatts_if, param->read.conn_id, param->read.trans_id,
-                                 ESP_GATT_OK, &rsp);
-
-
-                // ESP_LOGI(GATTS_MACHINE_TAG, " INDICATING " );
-                // uint16_t i=0;
-                // uint16_t partial_size=0;
-                // while(i< strlen(json_status)){
-                //     partial_size = min(mtu_size, strlen(json_status) - i);
-
-
-                //     esp_ble_gatts_send_indicate(heart_rate_profile_tab[PROFILE_MACHINE_IDX].gatts_if, spp_conn_id, machine_handle_table[GATT_MACHINE_IDX_LOGGER_STATUS_VALUE],
-                //                 partial_size, (uint8_t*)&json_status[i], false);
-                //     i+=partial_size;
-                //     vTaskDelay(10 / portTICK_PERIOD_MS);
-                // }
-                //send machine config
+                    ESP_LOGI(GATTS_MACHINE_TAG, "RESPONSE LEN %d", min(mtu_size-1 ,strlen(memory_machine_conf)-param->read.offset   )  );
+                    
+                    
+                    esp_ble_gatts_send_response(gatts_if, param->read.conn_id, param->read.trans_id, ESP_GATT_OK, &rsp);
+                //}
                 break;
             }
             case GATT_MACHINE_IDX_COMMAND_VALUE:{
@@ -236,17 +232,19 @@ void machine_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, e
                 break;
             }
             case GATT_MACHINE_IDX_LOGGER_STATUS_VALUE:{
+                //case starting_polling (both)
+                //
                 //send logger status
+                //polling conf
+                //polling status
+                //writing conf
                 break;
             }
             default:{
                 break;
             }
         }
-        // if (param->write.need_rsp){
-        //     esp_ble_gatts_send_response(gatts_if, param->read.conn_id, param->read.trans_id,
-        //                             ESP_GATT_OK, &rsp);
-        // }
+
         break;
     }
     case ESP_GATTS_WRITE_EVT:
@@ -315,6 +313,7 @@ void machine_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, e
         break;
     case ESP_GATTS_MTU_EVT:
         ESP_LOGI(GATTS_MACHINE_TAG, "ESP_GATTS_MTU_EVT, MTU %d", param->mtu.mtu);
+        mtu_size = param->mtu.mtu;
         break;
     case ESP_GATTS_START_EVT:
         ESP_LOGI(GATTS_MACHINE_TAG, "SERVICE_START_EVT, status %d, service_handle %d", param->start.status, param->start.service_handle);
@@ -341,6 +340,8 @@ void machine_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, e
         conn_params.timeout = 400;    // timeout = 400*10ms = 4000ms
         //start sent the update connection parameters to the peer device.
         esp_ble_gap_update_conn_params(&conn_params);
+        current_len=0;
+        ESP_LOGI(GATTS_MACHINE_TAG, "RESET CURRENT LEN %d",current_len);
         break;
     case ESP_GATTS_ADD_CHAR_DESCR_EVT:
         ESP_LOGI(GATTS_MACHINE_TAG, "ADD_DESCR_EVT, status %d, attr_handle %d, service_handle %d\n",
@@ -351,10 +352,29 @@ void machine_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, e
     case ESP_GATTS_STOP_EVT:
         break;
     case ESP_GATTS_CONF_EVT:
-        //ESP_LOGI(GATTS_MACHINE_TAG, "ESP_GATTS_CONF_EVT status %d attr_handle %d", param->conf.status, param->conf.handle);
+        
         if (param->conf.status != ESP_GATT_OK)
         {
-            esp_log_buffer_hex(GATTS_MACHINE_TAG, param->conf.value, param->conf.len);
+            ESP_LOGI(GATTS_MACHINE_TAG, "ESP_GATTS_CONF_EVT ERROR status %2x attr_handle %d", param->conf.status, param->conf.handle);
+            //resend last indication
+            //if(param->conf.status != ESP_GATT_BUSY)
+            esp_ble_gatts_send_indicate(heart_rate_profile_tab[PROFILE_MACHINE_IDX].gatts_if, spp_conn_id, machine_handle_table[GATT_MACHINE_IDX_STATUS_VALUE],
+                        current_size_sent, &tmp_buffer[current_idx], true);
+            //esp_log_buffer_hex(GATTS_MACHINE_TAG, param->conf.value, param->conf.len);
+        }
+        else{
+            ESP_LOGI(GATTS_MACHINE_TAG, "ESP_GATTS_CONF_EVT OK status %2x attr_handle %d", param->conf.status, param->conf.handle);
+            //send next piece
+            current_idx+=current_size_sent;
+            current_size_sent = min(mtu_size-5, strlen((char*)tmp_buffer)-current_idx);
+            if(current_size_sent>0){
+                esp_ble_gatts_send_indicate(heart_rate_profile_tab[PROFILE_MACHINE_IDX].gatts_if, spp_conn_id, machine_handle_table[GATT_MACHINE_IDX_STATUS_VALUE],
+                        current_size_sent, &tmp_buffer[current_idx], true);
+            }
+            else{
+                current_len =0;
+                ESP_LOGI(GATTS_MACHINE_TAG, "RESET CURRENT LEN %d",current_len);
+            }
         }
         break;
     case ESP_GATTS_CREAT_ATTR_TAB_EVT:{

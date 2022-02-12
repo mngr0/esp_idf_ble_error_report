@@ -17,6 +17,7 @@ typedef enum {
 
 typedef struct {
     logger_state_t logger_state;
+    logger_state_t logger_state_next;
     uint16_t current_idx_read;
     command_type_t current_command_type;
     command_type_t current_expected_reply_type;

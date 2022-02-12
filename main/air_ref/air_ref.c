@@ -49,9 +49,9 @@ int32_t ar_status[256];
 int32_t m_status[256];
 
 logger_memory_t logger_memory;
-logger_memory_t logger_memory_tmp;
+// logger_memory_t logger_memory_tmp;
 
-extern char* memory_machine_conf;
+extern char *memory_machine_conf;
 
 static char *ar_config_names[air_ref_conf_parameters_size] = {
     FOREACH_AR_CONF(STRINGIFY)};
@@ -92,9 +92,8 @@ void jsonify(char **names, int32_t *values, uint8_t size, char *output) {
 #define jsonify_machine_status(output)                                         \
   jsonify(m_status_names, m_status, machine_status_parameters_size, output)
 
-#define jsonify_machine_conf(output)                                         \
+#define jsonify_machine_conf(output)                                           \
   jsonify(m_config_names, m_config, machine_conf_parameters_size, output)
-
 
 #define jsonify_air_ref_status(output)                                         \
   jsonify(ar_status_names, ar_status, air_ref_status_parameters_size, output)
@@ -281,6 +280,44 @@ void start_query_logger_status(logger_memory_t *logger, logger_state_t state,
       logger, logger_state_read_machine_conf, read_machine_conf_parameter,     \
       reply_machine_conf_parameter, m_config, m_config_size);
 
+void go_state_next(logger_state_t new_state) {
+
+  logger_memory.logger_state = new_state;
+  logger_memory.logger_state = new_state;
+  logger_memory.current_idx_read = 0;
+  switch (new_state) {
+  case logger_state_read_routine_conf: {
+    start_query_routine_conf(&logger_memory);
+    break;
+  }
+  case logger_state_read_machine_conf: {
+    start_query_machine_conf(&logger_memory);
+    break;
+  }
+  case logger_state_write_routine_conf: {
+
+    logger_memory.current_command_type = write_routine_conf_parameter;
+    logger_memory.current_expected_reply_type = ack;
+    logger_memory.current_list = ar_config;
+    logger_memory.current_size = ar_config_size;
+
+    break;
+  }
+  case logger_state_write_machine_conf: {
+
+    logger_memory.current_command_type = write_machine_conf_parameter;
+    logger_memory.current_expected_reply_type = ack;
+    logger_memory.current_list = m_config;
+    logger_memory.current_size = m_config_size;
+
+    break;
+  }
+  default: {
+    break;
+  }
+  }
+}
+
 static void query_task(void *arg) {
 
   char json_update[JSON_STRING_SIZE];
@@ -292,35 +329,10 @@ static void query_task(void *arg) {
   ar_status_size = air_ref_status_parameters_size;
   m_status_size = machine_status_parameters_size;
 
-  // query_array(ar_config, ar_config_size, read_routine_conf_parameter,
-  //             reply_routine_conf_parameter);
-  // print_array("air_ref_config:", ar_config, ar_config_names,
-  // ar_config_size);
-
-  // query_array(m_config, m_config_size, read_machine_conf_parameter,
-  //             reply_machine_conf_parameter);
-  // print_array("machine_config:", m_config, m_config_names,
-  // m_config_size); logger_memory.logger_state = logger_state_polling;
-
   start_query_machine_conf(&logger_memory);
   logger_memory.logger_state = logger_state_starting_poll_machine_conf;
 
   while (1) {
-    // query_array(ar_status, ar_status_size,
-    // read_routine_status_parameter,
-    //             reply_routine_conf_parameter);
-    // print_array("air_ref_status:", ar_status, ar_status_names,
-    // ar_status_size);
-
-    // // jsonify()
-    // // gatt_air_ref_update_status();
-
-    // query_array(m_status, m_status_size, read_machine_status_parameter,
-    //             reply_machine_status_parameter);
-    // print_array("machine_status:", m_status, m_status_names,
-    // m_status_size); jsonify_machine_status(json_update);
-    // gatt_machine_send_status_update_to_client(json_update);
-    // // gatt_machine_update_status(json_update);
 
     switch (logger_memory.logger_state) {
 
@@ -330,7 +342,8 @@ static void query_task(void *arg) {
         start_query_routine_conf(&logger_memory);
         logger_memory.logger_state = logger_state_starting_poll_routine_conf;
 
-        print_array("machine_config:", m_config, m_config_names, m_config_size);
+        // print_array("machine_config:", m_config, m_config_names,
+        // m_config_size);
         jsonify_machine_conf(get_str_pnt_diocane());
       }
       break;
@@ -341,23 +354,26 @@ static void query_task(void *arg) {
       if (logger_memory.current_idx_read == logger_memory.current_size) {
         start_query_machine_status(&logger_memory);
         logger_memory.logger_state = logger_state_poll_machine_status;
-        print_array("air_ref_config:", ar_config, ar_config_names,
-                    ar_config_size);
+        // print_array("air_ref_config:", ar_config, ar_config_names,
+        // ar_config_size);
       }
       break;
     }
 
     case logger_state_poll_machine_status: {
       query_next(&logger_memory);
-
       if (logger_memory.current_idx_read == logger_memory.current_size) {
         start_query_routine_status(&logger_memory);
-        print_array("machine_status:", m_status, m_status_names, m_status_size);
-
+        // print_array("machine_status:", m_status, m_status_names,
+        // m_status_size);
         jsonify_machine_status(json_update);
-        ESP_LOGI("HERE COMES THE JSON", "LEDN:%u - %s", strlen(json_update),
-                 json_update);
+        // ESP_LOGI("HERE COMES THE JSON", "LEDN:%u - %s", strlen(json_update),
+        // json_update);
         gatt_machine_send_status_update_to_client(json_update);
+      }
+      if (logger_memory.logger_state_next != -1) {
+        go_state_next(logger_memory.logger_state_next);
+        logger_memory.logger_state_next = -1;
       }
       break;
     }
@@ -365,13 +381,16 @@ static void query_task(void *arg) {
       query_next(&logger_memory);
       if (logger_memory.current_idx_read == logger_memory.current_size) {
         start_query_machine_status(&logger_memory);
-        print_array("air_ref_status:", ar_status, ar_status_names,
-                    ar_status_size);
+        // print_array("air_ref_status:", ar_status, ar_status_names,
+        // ar_status_size);
         jsonify_air_ref_status(json_update);
-        ESP_LOGI("HERE COMES THE JSON", "%s", json_update);
+        // ESP_LOGI("HERE COMES THE JSON", "%s", json_update);
         // gatt_machine_send_status_update_to_client(json_update);
       }
-
+      if (logger_memory.logger_state_next != -1) {
+        go_state_next(logger_memory.logger_state_next);
+        logger_memory.logger_state_next = -1;
+      }
       break;
     }
     case logger_state_read_routine_conf: {
@@ -389,7 +408,7 @@ static void query_task(void *arg) {
         gatt_machine_send_logger_update_to_client(json_update);
       }
       if (logger_memory.current_idx_read == logger_memory.current_size) {
-                print_array("air_ref_config:", ar_config, ar_config_names,
+        print_array("air_ref_config:", ar_config, ar_config_names,
                     ar_config_size);
         start_query_machine_status(&logger_memory);
         cJSON *root;
@@ -423,7 +442,8 @@ static void query_task(void *arg) {
       }
       if (logger_memory.current_idx_read == logger_memory.current_size) {
         jsonify_machine_conf(get_str_pnt_diocane());
-         ESP_LOGI("HERE COMES THE JSON", "LEN:%u - %s", strlen(get_str_pnt_diocane()), get_str_pnt_diocane());
+        ESP_LOGI("HERE COMES THE JSON", "LEN:%u - %s",
+                 strlen(get_str_pnt_diocane()), get_str_pnt_diocane());
         print_array("machine_config:", m_config, m_config_names, m_config_size);
         start_query_machine_status(&logger_memory);
         cJSON *root;
@@ -434,9 +454,10 @@ static void query_task(void *arg) {
         cJSON_Delete(root);
         ESP_LOGI("HERE COMES THE JSON", "LEN:%u - %s", strlen(json_update),
                  json_update);
-        gatt_machine_send_logger_update_to_client(json_update);
-         
-
+        bool done;
+        do {
+          done =gatt_machine_send_logger_update_to_client(json_update);
+        }while(!done);
       }
       // if changed...
       // jsonify
@@ -462,47 +483,52 @@ static void query_task(void *arg) {
 }
 
 void logger_set_state(logger_state_t new_state) {
-  if ((logger_memory.logger_state == logger_state_poll_routine_status) ||
-      (logger_memory.logger_state == logger_state_poll_routine_status)) {
-
-    logger_memory.logger_state = new_state;
-    logger_memory_tmp.logger_state = new_state;
-    logger_memory_tmp.current_idx_read = 0;
-    switch (new_state) {
-    case logger_state_read_routine_conf: {
-      start_query_routine_conf(&logger_memory);
-      break;
-    }
-    case logger_state_read_machine_conf: {
-      start_query_machine_conf(&logger_memory);
-      break;
-    }
-    case logger_state_write_routine_conf: {
-
-      logger_memory_tmp.current_command_type = write_routine_conf_parameter;
-      logger_memory_tmp.current_expected_reply_type = ack;
-      logger_memory_tmp.current_list = ar_config;
-      logger_memory_tmp.current_size = ar_config_size;
-
-      break;
-    }
-    case logger_state_write_machine_conf: {
-
-      logger_memory_tmp.current_command_type = write_machine_conf_parameter;
-      logger_memory_tmp.current_expected_reply_type = ack;
-      logger_memory_tmp.current_list = m_config;
-      logger_memory_tmp.current_size = m_config_size;
-
-      break;
-    }
-    default: {
-      break;
-    }
-    }
+  if (logger_memory.logger_state_next == -1) {
+    logger_memory.logger_state_next = new_state;
   }
-  else{
-    ESP_LOGI("LOGGER SET STATE", "CHANGE REJECTED");
-  }
+  return;
+
+  // if ((logger_memory.logger_state == logger_state_poll_routine_status) ||
+  //     (logger_memory.logger_state == logger_state_poll_routine_status)) {
+
+  //   logger_memory.logger_state = new_state;
+  //   logger_memory_tmp.logger_state = new_state;
+  //   logger_memory_tmp.current_idx_read = 0;
+  //   switch (new_state) {
+  //   case logger_state_read_routine_conf: {
+  //     start_query_routine_conf(&logger_memory);
+  //     break;
+  //   }
+  //   case logger_state_read_machine_conf: {
+  //     start_query_machine_conf(&logger_memory);
+  //     break;
+  //   }
+  //   case logger_state_write_routine_conf: {
+
+  //     logger_memory_tmp.current_command_type = write_routine_conf_parameter;
+  //     logger_memory_tmp.current_expected_reply_type = ack;
+  //     logger_memory_tmp.current_list = ar_config;
+  //     logger_memory_tmp.current_size = ar_config_size;
+
+  //     break;
+  //   }
+  //   case logger_state_write_machine_conf: {
+
+  //     logger_memory_tmp.current_command_type = write_machine_conf_parameter;
+  //     logger_memory_tmp.current_expected_reply_type = ack;
+  //     logger_memory_tmp.current_list = m_config;
+  //     logger_memory_tmp.current_size = m_config_size;
+
+  //     break;
+  //   }
+  //   default: {
+  //     break;
+  //   }
+  //   }
+  // }
+  // else{
+  //   ESP_LOGI("LOGGER SET STATE", "CHANGE REJECTED");
+  // }
 }
 
 void logger_init() {
