@@ -205,6 +205,4 @@ typedef enum{
 }air_ref_status_params_t;
 
 
-void logger_init() ;
-
 #endif /* AIR_REF_H_ */

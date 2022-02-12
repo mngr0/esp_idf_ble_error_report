@@ -10,7 +10,7 @@ typedef enum{
 	write_routine_conf_parameter,
 	write_machine_conf_parameter,
 	reply_routine_conf_parameter,
-	reply_routine_status_paramater,
+	reply_routine_status_parameter,
 	reply_machine_conf_parameter,
 	reply_machine_status_parameter,
 	reboot,

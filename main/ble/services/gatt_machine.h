@@ -1,6 +1,5 @@
-
-#ifndef GATT_M_STATE_H_
-#define GATT_M_STATE_H_
+#ifndef GATT_MACHINE_H_
+#define GATT_MACHINE_H_
 #include <stdint.h>
 
 #include "esp_gatt_defs.h"
@@ -10,20 +9,22 @@ typedef enum
 {
     GATT_MACHINE_IDX_SERVICE,
 
-    GATT_MACHINE_STATUS_CHAR,
-    GATT_MACHINE_STATUS_VALUE,
+    GATT_MACHINE_IDX_STATUS_CHAR,
+    GATT_MACHINE_IDX_STATUS_VALUE,
 
-    GATT_MACHINE_CONFIG_CHAR,
-    GATT_MACHINE_CONFIG_VALUE,
+    GATT_MACHINE_IDX_CONFIG_CHAR,
+    GATT_MACHINE_IDX_CONFIG_VALUE,
 
-    GATT_MACHINE_COMMAND_CHAR,
-    GATT_MACHINE_COMMAND_VALUE,
+    GATT_MACHINE_IDX_COMMAND_CHAR,
+    GATT_MACHINE_IDX_COMMAND_VALUE,
 
-    GATT_MACHINE_LOGGER_STATUS_CHAR,
-    GATT_MACHINE_LOGGER_STATUS_VALUE,
+    GATT_MACHINE_IDX_LOGGER_STATUS_CHAR,
+    GATT_MACHINE_IDX_LOGGER_STATUS_VALUE,
 
     GATT_MACHINE_NB
-} gatt_m_state_t;
+} gatt_machine_t;
+
+
 
 
 //status is notified, readonly
@@ -33,10 +34,18 @@ typedef enum
 
 //possible command are : [read_conf | ]
 
+// typedef struct {
+//     //pointer to send
+// } thing_t;
 
-uint16_t m_state_handle_table[GATT_MACHINE_NB];
+char* get_str_pnt_diocane();
 
-extern const uint16_t GATT_M_STATE_UUID_SERVICE;
-extern const esp_gatts_attr_db_t gatt_m_state_db[GATT_MACHINE_NB];
-extern void m_state_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param);
+void gatt_machine_send_status_update_to_client(char* json_status);
+void gatt_machine_send_logger_update_to_client(char* json_status);
+
+uint16_t machine_handle_table[GATT_MACHINE_NB];
+
+extern const uint16_t GATT_MACHINE_UUID_SERVICE;
+extern const esp_gatts_attr_db_t gatt_machine_db[GATT_MACHINE_NB];
+extern void machine_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param);
 #endif /* DEVINFO_SERVICE_H_ */

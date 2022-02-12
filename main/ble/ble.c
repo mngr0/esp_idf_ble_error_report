@@ -39,11 +39,10 @@
 
 #include "ble/ble.h"
 
-#include "services/gatt_ar_conf.h"
-#include "services/gatt_ar_state.h"
-#include "services/gatt_bluefi.h"
-#include "services/gatt_log_state.h"
-#include "services/gatt_m_state.h"
+// #include "services/gatt_ar_conf.h"
+// #include "services/gatt_ar_state.h"
+// #include "services/gatt_m_state.h"
+#include "services/gatt_machine.h"
 
 #define GATTS_TABLE_TAG "GATTS_TABLE_DEMO"
 
@@ -74,6 +73,8 @@ static uint8_t service_uuid[16] = {
     0xfb, 0x34, 0x9b, 0x5f, 0x80, 0x00, 0x00, 0x80,
     0x00, 0x10, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00,
 };
+
+static bool is_connected = false;
 
 /* The length of adv data must be less than 31 bytes */
 static esp_ble_adv_data_t adv_data = {
@@ -129,43 +130,13 @@ struct gatts_profile_inst heart_rate_profile_tab[PROFILE_NUM] = {
             .gatts_if = ESP_GATT_IF_NONE, /* Not get the gatt_if, so initial is
                                              ESP_GATT_IF_NONE */
         },
-    [PROFILE_M_STATE_IDX] =
+    [PROFILE_MACHINE_IDX] =
         {
-            .gatts_cb = m_state_event_handler,
+            .gatts_cb = machine_event_handler,
             .gatts_if = ESP_GATT_IF_NONE, /* Not get the gatt_if, so initial is
                                              ESP_GATT_IF_NONE */
 
         },
-    [PROFILE_AR_CONF_IDX] =
-        {
-            .gatts_cb = ar_conf_event_handler,
-            .gatts_if = ESP_GATT_IF_NONE, /* Not get the gatt_if, so initial is
-                                             ESP_GATT_IF_NONE */
-
-        },
-    [PROFILE_AR_STATE_IDX] =
-        {
-            .gatts_cb = ar_state_event_handler,
-            .gatts_if = ESP_GATT_IF_NONE, /* Not get the gatt_if, so initial is
-                                             ESP_GATT_IF_NONE */
-
-        },
-
-    [PROFILE_BLUEFI_IDX] =
-        {
-            .gatts_cb = bluefi_event_handler,
-            .gatts_if = ESP_GATT_IF_NONE, /* Not get the gatt_if, so initial is
-                                             ESP_GATT_IF_NONE */
-
-        },
-
-    [PROFILE_LOG_STATE_IDX] =
-        {
-            .gatts_cb = log_state_event_handler,
-            .gatts_if = ESP_GATT_IF_NONE, /* Not get the gatt_if, so initial is
-                                             ESP_GATT_IF_NONE */
-        },
-
 };
 
 static void gap_event_handler(esp_gap_ble_cb_event_t event,
@@ -280,6 +251,10 @@ void example_exec_write_event_env(prepare_type_env_t *prepare_write_env,
   prepare_write_env->prepare_len = 0;
 }
 
+bool ble_is_connected(){
+  return is_connected;
+}
+
 void gatts_profile_event_handler(esp_gatts_cb_event_t event,
                                  esp_gatt_if_t gatts_if,
                                  esp_ble_gatts_cb_param_t *param) {
@@ -343,8 +318,8 @@ void gatts_profile_event_handler(esp_gatts_cb_event_t event,
     ESP_LOGI(GATTS_TABLE_TAG, "ESP_GATTS_MTU_EVT, MTU %d", param->mtu.mtu);
     break;
   case ESP_GATTS_CONF_EVT:
-    ESP_LOGI(GATTS_TABLE_TAG, "ESP_GATTS_CONF_EVT, status = %d, attr_handle %d",
-             param->conf.status, param->conf.handle);
+    //ESP_LOGI(GATTS_TABLE_TAG, "ESP_GATTS_CONF_EVT, status = %d, attr_handle %d",
+    //         param->conf.status, param->conf.handle);
     break;
   case ESP_GATTS_START_EVT:
     ESP_LOGI(GATTS_TABLE_TAG, "SERVICE_START_EVT, status %d, service_handle %d",
@@ -363,11 +338,14 @@ void gatts_profile_event_handler(esp_gatts_cb_event_t event,
     conn_params.min_int = 0x10; // min_int = 0x10*1.25ms = 20ms // apple: 0x0c 15ms
     conn_params.timeout = 400;  // timeout = 400*10ms = 4000ms //apple: compreso tra 2 e 6 secondi
     // start sent the update connection parameters to the peer device.
+    is_connected = true;
+
     esp_ble_gap_update_conn_params(&conn_params);
     break;
   case ESP_GATTS_DISCONNECT_EVT:
     ESP_LOGI(GATTS_TABLE_TAG, "ESP_GATTS_DISCONNECT_EVT, reason = 0x%x",
              param->disconnect.reason);
+             is_connected = false;
     esp_ble_gap_start_advertising(&adv_params);
     break;
   case ESP_GATTS_CREAT_ATTR_TAB_EVT: {
@@ -377,81 +355,25 @@ void gatts_profile_event_handler(esp_gatts_cb_event_t event,
                param->add_attr_tab.status);
     }
 
-    else if (param->add_attr_tab.svc_uuid.uuid.uuid16 ==
-             GATT_AR_CONF_UUID_SERVICE) {
-      if (param->add_attr_tab.num_handle != GATT_AR_CONF_NB) {
-        ESP_LOGE(GATTS_TABLE_TAG,
-                 "create attribute ar conf table abnormally, num_handle (%d) "
-                 "isn't equal to INFO_NB(%d)",
-                 param->add_attr_tab.num_handle, GATT_AR_CONF_NB);
-      } else {
-        ESP_LOGI(GATTS_TABLE_TAG,
-                 "create attribute ar_conf table successfully, the number "
-                 "handle = %d\n",
-                 param->add_attr_tab.num_handle);
-        memcpy(ar_conf_handle_table, param->add_attr_tab.handles,
-               sizeof(ar_conf_handle_table));
-        esp_ble_gatts_start_service(
-            ar_conf_handle_table[GATT_AR_CONF_IDX_SERVICE]);
-      }
-    }
 
-    else if (param->add_attr_tab.svc_uuid.uuid.uuid16 ==
-             GATT_AR_STATE_UUID_SERVICE) {
-      if (param->add_attr_tab.num_handle != GATT_AR_STATE_NB) {
-        ESP_LOGE(GATTS_TABLE_TAG,
-                 "create attribute ar state table abnormally, num_handle (%d) "
-                 "isn't equal to INFO_NB(%d)",
-                 param->add_attr_tab.num_handle, GATT_AR_STATE_NB);
-      } else {
-        ESP_LOGI(GATTS_TABLE_TAG,
-                 "create attribute ar state table successfully, the number "
-                 "handle = %d\n",
-                 param->add_attr_tab.num_handle);
-        memcpy(ar_state_handle_table, param->add_attr_tab.handles,
-               sizeof(ar_state_handle_table));
-        esp_ble_gatts_start_service(
-            ar_state_handle_table[GATT_AR_STATE_IDX_SERVICE]);
-      }
-    }
+    // else if (param->add_attr_tab.svc_uuid.uuid.uuid16 ==
+    //     GATT_MACHINE_UUID_SERVICE) {
+    //   if (param->add_attr_tab.num_handle != GATT_MACHINE_NB) {
+    //     ESP_LOGE(GATTS_TABLE_TAG,
+    //              "create attribute log state table abnormally, num_handle (%d) "
+    //              "isn't equal to INFO_NB(%d)",
+    //              param->add_attr_tab.num_handle, GATT_MACHINE_NB);
+    //   } else {
+    //     ESP_LOGI(GATTS_TABLE_TAG,
+    //              "create attribute log state table successfully, the number "
+    //              "handle = %d\n",
+    //              param->add_attr_tab.num_handle);
+    //     memcpy(machine_handle_table, param->add_attr_tab.handles,
+    //            sizeof(machine_handle_table));
+    //     esp_ble_gatts_start_service(machine_handle_table[GATT_MACHINE_IDX_SERVICE]);
 
-    else if (param->add_attr_tab.svc_uuid.uuid.uuid16 ==
-             GATT_M_STATE_UUID_SERVICE) {
-      if (param->add_attr_tab.num_handle != GATT_M_STATE_NB) {
-        ESP_LOGE(GATTS_TABLE_TAG,
-                 "create attribute m state table abnormally, num_handle (%d) "
-                 "isn't equal to INFO_NB(%d)",
-                 param->add_attr_tab.num_handle, GATT_M_STATE_NB);
-      } else {
-        ESP_LOGI(GATTS_TABLE_TAG,
-                 "create attribute m state table successfully, the number "
-                 "handle = %d\n",
-                 param->add_attr_tab.num_handle);
-        memcpy(m_state_handle_table, param->add_attr_tab.handles,
-               sizeof(m_state_handle_table));
-        esp_ble_gatts_start_service(
-            m_state_handle_table[GATT_M_STATE_IDX_SERVICE]);
-      }
-    }
-
-    else if (param->add_attr_tab.svc_uuid.uuid.uuid16 ==
-             GATT_LOG_STATE_UUID_SERVICE) {
-      if (param->add_attr_tab.num_handle != GATT_LOG_STATE_NB) {
-        ESP_LOGE(GATTS_TABLE_TAG,
-                 "create attribute log state table abnormally, num_handle (%d) "
-                 "isn't equal to INFO_NB(%d)",
-                 param->add_attr_tab.num_handle, GATT_LOG_STATE_NB);
-      } else {
-        ESP_LOGI(GATTS_TABLE_TAG,
-                 "create attribute log state table successfully, the number "
-                 "handle = %d\n",
-                 param->add_attr_tab.num_handle);
-        memcpy(log_state_handle_table, param->add_attr_tab.handles,
-               sizeof(log_state_handle_table));
-        esp_ble_gatts_start_service(
-            log_state_handle_table[GATT_LOG_STATE_IDX_SERVICE]);
-      }
-    }
+    //   }
+    // }
 
     break;
   }
@@ -471,6 +393,8 @@ void gatts_profile_event_handler(esp_gatts_cb_event_t event,
 static void gatts_event_handler(esp_gatts_cb_event_t event,
                                 esp_gatt_if_t gatts_if,
                                 esp_ble_gatts_cb_param_t *param) {
+                                  
+  //ESP_LOGI(GATTS_TABLE_TAG,"event %d to inteface %d", event, gatts_if);
   /* If event is register event, store the gatts_if for each profile */
   if (event == ESP_GATTS_REG_EVT) {
     if (param->reg.status == ESP_GATT_OK) {
@@ -549,34 +473,34 @@ void BLE_init(void) {
     ESP_LOGE(GATTS_TABLE_TAG, "gatts app register error, error code = %x", ret);
     return;
   }
-  ret = esp_ble_gatts_app_register(PROFILE_M_STATE_IDX);
-  if (ret) {
-    ESP_LOGE(GATTS_TABLE_TAG, "gatts app register error, error code = %x", ret);
-    return;
-  }
-  ret = esp_ble_gatts_app_register(PROFILE_AR_CONF_IDX);
+  // ret = esp_ble_gatts_app_register(PROFILE_M_STATE_IDX);
+  // if (ret) {
+  //   ESP_LOGE(GATTS_TABLE_TAG, "gatts app register error, error code = %x", ret);
+  //   return;
+  // }
+  // ret = esp_ble_gatts_app_register(PROFILE_AR_CONF_IDX);
+  // if (ret) {
+  //   ESP_LOGE(GATTS_TABLE_TAG, "gatts app register error, error code = %x", ret);
+  //   return;
+  // }
+
+  // ret = esp_ble_gatts_app_register(PROFILE_AR_STATE_IDX);
+  // if (ret) {
+  //   ESP_LOGE(GATTS_TABLE_TAG, "gatts app register error, error code = %x", ret);
+  //   return;
+  // }
+
+  ret = esp_ble_gatts_app_register(PROFILE_MACHINE_IDX);
   if (ret) {
     ESP_LOGE(GATTS_TABLE_TAG, "gatts app register error, error code = %x", ret);
     return;
   }
 
-  ret = esp_ble_gatts_app_register(PROFILE_AR_STATE_IDX);
-  if (ret) {
-    ESP_LOGE(GATTS_TABLE_TAG, "gatts app register error, error code = %x", ret);
-    return;
-  }
-
-  ret = esp_ble_gatts_app_register(PROFILE_LOG_STATE_IDX);
-  if (ret) {
-    ESP_LOGE(GATTS_TABLE_TAG, "gatts app register error, error code = %x", ret);
-    return;
-  }
-
-  ret = esp_ble_gatts_app_register(PROFILE_BLUEFI_IDX);
-  if (ret) {
-    ESP_LOGE(GATTS_TABLE_TAG, "gatts app register error, error code = %x", ret);
-    return;
-  }
+  // ret = esp_ble_gatts_app_register(PROFILE_BLUEFI_IDX);
+  // if (ret) {
+  //   ESP_LOGE(GATTS_TABLE_TAG, "gatts app register error, error code = %x", ret);
+  //   return;
+  // }
 
   esp_err_t local_mtu_ret = esp_ble_gatt_set_local_mtu(500);
   if (local_mtu_ret) {

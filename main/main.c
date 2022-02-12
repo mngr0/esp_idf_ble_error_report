@@ -32,7 +32,7 @@
 #include "peripherals/uart.h"
 #include "peripherals/i2c_devices.h"
 #include "peripherals/spi_sd.h"
-#include "air_ref/air_ref.h"
+#include "air_ref/logger.h"
 
 #include "ble/ble.h"
 #define GATTS_TABLE_TAG "GATTS_TABLE_DEMO"
@@ -118,6 +118,6 @@ void app_main(void) {
 
   configure_serial();
 
-  //BLE_init();
+  BLE_init();
   logger_init();
 }

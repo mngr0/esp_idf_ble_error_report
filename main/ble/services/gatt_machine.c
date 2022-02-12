@@ -1,21 +1,7 @@
-/*
-   This example code is in the Public Domain (or CC0 licensed, at your option.)
+#include <stdint.h>
+#include <string.h>
 
-   Unless required by applicable law or agreed to in writing, this
-   software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-   CONDITIONS OF ANY KIND, either express or implied.
-*/
-
-/****************************************************************************
-*
-* This demo showcases creating a GATT database using a predefined attribute table.
-* It acts as a GATT server and can send adv data, be connected by client.
-* Run the gatt_client demo, the client demo will automatically connect to the gatt_server_service_table demo.
-* Client demo will enable GATT server's notify after connection. The two devices will then exchange
-* data.
-*
-****************************************************************************/
-
+#include "esp_gatt_defs.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/event_groups.h"
@@ -32,13 +18,14 @@
 #include "driver/gpio.h"
 #include "driver/uart.h"
 
-#include "gatt_m_state.h"
+#include "gatt_machine.h"
 
 #include "ble/ble.h"
 #include "stdbool.h"
 
-
-#define GATTS_M_STATE_TAG "GATTS_M_STATE"
+#include "cJSON.h"
+#include "air_ref/logger.h"
+#define GATTS_MACHINE_TAG "GATTS_MACHINE"
 
 extern void jsonify_machine_status(char**output);
 
@@ -46,150 +33,349 @@ extern void jsonify_machine_status(char**output);
 extern uint8_t raw_scan_rsp_data[10];
 extern uint8_t raw_adv_data[26];
 extern struct gatts_profile_inst machine_state_profile_tab[PROFILE_NUM];
-const uint16_t GATT_M_STATE_UUID_SERVICE = (0xFF00 | GATT_M_STATE_IDX_SERVICE) & (PROFILE_M_STATE_IDX << 8);
-const uint16_t GATT_M_STATE_UUID_VALUE = (0xFF00 | GATT_M_STATE_IDX_VALUE) & (PROFILE_M_STATE_IDX << 8);
+
+const uint16_t GATT_MACHINE_UUID_SERVICE = (GATT_MACHINE_IDX_SERVICE) | (PROFILE_MACHINE_IDX << 8);
+const uint16_t GATT_MACHINE_STATUS_VALUE = ( GATT_MACHINE_IDX_STATUS_VALUE) | (PROFILE_MACHINE_IDX << 8);
+const uint16_t GATT_MACHINE_CONFIG_VALUE = (GATT_MACHINE_IDX_CONFIG_VALUE) | (PROFILE_MACHINE_IDX << 8);
+const uint16_t GATT_MACHINE_COMMAND_VALUE = ( GATT_MACHINE_IDX_COMMAND_VALUE) | (PROFILE_MACHINE_IDX << 8);
+const uint16_t GATT_MACHINE_LOGGER_STATUS_VALUE = ( GATT_MACHINE_IDX_LOGGER_STATUS_VALUE) | (PROFILE_MACHINE_IDX << 8);
+
 
 static const uint16_t primary_service_uuid = ESP_GATT_UUID_PRI_SERVICE;
+
 static const uint16_t character_declaration_uuid = ESP_GATT_UUID_CHAR_DECLARE;
-static const uint8_t char_prop_read_notify = ESP_GATT_CHAR_PROP_BIT_READ | ESP_GATT_CHAR_PROP_BIT_NOTIFY;
+static const uint8_t char_prop_read_notify = ESP_GATT_CHAR_PROP_BIT_READ | ESP_GATT_CHAR_PROP_BIT_NOTIFY | ESP_GATT_CHAR_PROP_BIT_INDICATE;
+static const uint8_t char_prop_read_write = ESP_GATT_CHAR_PROP_BIT_READ | ESP_GATT_CHAR_PROP_BIT_WRITE;
+static const uint8_t char_prop_notify =  ESP_GATT_CHAR_PROP_BIT_NOTIFY | ESP_GATT_CHAR_PROP_BIT_INDICATE;
+static const uint8_t char_prop_write =  ESP_GATT_CHAR_PROP_BIT_WRITE;
 
 static prepare_type_env_t b_prepare_write_env;
-static esp_gatt_char_prop_t b_property = 0;
+//static esp_gatt_char_prop_t b_property = 0;
+static uint16_t spp_conn_id = 0xffff;
 
-/* Full Database Description - Used to add attributes into the database */
-const esp_gatts_attr_db_t gatt_m_state_db[GATT_M_STATE_NB] =
+static esp_gatt_if_t spp_gatts_if = 0xff;
+
+char memory_machine_status[1024]={'a','a','a','a'};
+char memory_machine_conf[1024];
+char diocane3[1024]={'c','a','a','a'};
+char diocane4[1024]={'d','a','a','a'};
+
+
+char* get_str_pnt_diocane(){
+    return memory_machine_conf;
+}
+
+const esp_gatts_attr_db_t gatt_machine_db[GATT_MACHINE_NB] =
     {
-        [GATT_M_STATE_IDX_SERVICE] =
-            {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&primary_service_uuid, ESP_GATT_PERM_READ, sizeof(uint16_t), sizeof(GATT_M_STATE_UUID_SERVICE), (uint8_t *)&GATT_M_STATE_UUID_SERVICE}},
+        [GATT_MACHINE_IDX_SERVICE] =
+            {{ESP_GATT_AUTO_RSP},  {ESP_UUID_LEN_16, (uint8_t *)&primary_service_uuid,  ESP_GATT_PERM_READ, 
+            sizeof(GATT_MACHINE_UUID_SERVICE), sizeof(GATT_MACHINE_UUID_SERVICE), (uint8_t *)&GATT_MACHINE_UUID_SERVICE}},
 
-        [GATT_M_STATE_IDX_CHAR] =
-            {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&character_declaration_uuid, ESP_GATT_PERM_READ, CHAR_DECLARATION_SIZE, CHAR_DECLARATION_SIZE, (uint8_t *)&char_prop_read_notify}},
 
-        [GATT_M_STATE_IDX_VALUE] =
-            {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&GATT_M_STATE_UUID_VALUE, ESP_GATT_PERM_READ, GATTS_DEMO_CHAR_VAL_LEN_MAX, 100,0}},//sizeof(machine_state_t), (uint8_t *)&m_state}},
+        [GATT_MACHINE_IDX_STATUS_CHAR] = //notify only
+            {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&character_declaration_uuid, ESP_GATT_PERM_READ| ESP_GATT_PERM_WRITE, //write here should enable/disable notification
+             CHAR_DECLARATION_SIZE, CHAR_DECLARATION_SIZE, (uint8_t *)&char_prop_notify}},
+
+        [GATT_MACHINE_IDX_STATUS_VALUE] =
+            {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&GATT_MACHINE_STATUS_VALUE, ESP_GATT_PERM_READ,
+             GATTS_DEMO_CHAR_VAL_LEN_MAX, 1024, (uint8_t*)memory_machine_status }},//sizeof(machine_state_t), (uint8_t *)&m_state}},
+
+
+        [GATT_MACHINE_IDX_CONFIG_CHAR] = //read notify write?
+            {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&character_declaration_uuid, ESP_GATT_PERM_READ ,
+             CHAR_DECLARATION_SIZE, CHAR_DECLARATION_SIZE, (uint8_t *)&char_prop_read_write}},
+
+        [GATT_MACHINE_IDX_CONFIG_VALUE] =
+            {{ESP_GATT_RSP_BY_APP}, {ESP_UUID_LEN_16, (uint8_t *)&GATT_MACHINE_CONFIG_VALUE, ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE,
+             GATTS_DEMO_CHAR_VAL_LEN_MAX, 1024, (uint8_t*)memory_machine_conf}},//sizeof(machine_state_t), (uint8_t *)&m_state}},
+
+
+        [GATT_MACHINE_IDX_COMMAND_CHAR] = //write only
+            {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&character_declaration_uuid, ESP_GATT_PERM_READ,
+             CHAR_DECLARATION_SIZE, CHAR_DECLARATION_SIZE, (uint8_t *)&char_prop_write}},
+
+        [GATT_MACHINE_IDX_COMMAND_VALUE] =
+            {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&GATT_MACHINE_COMMAND_VALUE, ESP_GATT_PERM_WRITE,
+             GATTS_DEMO_CHAR_VAL_LEN_MAX, 64, (uint8_t*)diocane3}},//sizeof(machine_state_t), (uint8_t *)&m_state}},
+
+
+        [GATT_MACHINE_IDX_LOGGER_STATUS_CHAR] = // read notify ()
+            {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&character_declaration_uuid, ESP_GATT_PERM_READ,
+             CHAR_DECLARATION_SIZE, CHAR_DECLARATION_SIZE, (uint8_t *)&char_prop_read_notify}},
+
+        [GATT_MACHINE_IDX_LOGGER_STATUS_VALUE] =
+            {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&GATT_MACHINE_LOGGER_STATUS_VALUE, ESP_GATT_PERM_READ,
+             GATTS_DEMO_CHAR_VAL_LEN_MAX, 64, (uint8_t*)diocane4}},//sizeof(machine_state_t), (uint8_t *)&m_state}},
 };
 
-void m_state_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param)
+static uint8_t find_char_and_desr_index(uint16_t handle)
 {
+    uint8_t error = 0xff;
+
+    for(int i = 0; i < GATT_MACHINE_NB ; i++){
+        if(handle == machine_handle_table[i]){
+            return i;
+        }
+        ESP_LOGI(GATTS_MACHINE_TAG, " handle discarded %d",machine_handle_table[i] );
+    }
+    return error;
+}
+
+#define mtu_size 20
+
+#define min(a,b) (a<b ? a:b)
+
+void gatt_machine_send_status_update_to_client(char* json_status){
+    if(ble_is_connected()){
+        ESP_LOGI(GATTS_MACHINE_TAG, " INDICATING " );
+        uint16_t i=0;
+        uint16_t partial_size=0;
+        while(i< strlen(json_status)){
+            partial_size = min(mtu_size, strlen(json_status) - i);
+            esp_ble_gatts_send_indicate(heart_rate_profile_tab[PROFILE_MACHINE_IDX].gatts_if, spp_conn_id, machine_handle_table[GATT_MACHINE_IDX_STATUS_VALUE],
+                        partial_size, (uint8_t*)&json_status[i], false);
+            i+=partial_size;
+            vTaskDelay(10 / portTICK_PERIOD_MS);
+        }
+    }
+}
+
+void gatt_machine_send_logger_update_to_client(char* json_status){
+if(ble_is_connected()){
+        ESP_LOGI(GATTS_MACHINE_TAG, " INDICATING " );
+        uint16_t i=0;
+        uint16_t partial_size=0;
+        while(i< strlen(json_status)){
+            partial_size = min(mtu_size, strlen(json_status) - i);
+            esp_ble_gatts_send_indicate(heart_rate_profile_tab[PROFILE_MACHINE_IDX].gatts_if, spp_conn_id, machine_handle_table[GATT_MACHINE_IDX_LOGGER_STATUS_VALUE],
+                        partial_size, (uint8_t*)&json_status[i], false);
+            i+=partial_size;
+            vTaskDelay(10 / portTICK_PERIOD_MS);
+        }
+    }
+}
+
+
+
+void machine_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param)
+{
+    esp_ble_gatts_cb_param_t *p_data = (esp_ble_gatts_cb_param_t *) param;
+    uint8_t res = 0xff;
     switch (event)
     {
-    case ESP_GATTS_REG_EVT:
-        ESP_LOGI(GATTS_M_STATE_TAG, "REGISTER_APP_EVT, status %d, app_id %d\n", param->reg.status, param->reg.app_id);
-        heart_rate_profile_tab[PROFILE_M_STATE_IDX].service_id.is_primary = true;
-        heart_rate_profile_tab[PROFILE_M_STATE_IDX].service_id.id.inst_id = 0x00;
-        heart_rate_profile_tab[PROFILE_M_STATE_IDX].service_id.id.uuid.len = ESP_UUID_LEN_16;
-        heart_rate_profile_tab[PROFILE_M_STATE_IDX].service_id.id.uuid.uuid.uuid16 = GATT_M_STATE_UUID_SERVICE;
+    case ESP_GATTS_REG_EVT:{
+        //TODO lo devo mettere?
+        // esp_err_t set_dev_name_ret = esp_ble_gap_set_device_name(SAMPLE_DEVICE_NAME);
+        // if (set_dev_name_ret){
+        //     ESP_LOGE(GATTS_MACHINE_TAG, "set device name failed, error code = %x", set_dev_name_ret);
+        // }
+        // esp_err_t ret = esp_ble_gap_config_adv_data(&adv_data);
+        // if (ret){
+        //     ESP_LOGE(GATTS_MACHINE_TAG, "config adv data failed, error code = %x", ret);
+        // }
+        // adv_config_done |= ADV_CONFIG_FLAG;
+        // //config scan response data
+        // ret = esp_ble_gap_config_adv_data(&scan_rsp_data);
+        // if (ret){
+        //     ESP_LOGE(GATTS_MACHINE_TAG, "config scan response data failed, error code = %x", ret);
+        // }
+        // adv_config_done |= SCAN_RSP_CONFIG_FLAG;
 
-        esp_ble_gatts_create_service(gatts_if, &heart_rate_profile_tab[PROFILE_M_STATE_IDX].service_id, GATT_M_STATE_NB);
+        ESP_LOGI(GATTS_MACHINE_TAG, "REGISTER_APP_EVT, status %d, app_id %d\n", param->reg.status, param->reg.app_id);
+
+        esp_err_t create_attr_ret = esp_ble_gatts_create_attr_tab(gatt_machine_db, gatts_if, GATT_MACHINE_NB, PROFILE_MACHINE_IDX);//ultimo parametro modificato
+        if (create_attr_ret){
+            ESP_LOGE(GATTS_MACHINE_TAG, "create attr table failed, error code = %x", create_attr_ret);
+        }
+
         break;
+    }
     case ESP_GATTS_READ_EVT:
     { // READ MACHINE STATE
-        ESP_LOGI(GATTS_M_STATE_TAG, "GATT_READ_EVT, conn_id %d, trans_id %d, handle %d\n", param->read.conn_id, param->read.trans_id, param->read.handle);
+    res = find_char_and_desr_index(p_data->read.handle);
+        ESP_LOGI(GATTS_MACHINE_TAG, "GATT_READ_EVT, conn_id %d, trans_id %d, handle %d res=%d\n", param->read.conn_id, param->read.trans_id, param->read.handle,res);
         esp_gatt_rsp_t rsp;
         //sned m_state as json
+        //res = find_char_and_desr_index(p_data->read.handle);
+        switch(res){
+            case GATT_MACHINE_IDX_STATUS_VALUE:{
+                //send machine status
+                break;
+            }
+            case GATT_MACHINE_IDX_CONFIG_VALUE:{
+                ESP_LOGI(GATTS_MACHINE_TAG, "GATT_MACHINE_IDX_CONFIG_VALUE");
+                esp_gatt_rsp_t rsp;
+
+                 memset(&rsp, 0, sizeof(esp_gatt_rsp_t));
+                rsp.attr_value.handle = param->read.handle;
+
+                ESP_LOGI(GATTS_MACHINE_TAG, "RESPONSE LEN %d", strlen(memory_machine_conf) );
+                rsp.attr_value.len = strlen(memory_machine_conf);
+                memcpy(rsp.attr_value.value, memory_machine_conf, strlen(memory_machine_conf));
+                esp_ble_gatts_send_response(gatts_if, param->read.conn_id, param->read.trans_id,
+                                 ESP_GATT_OK, &rsp);
 
 
+                // ESP_LOGI(GATTS_MACHINE_TAG, " INDICATING " );
+                // uint16_t i=0;
+                // uint16_t partial_size=0;
+                // while(i< strlen(json_status)){
+                //     partial_size = min(mtu_size, strlen(json_status) - i);
 
-        // flatcc_builder_t builder;
-        // size_t size;
-        // void *buf;
 
-        // memset(&rsp, 0, sizeof(esp_gatt_rsp_t));
-        // rsp.attr_value.handle = param->read.handle;
-
-        // flatcc_builder_init(&builder);
-        // load_m_state(&builder, &m_state);
-        // buf = flatcc_builder_finalize_buffer(&builder, &size);
-        // rsp.attr_value.len = size;
-        // memcpy(rsp.attr_value.value, buf, size);
-        // ESP_LOGI(GATTS_M_STATE_TAG, "required size: %d\n", size);
-
-        // flatcc_builder_aligned_free(buf);
-        // flatcc_builder_clear(&builder);
-
-        esp_ble_gatts_send_response(gatts_if, param->read.conn_id, param->read.trans_id,
-                                    ESP_GATT_OK, &rsp);
+                //     esp_ble_gatts_send_indicate(heart_rate_profile_tab[PROFILE_MACHINE_IDX].gatts_if, spp_conn_id, machine_handle_table[GATT_MACHINE_IDX_LOGGER_STATUS_VALUE],
+                //                 partial_size, (uint8_t*)&json_status[i], false);
+                //     i+=partial_size;
+                //     vTaskDelay(10 / portTICK_PERIOD_MS);
+                // }
+                //send machine config
+                break;
+            }
+            case GATT_MACHINE_IDX_COMMAND_VALUE:{
+                //nothing to say
+                break;
+            }
+            case GATT_MACHINE_IDX_LOGGER_STATUS_VALUE:{
+                //send logger status
+                break;
+            }
+            default:{
+                break;
+            }
+        }
+        // if (param->write.need_rsp){
+        //     esp_ble_gatts_send_response(gatts_if, param->read.conn_id, param->read.trans_id,
+        //                             ESP_GATT_OK, &rsp);
+        // }
         break;
     }
     case ESP_GATTS_WRITE_EVT:
     { //EDIT CONF
-        ESP_LOGI(GATTS_M_STATE_TAG, "GATT_WRITE_EVT, conn_id %d, trans_id %d, handle %d\n", param->write.conn_id, param->write.trans_id, param->write.handle);
+        
+        if(p_data->write.is_prep == false){
+            res = find_char_and_desr_index(p_data->write.handle);
+            switch(res){
+                case GATT_MACHINE_IDX_STATUS_VALUE:{
+                    //non write
+                    break;
+                }
+                case GATT_MACHINE_IDX_CONFIG_VALUE:{
+                    //start config update procedure
+                    break;
+                }
+                case GATT_MACHINE_IDX_COMMAND_VALUE:{
+                    //TODO HERE
+                    ESP_LOGI(GATTS_MACHINE_TAG, "RECEIVING WRITE ON COMMAND");
+                    esp_log_buffer_hex(GATTS_MACHINE_TAG, param->write.value, param->write.len);
+                    //if (param->write.len < strlen((char*)param->write.value)){
+                        ESP_LOGI(GATTS_MACHINE_TAG, "STRING IS VALID");
+                    
+                        cJSON *root;
+                        root = cJSON_ParseWithLength((char*)param->write.value, param->write.len);
+                        cJSON *width = cJSON_GetObjectItemCaseSensitive(root, "cmd");
+                        ESP_LOGI(GATTS_MACHINE_TAG, "VALUE IS %d",width->valueint);
+                        if (cJSON_IsNumber(width)){
+                            ESP_LOGI(GATTS_MACHINE_TAG, "VALUE IS VALID");
+                            if(width->valueint == 2){
+                                ESP_LOGI(GATTS_MACHINE_TAG, "VALUE IS 2");
+                                logger_set_state(logger_state_read_machine_conf);
+                            }
+                        }
+                        cJSON_Delete(root);
+                    //}
+                    //if command==read conf
+                    ///start config read
+   
+                    break;
+                }
+                case GATT_MACHINE_IDX_LOGGER_STATUS_VALUE:{
+                    //non write
+                    break;
+                }
+                default:{
+                    break;
+                }
+            }
+        }
+
+
+        ESP_LOGI(GATTS_MACHINE_TAG, "GATT_WRITE_EVT, conn_id %d, trans_id %d, handle %d\n", param->write.conn_id, param->write.trans_id, param->write.handle);
         if (!param->write.is_prep)
         {
-            ESP_LOGI(GATTS_M_STATE_TAG, "GATT_WRITE_EVT, value len %d, value :", param->write.len);
-            esp_log_buffer_hex(GATTS_M_STATE_TAG, param->write.value, param->write.len);
+            ESP_LOGI(GATTS_MACHINE_TAG, "GATT_WRITE_EVT, value len %d, value :", param->write.len);
+            esp_log_buffer_hex(GATTS_MACHINE_TAG, param->write.value, param->write.len);
         }
         example_write_event_env(gatts_if, &b_prepare_write_env, param);
         break;
     }
     case ESP_GATTS_EXEC_WRITE_EVT:
-        ESP_LOGI(GATTS_M_STATE_TAG, "ESP_GATTS_EXEC_WRITE_EVT");
+        ESP_LOGI(GATTS_MACHINE_TAG, "ESP_GATTS_EXEC_WRITE_EVT");
         esp_ble_gatts_send_response(gatts_if, param->write.conn_id, param->write.trans_id, ESP_GATT_OK, NULL);
         example_exec_write_event_env(&b_prepare_write_env, param);
         break;
     case ESP_GATTS_MTU_EVT:
-        ESP_LOGI(GATTS_M_STATE_TAG, "ESP_GATTS_MTU_EVT, MTU %d", param->mtu.mtu);
+        ESP_LOGI(GATTS_MACHINE_TAG, "ESP_GATTS_MTU_EVT, MTU %d", param->mtu.mtu);
+        break;
+    case ESP_GATTS_START_EVT:
+        ESP_LOGI(GATTS_MACHINE_TAG, "SERVICE_START_EVT, status %d, service_handle %d", param->start.status, param->start.service_handle);
         break;
     case ESP_GATTS_UNREG_EVT:
         break;
     case ESP_GATTS_CREATE_EVT:
-        ESP_LOGI(GATTS_M_STATE_TAG, "CREATE_SERVICE_EVT, status %d,  service_handle %d\n", param->create.status, param->create.service_handle);
-        heart_rate_profile_tab[PROFILE_M_STATE_IDX].service_handle = param->create.service_handle;
-        heart_rate_profile_tab[PROFILE_M_STATE_IDX].char_uuid.len = ESP_UUID_LEN_16;
-        heart_rate_profile_tab[PROFILE_M_STATE_IDX].char_uuid.uuid.uuid16 = GATT_M_STATE_UUID_VALUE;
-
-        esp_ble_gatts_start_service(heart_rate_profile_tab[PROFILE_M_STATE_IDX].service_handle);
-        b_property = ESP_GATT_CHAR_PROP_BIT_READ | ESP_GATT_CHAR_PROP_BIT_WRITE | ESP_GATT_CHAR_PROP_BIT_NOTIFY;
-        esp_err_t add_char_ret = esp_ble_gatts_add_char(heart_rate_profile_tab[PROFILE_M_STATE_IDX].service_handle, &heart_rate_profile_tab[PROFILE_M_STATE_IDX].char_uuid,
-                                                        ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE,
-                                                        b_property,
-                                                        NULL, NULL);
-        if (add_char_ret)
-        {
-            ESP_LOGE(GATTS_M_STATE_TAG, "add char failed, error code =%x", add_char_ret);
-        }
+        ESP_LOGI(GATTS_MACHINE_TAG, "CREATE_SERVICE_EVT, status %d,  service_handle %d\n", param->create.status, param->create.service_handle);
         break;
     case ESP_GATTS_ADD_INCL_SRVC_EVT:
         break;
-    case ESP_GATTS_ADD_CHAR_EVT:
-        ESP_LOGI(GATTS_M_STATE_TAG, "ADD_CHAR_EVT, status %d,  attr_handle %d, service_handle %d\n",
-                 param->add_char.status, param->add_char.attr_handle, param->add_char.service_handle);
+    case ESP_GATTS_CONNECT_EVT:
+        ESP_LOGI(GATTS_MACHINE_TAG, "ESP_GATTS_CONNECT_EVT, conn_id = %d", param->connect.conn_id);
+        esp_log_buffer_hex(GATTS_MACHINE_TAG, param->connect.remote_bda, 6);
+    	    spp_conn_id = p_data->connect.conn_id;
+    	    spp_gatts_if = gatts_if;
 
-        heart_rate_profile_tab[PROFILE_M_STATE_IDX].char_handle = param->add_char.attr_handle;
-        heart_rate_profile_tab[PROFILE_M_STATE_IDX].descr_uuid.len = ESP_UUID_LEN_16;
-        heart_rate_profile_tab[PROFILE_M_STATE_IDX].descr_uuid.uuid.uuid16 = ESP_GATT_UUID_CHAR_CLIENT_CONFIG;
-        esp_ble_gatts_add_char_descr(heart_rate_profile_tab[PROFILE_M_STATE_IDX].service_handle, &heart_rate_profile_tab[PROFILE_M_STATE_IDX].descr_uuid,
-                                     ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE,
-                                     NULL, NULL);
+        esp_ble_conn_update_params_t conn_params = {0};
+        memcpy(conn_params.bda, param->connect.remote_bda, sizeof(esp_bd_addr_t));
+        /* For the iOS system, please refer to Apple official documents about the BLE connection parameters restrictions. */
+        conn_params.latency = 0;
+        conn_params.max_int = 0x20;    // max_int = 0x20*1.25ms = 40ms
+        conn_params.min_int = 0x10;    // min_int = 0x10*1.25ms = 20ms
+        conn_params.timeout = 400;    // timeout = 400*10ms = 4000ms
+        //start sent the update connection parameters to the peer device.
+        esp_ble_gap_update_conn_params(&conn_params);
         break;
     case ESP_GATTS_ADD_CHAR_DESCR_EVT:
-        heart_rate_profile_tab[PROFILE_M_STATE_IDX].descr_handle = param->add_char_descr.attr_handle;
-        ESP_LOGI(GATTS_M_STATE_TAG, "ADD_DESCR_EVT, status %d, attr_handle %d, service_handle %d\n",
+        ESP_LOGI(GATTS_MACHINE_TAG, "ADD_DESCR_EVT, status %d, attr_handle %d, service_handle %d\n",
                  param->add_char_descr.status, param->add_char_descr.attr_handle, param->add_char_descr.service_handle);
         break;
     case ESP_GATTS_DELETE_EVT:
         break;
-    case ESP_GATTS_START_EVT:
-        ESP_LOGI(GATTS_M_STATE_TAG, "SERVICE_START_EVT, status %d, service_handle %d\n",
-                 param->start.status, param->start.service_handle);
-        break;
     case ESP_GATTS_STOP_EVT:
         break;
-    case ESP_GATTS_CONNECT_EVT:
-        ESP_LOGI(GATTS_M_STATE_TAG, "CONNECT_EVT, conn_id %d, remote %02x:%02x:%02x:%02x:%02x:%02x:",
-                 param->connect.conn_id,
-                 param->connect.remote_bda[0], param->connect.remote_bda[1], param->connect.remote_bda[2],
-                 param->connect.remote_bda[3], param->connect.remote_bda[4], param->connect.remote_bda[5]);
-        heart_rate_profile_tab[PROFILE_M_STATE_IDX].conn_id = param->connect.conn_id;
-        break;
     case ESP_GATTS_CONF_EVT:
-        ESP_LOGI(GATTS_M_STATE_TAG, "ESP_GATTS_CONF_EVT status %d attr_handle %d", param->conf.status, param->conf.handle);
+        //ESP_LOGI(GATTS_MACHINE_TAG, "ESP_GATTS_CONF_EVT status %d attr_handle %d", param->conf.status, param->conf.handle);
         if (param->conf.status != ESP_GATT_OK)
         {
-            esp_log_buffer_hex(GATTS_M_STATE_TAG, param->conf.value, param->conf.len);
+            esp_log_buffer_hex(GATTS_MACHINE_TAG, param->conf.value, param->conf.len);
         }
         break;
+    case ESP_GATTS_CREAT_ATTR_TAB_EVT:{
+        if (param->add_attr_tab.status != ESP_GATT_OK){
+            ESP_LOGE(GATTS_MACHINE_TAG, "create attribute table failed, error code=0x%x", param->add_attr_tab.status);
+        }
+        else if (param->add_attr_tab.num_handle != GATT_MACHINE_NB){
+            ESP_LOGE(GATTS_MACHINE_TAG, "create attribute table abnormally, num_handle (%d) \
+                    doesn't equal to HRS_IDX_NB(%d)", param->add_attr_tab.num_handle, GATT_MACHINE_NB);
+        }
+        else {
+            ESP_LOGI(GATTS_MACHINE_TAG, "create attribute table successfully, the number handle = %d\n",param->add_attr_tab.num_handle);
+            memcpy(machine_handle_table, param->add_attr_tab.handles, sizeof(machine_handle_table));
+            esp_ble_gatts_start_service(machine_handle_table[GATT_MACHINE_IDX_SERVICE]);
+        }
+        break;
+    }
     case ESP_GATTS_DISCONNECT_EVT:
+        ESP_LOGI(GATTS_MACHINE_TAG, "ESP_GATTS_DISCONNECT_EVT, reason = 0x%x", param->disconnect.reason);
+        //esp_ble_gap_start_advertising(&adv_params);
+        break;
     case ESP_GATTS_OPEN_EVT:
     case ESP_GATTS_CANCEL_OPEN_EVT:
     case ESP_GATTS_CLOSE_EVT:
