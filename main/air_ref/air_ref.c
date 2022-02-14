@@ -18,7 +18,7 @@
 
 #include "utility/utility.h"
 
-#include "ble/services/gatt_machine.h"
+#include "ble/services/gatt_handle.h"
 
 #include "cJSON.h"
 
@@ -259,6 +259,7 @@ static void query_task(void *arg) {
         jsonify_machine_status(json_update);
         // ESP_LOGI("HERE COMES THE JSON", "LEDN:%u - %s", strlen(json_update),
         // json_update);
+
         gatt_machine_send_status_update_to_client(json_update);
       }
       if (logger_memory.logger_state_next != -1) {

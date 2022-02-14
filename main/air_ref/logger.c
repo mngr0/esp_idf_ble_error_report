@@ -19,7 +19,7 @@
 
 #include "utility/utility.h"
 
-#include "ble/services/gatt_machine.h"
+#include "ble/services/gatt_handle.h"
 
 #include "cJSON.h"
 

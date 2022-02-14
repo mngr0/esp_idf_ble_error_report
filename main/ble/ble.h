@@ -31,8 +31,9 @@ typedef enum
     // PROFILE_M_STATE_IDX,
     // PROFILE_AR_STATE_IDX,
     // PROFILE_AR_CONF_IDX,
-    //PROFILE_ROUTINE_IDX,
+
     PROFILE_MACHINE_IDX,
+    PROFILE_ROUTINE_IDX,
     PROFILE_NUM
 } PROFILE_NUMBERS;
 
@@ -69,22 +70,8 @@ void BLE_init(void);
 
 bool ble_is_connected();
 
+int get_mtu_size();
+
 void example_write_event_env(esp_gatt_if_t gatts_if, prepare_type_env_t *prepare_write_env, esp_ble_gatts_cb_param_t *param);
-
-// void gatts_profile_event_handler(esp_gatts_cb_event_t event,
-//                                         esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param);
-
-// void m_state_event_handler(esp_gatts_cb_event_t event,
-//                                   esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param);
-
-// void ar_state_event_handler(esp_gatts_cb_event_t event,
-//                                    esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param);
-
-// void ar_conf_event_handler(esp_gatts_cb_event_t event,
-//                                   esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param);
-
-// void bluefi_event_handler(esp_gatts_cb_event_t event,
-//                                  esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param);
-
 
 #endif

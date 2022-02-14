@@ -39,29 +39,23 @@
 
 #include "ble/ble.h"
 
-// #include "services/gatt_ar_conf.h"
-// #include "services/gatt_ar_state.h"
-// #include "services/gatt_m_state.h"
-#include "services/gatt_machine.h"
+#include "services/gatt_handle.h"
 
 #define GATTS_TABLE_TAG "GATTS_TABLE_DEMO"
 
-#define BLINK_GPIO1 2
-#define BLINK_GPIO2 15
-#define BLINK_GPIO3 13
-#define BTN_GPIO 3
 
-// extern machine_state_t m_state;
-// extern air_ref_conf_t ar_conf;
-// extern air_ref_state_t ar_state;
+uint8_t current_buffer[2048];
+uint16_t current_idx=0;
+uint16_t current_size_sent=0;
+uint16_t current_len=0;
+
+
 
 void gatts_profile_event_handler(esp_gatts_cb_event_t event,
                                  esp_gatt_if_t gatts_if,
                                  esp_ble_gatts_cb_param_t *param);
 
 static uint8_t adv_config_done = 0;
-
-// uint16_t heart_rate_handle_table[HRS_IDX_NB];
 
 static prepare_type_env_t prepare_write_env;
 
@@ -135,7 +129,12 @@ struct gatts_profile_inst heart_rate_profile_tab[PROFILE_NUM] = {
             .gatts_cb = machine_event_handler,
             .gatts_if = ESP_GATT_IF_NONE, /* Not get the gatt_if, so initial is
                                              ESP_GATT_IF_NONE */
-
+        },
+    [PROFILE_ROUTINE_IDX] =
+        {
+            .gatts_cb = routine_event_handler,
+            .gatts_if = ESP_GATT_IF_NONE, /* Not get the gatt_if, so initial is
+                                             ESP_GATT_IF_NONE */
         },
 };
 
@@ -239,6 +238,7 @@ void example_exec_write_event_env(prepare_type_env_t *prepare_write_env,
                                   esp_ble_gatts_cb_param_t *param) {
   if (param->exec_write.exec_write_flag == ESP_GATT_PREP_WRITE_EXEC &&
       prepare_write_env->prepare_buf) {
+        ESP_LOGI(GATTS_TABLE_TAG, "BUFFER OUT EXEC WRITE ENV");
     esp_log_buffer_hex(GATTS_TABLE_TAG, prepare_write_env->prepare_buf,
                        prepare_write_env->prepare_len);
   } else {
