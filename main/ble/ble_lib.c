@@ -23,6 +23,7 @@
 
 void example_write_event_env(esp_gatt_if_t gatts_if, prepare_type_env_t *prepare_write_env, esp_ble_gatts_cb_param_t *param){
     esp_gatt_status_t status = ESP_GATT_OK;
+    ESP_LOGE(GATTS_TAG, "example_write_event_env\n");
     if (param->write.need_rsp){
         if (param->write.is_prep){
             if (prepare_write_env->prepare_buf == NULL) {
