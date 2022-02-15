@@ -212,6 +212,10 @@ static void query_task(void *arg) {
 
   char json_update[JSON_STRING_SIZE];
 
+  get_machine_handle_ptr()->gatts_if=&heart_rate_profile_tab[PROFILE_MACHINE_IDX].gatts_if;
+  get_routine_handle_ptr()->gatts_if=&heart_rate_profile_tab[PROFILE_ROUTINE_IDX].gatts_if;
+
+
   // read device type
 
   ar_config_size = air_ref_conf_parameters_size;
@@ -234,7 +238,7 @@ static void query_task(void *arg) {
 
         // print_array("machine_config:", m_config, m_config_names,
         // m_config_size);
-        jsonify_machine_conf(get_str_pnt_diocane());
+        jsonify_machine_conf(get_machine_handle_ptr()->config);
       }
       break;
     }
@@ -246,6 +250,7 @@ static void query_task(void *arg) {
         logger_memory.logger_state = logger_state_poll_machine_status;
         // print_array("air_ref_config:", ar_config, ar_config_names,
         // ar_config_size);
+        jsonify_machine_conf(get_routine_handle_ptr()->config);
       }
       break;
     }
@@ -316,9 +321,9 @@ static void query_task(void *arg) {
         gatt_machine_send_logger_update_to_client(json_update);
       }
       if (logger_memory.current_idx_read == logger_memory.current_size) {
-        jsonify_machine_conf(get_str_pnt_diocane());
+        jsonify_machine_conf(get_machine_handle_ptr()->config);
         ESP_LOGI("HERE COMES THE JSON", "LEN:%u - %s",
-                 strlen(get_str_pnt_diocane()), get_str_pnt_diocane());
+                 strlen(get_machine_handle_ptr()->config), get_machine_handle_ptr()->config);
         print_array("machine_config:", m_config, m_config_names, m_config_size);
         start_query_machine_status(&logger_memory);
         jsonify_command("complete_read_machine_conf",

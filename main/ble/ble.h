@@ -70,7 +70,7 @@ void BLE_init(void);
 
 bool ble_is_connected();
 
-int get_mtu_size();
+//int get_mtu_size();
 
 void example_write_event_env(esp_gatt_if_t gatts_if, prepare_type_env_t *prepare_write_env, esp_ble_gatts_cb_param_t *param);
 

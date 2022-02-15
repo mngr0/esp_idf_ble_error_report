@@ -49,21 +49,6 @@ static const uint8_t char_prop_write =  ESP_GATT_CHAR_PROP_BIT_WRITE;
 
 static handle_descriptor_t routine_descriptor;
 
-
-char* get_str_pnt_diocane2(){
-    return routine_descriptor.config;
-}
-
-
-
-bool gatt_routine_send_status_update_to_client(char *json_status){
-    return gatt_handle_send_status_update_to_client(routine_descriptor.handle_table, routine_descriptor.conn_id, json_status, routine_descriptor.mtu_size);
-}
-
-bool gatt_routine_send_logger_update_to_client( char *json_status){
-    return  gatt_handle_send_logger_update_to_client(routine_descriptor.handle_table, routine_descriptor.conn_id, json_status, routine_descriptor.mtu_size);
-}
-
 const esp_gatts_attr_db_t gatt_routine_db[GATT_HANDLE_NB] =
     {
         [GATT_HANDLE_IDX_SERVICE] =
@@ -115,4 +100,19 @@ void routine_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, e
    
   handle_event_handler(GATTS_ROUTINE_TAG, &routine_descriptor, event, gatts_if,
                        param);
+}
+
+
+handle_descriptor_t* get_routine_handle_ptr(){
+    return &routine_descriptor;
+}
+
+
+
+bool gatt_routine_send_status_update_to_client(char *json_status){
+    return gatt_handle_send_status_update_to_client(&routine_descriptor, json_status);
+}
+
+bool gatt_routine_send_logger_update_to_client( char *json_status){
+    return  gatt_handle_send_logger_update_to_client(&routine_descriptor, json_status);
 }

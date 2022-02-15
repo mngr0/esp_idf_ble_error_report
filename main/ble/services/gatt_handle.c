@@ -2,8 +2,8 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "esp_gatt_defs.h"
 #include "esp_bt.h"
+#include "esp_gatt_defs.h"
 #include "esp_log.h"
 #include "esp_system.h"
 #include "nvs_flash.h"
@@ -23,7 +23,6 @@
 
 uint8_t find_char_and_desr_index(uint16_t *handle_table, uint16_t handle) {
   uint8_t error = 0xff;
-
   for (int i = 0; i < GATT_HANDLE_NB; i++) {
     if (handle == handle_table[i]) {
       return i;
@@ -32,20 +31,25 @@ uint8_t find_char_and_desr_index(uint16_t *handle_table, uint16_t handle) {
   return error;
 }
 
-bool gatt_handle_send_status_update_to_client(uint16_t *handle_table,
-                                              uint16_t conn_id,
-                                              char *json_status, int mtu_size) {
+
+// void init_handler(handle_descriptor_t *handle_descriptor, uint16_t* boh){
+//   handle_descriptor->gatts_if=boh;
+// }
+
+bool gatt_handle_send_status_update_to_client(
+    handle_descriptor_t *handle_descriptor, char *json_status) {
   if (ble_is_connected()) {
     if (current_len == 0) {
       ESP_LOGI(GATT_UTILS_TAG, " INDICATING ");
       strcpy((char *)current_buffer, json_status);
       current_idx = 0;
       current_len = strlen(json_status);
-      current_size_sent = min(mtu_size - 5, strlen(json_status));
+      current_size_sent =
+          min(handle_descriptor->mtu_size - 5, strlen(json_status));
       esp_ble_gatts_send_indicate(
-          heart_rate_profile_tab[PROFILE_MACHINE_IDX].gatts_if, conn_id,
-          handle_table[GATT_HANDLE_IDX_STATUS_VALUE], current_size_sent,
-          (uint8_t *)json_status, true);
+          *(handle_descriptor->gatts_if), handle_descriptor->conn_id,
+          handle_descriptor->handle_table[GATT_HANDLE_IDX_STATUS_VALUE],
+          current_size_sent, (uint8_t *)json_status, true);
       return true;
     } else {
       ESP_LOGI(GATT_UTILS_TAG, "NOTIFICATION DISCARTED BUSY %d", current_len);
@@ -56,20 +60,21 @@ bool gatt_handle_send_status_update_to_client(uint16_t *handle_table,
   return false;
 }
 
-bool gatt_handle_send_logger_update_to_client(uint16_t *handle_table,
-                                              uint16_t conn_id,
-                                              char *json_status, int mtu_size) {
+bool gatt_handle_send_logger_update_to_client(
+    handle_descriptor_t *handle_descriptor, char *json_status) {
   if (ble_is_connected()) {
     if (current_len == 0) {
       ESP_LOGI(GATT_UTILS_TAG, " INDICATING ");
       strcpy((char *)current_buffer, json_status);
       current_idx = 0;
       current_len = strlen(json_status);
-      current_size_sent = min(mtu_size - 5, strlen(json_status));
+      current_size_sent =
+          min(handle_descriptor->mtu_size - 5, strlen(json_status));
       esp_ble_gatts_send_indicate(
-          heart_rate_profile_tab[PROFILE_MACHINE_IDX].gatts_if, conn_id,
-          handle_table[GATT_HANDLE_IDX_HANDLE_STATUS_VALUE], current_size_sent,
-          (uint8_t *)json_status, true);
+           *(handle_descriptor->gatts_if), 
+          handle_descriptor->conn_id,
+          handle_descriptor->handle_table[GATT_HANDLE_IDX_HANDLE_STATUS_VALUE],
+          current_size_sent, (uint8_t *)json_status, true);
       return true;
     } else {
       ESP_LOGI(GATT_UTILS_TAG, "NOTIFICATION DISCARTED BUSY %d", current_len);

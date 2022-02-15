@@ -1,20 +1,3 @@
-/*
-   This example code is in the Public Domain (or CC0 licensed, at your option.)
-
-   Unless required by applicable law or agreed to in writing, this
-   software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-   CONDITIONS OF ANY KIND, either express or implied.
-*/
-
-/****************************************************************************
- *
- * This demo showcases creating a GATT database using a predefined attribute
- *table. It acts as a GATT server and can send adv data, be connected by client.
- * Run the gatt_client demo, the client demo will automatically connect to the
- *gatt_server_service_table demo. Client demo will enable GATT server's notify
- *after connection. The two devices will then exchange data.
- *
- ****************************************************************************/
 #include "string.h"
 
 #include "esp_log.h"
@@ -355,26 +338,6 @@ void gatts_profile_event_handler(esp_gatts_cb_event_t event,
                param->add_attr_tab.status);
     }
 
-
-    // else if (param->add_attr_tab.svc_uuid.uuid.uuid16 ==
-    //     GATT_MACHINE_UUID_SERVICE) {
-    //   if (param->add_attr_tab.num_handle != GATT_MACHINE_NB) {
-    //     ESP_LOGE(GATTS_TABLE_TAG,
-    //              "create attribute log state table abnormally, num_handle (%d) "
-    //              "isn't equal to INFO_NB(%d)",
-    //              param->add_attr_tab.num_handle, GATT_MACHINE_NB);
-    //   } else {
-    //     ESP_LOGI(GATTS_TABLE_TAG,
-    //              "create attribute log state table successfully, the number "
-    //              "handle = %d\n",
-    //              param->add_attr_tab.num_handle);
-    //     memcpy(machine_handle_table, param->add_attr_tab.handles,
-    //            sizeof(machine_handle_table));
-    //     esp_ble_gatts_start_service(machine_handle_table[GATT_MACHINE_IDX_SERVICE]);
-
-    //   }
-    // }
-
     break;
   }
   case ESP_GATTS_STOP_EVT:
@@ -454,7 +417,6 @@ void BLE_init(void) {
     return;
   }
 
-  esp_ble_gatt_set_local_mtu(500);
 
   ret = esp_ble_gatts_register_callback(gatts_event_handler);
   if (ret) {
@@ -473,24 +435,14 @@ void BLE_init(void) {
     ESP_LOGE(GATTS_TABLE_TAG, "gatts app register error, error code = %x", ret);
     return;
   }
-  // ret = esp_ble_gatts_app_register(PROFILE_M_STATE_IDX);
-  // if (ret) {
-  //   ESP_LOGE(GATTS_TABLE_TAG, "gatts app register error, error code = %x", ret);
-  //   return;
-  // }
-  // ret = esp_ble_gatts_app_register(PROFILE_AR_CONF_IDX);
-  // if (ret) {
-  //   ESP_LOGE(GATTS_TABLE_TAG, "gatts app register error, error code = %x", ret);
-  //   return;
-  // }
-
-  // ret = esp_ble_gatts_app_register(PROFILE_AR_STATE_IDX);
-  // if (ret) {
-  //   ESP_LOGE(GATTS_TABLE_TAG, "gatts app register error, error code = %x", ret);
-  //   return;
-  // }
 
   ret = esp_ble_gatts_app_register(PROFILE_MACHINE_IDX);
+  if (ret) {
+    ESP_LOGE(GATTS_TABLE_TAG, "gatts app register error, error code = %x", ret);
+    return;
+  }
+
+  ret = esp_ble_gatts_app_register(PROFILE_ROUTINE_IDX);
   if (ret) {
     ESP_LOGE(GATTS_TABLE_TAG, "gatts app register error, error code = %x", ret);
     return;
@@ -502,7 +454,7 @@ void BLE_init(void) {
   //   return;
   // }
 
-  esp_err_t local_mtu_ret = esp_ble_gatt_set_local_mtu(500);
+  esp_err_t local_mtu_ret = esp_ble_gatt_set_local_mtu(200);
   if (local_mtu_ret) {
     ESP_LOGE(GATTS_TABLE_TAG, "set local  MTU failed, error code = %x",
              local_mtu_ret);
