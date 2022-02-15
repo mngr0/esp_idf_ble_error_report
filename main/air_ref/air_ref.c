@@ -27,11 +27,11 @@
 packet_ringbuffer_t packet_structure;
 
 TaskHandle_t xQueryTask;
-TaskHandle_t xReceiverTask;
+// TaskHandle_t xReceiverTask;
 
-uint32_t timestamp_last_update_m_state;
-uint32_t timestamp_last_update_ar_state;
-uint32_t timestamp_last_update_ar_conf;
+// uint32_t timestamp_last_update_m_state;
+// uint32_t timestamp_last_update_ar_state;
+// uint32_t timestamp_last_update_ar_conf;
 extern const uart_port_t uart_num;
 
 int32_t ar_config[256];
@@ -199,23 +199,13 @@ void go_state_next(logger_state_t new_state) {
   }
 }
 
-void jsonify_command(char *status, int32_t advancement, char *output) {
-  cJSON *root;
-  root = cJSON_CreateObject();
-  cJSON_AddStringToObject(root, "cmd", status);
-  cJSON_AddNumberToObject(root, "perc", advancement);
-  cJSON_PrintPreallocated(root, output, JSON_STRING_SIZE, false);
-  cJSON_Delete(root);
-}
-
 static void query_task(void *arg) {
 
   char json_update[JSON_STRING_SIZE];
 
-  //get_machine_handle_ptr()->gatts_if=&heart_rate_profile_tab[PROFILE_MACHINE_IDX].gatts_if;
-  //get_routine_handle_ptr()->gatts_if=&heart_rate_profile_tab[PROFILE_ROUTINE_IDX].gatts_if;
+  printadiocaneMACHINE();
 
-
+  printadiocaneROUTINE();
   // read device type
 
   ar_config_size = air_ref_conf_parameters_size;
@@ -238,6 +228,7 @@ static void query_task(void *arg) {
 
         // print_array("machine_config:", m_config, m_config_names,
         // m_config_size);
+        ESP_LOGI("LOGGER", "poll machine conf done");
         jsonify_machine_conf(get_machine_handle_ptr()->config);
       }
       break;
@@ -250,7 +241,8 @@ static void query_task(void *arg) {
         logger_memory.logger_state = logger_state_poll_machine_status;
         // print_array("air_ref_config:", ar_config, ar_config_names,
         // ar_config_size);
-        jsonify_machine_conf(get_routine_handle_ptr()->config);
+        ESP_LOGI("LOGGER", "poll routine conf done");
+        jsonify_routine_conf(get_routine_handle_ptr()->config);
       }
       break;
     }
@@ -264,7 +256,7 @@ static void query_task(void *arg) {
         jsonify_machine_status(json_update);
         // ESP_LOGI("HERE COMES THE JSON", "LEDN:%u - %s", strlen(json_update),
         // json_update);
-
+        ESP_LOGI("LOGGER", "poll machine status done");
         gatt_machine_send_status_update_to_client(json_update);
       }
       if (logger_memory.logger_state_next != -1) {
@@ -279,9 +271,9 @@ static void query_task(void *arg) {
         start_query_machine_status(&logger_memory);
         // print_array("air_ref_status:", ar_status, ar_status_names,
         // ar_status_size);
-        jsonify_air_ref_status(json_update);
-        // ESP_LOGI("HERE COMES THE JSON", "%s", json_update);
-        // gatt_machine_send_status_update_to_client(json_update);
+        jsonify_routine_status(json_update);
+        ESP_LOGI("LOGGER", "poll routine status done");
+        gatt_routine_send_status_update_to_client(json_update);
       }
       if (logger_memory.logger_state_next != -1) {
         go_state_next(logger_memory.logger_state_next);
@@ -295,18 +287,19 @@ static void query_task(void *arg) {
                         (logger_memory.current_idx_read * 100) /
                             logger_memory.current_size,
                         json_update);
-        ESP_LOGI("HERE COMES THE JSON", "LEDN:%u - %s", strlen(json_update),
-                 json_update);
-        gatt_machine_send_logger_update_to_client(json_update);
+        // ESP_LOGI("HERE COMES THE JSON", "LEDN:%u - %s", strlen(json_update),
+        // json_update);
+        gatt_routine_send_logger_update_to_client(json_update);
       }
       if (logger_memory.current_idx_read == logger_memory.current_size) {
         print_array("air_ref_config:", ar_config, ar_config_names,
                     ar_config_size);
         start_query_machine_status(&logger_memory);
         jsonify_command("complete_read_routine_conf", 100, json_update);
-        ESP_LOGI("HERE COMES THE JSON", "LEDN:%u - %s", strlen(json_update),
-                 json_update);
-        gatt_machine_send_logger_update_to_client(json_update);
+        ESP_LOGI("LOGGER", "read routine conf done");
+        // ESP_LOGI("HERE COMES THE JSON", "LEDN:%u - %s", strlen(json_update),
+        // json_update);
+        gatt_routine_send_logger_update_to_client(json_update);
       }
       break;
     }
@@ -316,22 +309,25 @@ static void query_task(void *arg) {
                         (logger_memory.current_idx_read * 100) /
                             logger_memory.current_size,
                         json_update);
-        ESP_LOGI("HERE COMES THE JSON", "LEN:%u - %s", strlen(json_update),
-                 json_update);
+        // ESP_LOGI("HERE COMES THE JSON", "LEN:%u - %s", strlen(json_update),
+        // json_update);
+
         gatt_machine_send_logger_update_to_client(json_update);
       }
       if (logger_memory.current_idx_read == logger_memory.current_size) {
         jsonify_machine_conf(get_machine_handle_ptr()->config);
-        ESP_LOGI("HERE COMES THE JSON", "LEN:%u - %s",
-                 strlen(get_machine_handle_ptr()->config), get_machine_handle_ptr()->config);
-        print_array("machine_config:", m_config, m_config_names, m_config_size);
+        // ESP_LOGI("HERE COMES THE JSON", "LEN:%u - %s",
+        // strlen(get_machine_handle_ptr()->config),
+        // get_machine_handle_ptr()->config); print_array("machine_config:",
+        // m_config, m_config_names, m_config_size);
         start_query_machine_status(&logger_memory);
         jsonify_command("complete_read_machine_conf",
                         (logger_memory.current_idx_read * 100) /
                             logger_memory.current_size,
                         json_update);
-        ESP_LOGI("HERE COMES THE JSON", "LEN:%u - %s", strlen(json_update),
-                 json_update);
+        // ESP_LOGI("HERE COMES THE JSON", "LEN:%u - %s", strlen(json_update),
+        // json_update);
+        ESP_LOGI("LOGGER", "read machine conf done");
         bool done;
         do {
           done = gatt_machine_send_logger_update_to_client(json_update);

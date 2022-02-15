@@ -27,11 +27,7 @@
 //TODO in future, try to understand how the hell blufi works
 typedef enum
 {
-    PROFILE_APP_IDX = 0,
-    // PROFILE_M_STATE_IDX,
-    // PROFILE_AR_STATE_IDX,
-    // PROFILE_AR_CONF_IDX,
-
+    PROFILE_APP_IDX = 1,
     PROFILE_MACHINE_IDX,
     PROFILE_ROUTINE_IDX,
     PROFILE_NUM

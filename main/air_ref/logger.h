@@ -54,8 +54,11 @@ void start_query_logger_status(logger_memory_t *logger, logger_state_t state,
 #define jsonify_machine_conf(output)                                           \
   jsonify(m_config_names, m_config, machine_conf_parameters_size, output)
 
-#define jsonify_air_ref_status(output)                                         \
+#define jsonify_routine_status(output)                                         \
   jsonify(ar_status_names, ar_status, air_ref_status_parameters_size, output)
+
+#define jsonify_routine_conf(output)                                           \
+  jsonify(ar_config_names, ar_config, air_ref_conf_parameters_size, output)
 
 
 #define start_query_machine_status(logger)                                     \
@@ -78,7 +81,7 @@ void start_query_logger_status(logger_memory_t *logger, logger_state_t state,
       logger, logger_state_read_machine_conf, read_machine_conf_parameter,     \
       reply_machine_conf_parameter, m_config, m_config_size);
 
-
+void jsonify_command(char *status, int32_t advancement, char *output);
 
 
 #endif

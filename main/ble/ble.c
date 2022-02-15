@@ -26,13 +26,10 @@
 
 #define GATTS_TABLE_TAG "GATTS_TABLE_DEMO"
 
-
 uint8_t current_buffer[2048];
-uint16_t current_idx=0;
-uint16_t current_size_sent=0;
-uint16_t current_len=0;
-
-
+uint16_t current_idx = 0;
+uint16_t current_size_sent = 0;
+uint16_t current_len = 0;
 
 void gatts_profile_event_handler(esp_gatts_cb_event_t event,
                                  esp_gatt_if_t gatts_if,
@@ -221,7 +218,7 @@ void example_exec_write_event_env(prepare_type_env_t *prepare_write_env,
                                   esp_ble_gatts_cb_param_t *param) {
   if (param->exec_write.exec_write_flag == ESP_GATT_PREP_WRITE_EXEC &&
       prepare_write_env->prepare_buf) {
-        ESP_LOGI(GATTS_TABLE_TAG, "BUFFER OUT EXEC WRITE ENV");
+    ESP_LOGI(GATTS_TABLE_TAG, "BUFFER OUT EXEC WRITE ENV");
     esp_log_buffer_hex(GATTS_TABLE_TAG, prepare_write_env->prepare_buf,
                        prepare_write_env->prepare_len);
   } else {
@@ -234,9 +231,7 @@ void example_exec_write_event_env(prepare_type_env_t *prepare_write_env,
   prepare_write_env->prepare_len = 0;
 }
 
-bool ble_is_connected(){
-  return is_connected;
-}
+bool ble_is_connected() { return is_connected; }
 
 void gatts_profile_event_handler(esp_gatts_cb_event_t event,
                                  esp_gatt_if_t gatts_if,
@@ -301,7 +296,8 @@ void gatts_profile_event_handler(esp_gatts_cb_event_t event,
     ESP_LOGI(GATTS_TABLE_TAG, "ESP_GATTS_MTU_EVT, MTU %d", param->mtu.mtu);
     break;
   case ESP_GATTS_CONF_EVT:
-    //ESP_LOGI(GATTS_TABLE_TAG, "ESP_GATTS_CONF_EVT, status = %d, attr_handle %d",
+    // ESP_LOGI(GATTS_TABLE_TAG, "ESP_GATTS_CONF_EVT, status = %d, attr_handle
+    // %d",
     //         param->conf.status, param->conf.handle);
     break;
   case ESP_GATTS_START_EVT:
@@ -317,9 +313,12 @@ void gatts_profile_event_handler(esp_gatts_cb_event_t event,
     /* For the iOS system, please refer to Apple official documents about the
      * BLE connection parameters restrictions. */
     conn_params.latency = 0;
-    conn_params.max_int = 0x20; // max_int = 0x20*1.25ms = 40ms // apple: 0x1e 30ms
-    conn_params.min_int = 0x10; // min_int = 0x10*1.25ms = 20ms // apple: 0x0c 15ms
-    conn_params.timeout = 400;  // timeout = 400*10ms = 4000ms //apple: compreso tra 2 e 6 secondi
+    conn_params.max_int =
+        0x20; // max_int = 0x20*1.25ms = 40ms // apple: 0x1e 30ms
+    conn_params.min_int =
+        0x10; // min_int = 0x10*1.25ms = 20ms // apple: 0x0c 15ms
+    conn_params.timeout =
+        400; // timeout = 400*10ms = 4000ms //apple: compreso tra 2 e 6 secondi
     // start sent the update connection parameters to the peer device.
     is_connected = true;
 
@@ -328,7 +327,7 @@ void gatts_profile_event_handler(esp_gatts_cb_event_t event,
   case ESP_GATTS_DISCONNECT_EVT:
     ESP_LOGI(GATTS_TABLE_TAG, "ESP_GATTS_DISCONNECT_EVT, reason = 0x%x",
              param->disconnect.reason);
-             is_connected = false;
+    is_connected = false;
     esp_ble_gap_start_advertising(&adv_params);
     break;
   case ESP_GATTS_CREAT_ATTR_TAB_EVT: {
@@ -337,7 +336,6 @@ void gatts_profile_event_handler(esp_gatts_cb_event_t event,
                "create attribute table failed, error code=0x%x",
                param->add_attr_tab.status);
     }
-
     break;
   }
   case ESP_GATTS_STOP_EVT:
@@ -356,8 +354,8 @@ void gatts_profile_event_handler(esp_gatts_cb_event_t event,
 static void gatts_event_handler(esp_gatts_cb_event_t event,
                                 esp_gatt_if_t gatts_if,
                                 esp_ble_gatts_cb_param_t *param) {
-                                  
-  //ESP_LOGI(GATTS_TABLE_TAG,"event %d to inteface %d", event, gatts_if);
+
+  // ESP_LOGI(GATTS_TABLE_TAG,"event %d to inteface %d", event, gatts_if);
   /* If event is register event, store the gatts_if for each profile */
   if (event == ESP_GATTS_REG_EVT) {
     if (param->reg.status == ESP_GATT_OK) {
@@ -388,6 +386,11 @@ void BLE_init(void) {
 
   ESP_ERROR_CHECK(esp_bt_controller_mem_release(ESP_BT_MODE_CLASSIC_BT));
 
+  get_machine_handle_ptr()->profile_inst =
+      &(heart_rate_profile_tab[PROFILE_MACHINE_IDX]);
+  get_routine_handle_ptr()->profile_inst =
+      &heart_rate_profile_tab[PROFILE_ROUTINE_IDX];
+
   esp_bt_controller_config_t bt_cfg = BT_CONTROLLER_INIT_CONFIG_DEFAULT();
   ret = esp_bt_controller_init(&bt_cfg);
   if (ret) {
@@ -417,6 +420,10 @@ void BLE_init(void) {
     return;
   }
 
+  ret = esp_ble_gatt_set_local_mtu(200);
+  if (ret) {
+    ESP_LOGE(GATTS_TABLE_TAG, "set local  MTU 1 failed, error code = %x", ret);
+  }
 
   ret = esp_ble_gatts_register_callback(gatts_event_handler);
   if (ret) {
@@ -450,13 +457,12 @@ void BLE_init(void) {
 
   // ret = esp_ble_gatts_app_register(PROFILE_BLUEFI_IDX);
   // if (ret) {
-  //   ESP_LOGE(GATTS_TABLE_TAG, "gatts app register error, error code = %x", ret);
-  //   return;
+  //   ESP_LOGE(GATTS_TABLE_TAG, "gatts app register error, error code = %x",
+  //   ret); return;
   // }
 
-  esp_err_t local_mtu_ret = esp_ble_gatt_set_local_mtu(200);
-  if (local_mtu_ret) {
-    ESP_LOGE(GATTS_TABLE_TAG, "set local  MTU failed, error code = %x",
-             local_mtu_ret);
+  ret = esp_ble_gatt_set_local_mtu(200);
+  if (ret) {
+    ESP_LOGE(GATTS_TABLE_TAG, "set local  MTU failed, error code = %x", ret);
   }
 }

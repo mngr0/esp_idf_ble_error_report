@@ -30,15 +30,23 @@
 #define GATTS_MACHINE_TAG "GATTS_MACHINE"
 
 static const uint16_t GATT_HANDLE_UUID_SERVICE =
-    (GATT_HANDLE_IDX_SERVICE) | (PROFILE_MACHINE_IDX << 8);
+    (GATT_HANDLE_IDX_SERVICE) | (PROFILE_MACHINE_IDX << 4);
 static const uint16_t GATT_HANDLE_STATUS_VALUE =
-    (GATT_HANDLE_IDX_STATUS_VALUE) | (PROFILE_MACHINE_IDX << 8);
+    (GATT_HANDLE_IDX_STATUS_VALUE) | (PROFILE_MACHINE_IDX << 4);
 static const uint16_t GATT_HANDLE_CONFIG_VALUE =
-    (GATT_HANDLE_IDX_CONFIG_VALUE) | (PROFILE_MACHINE_IDX << 8);
+    (GATT_HANDLE_IDX_CONFIG_VALUE) | (PROFILE_MACHINE_IDX << 4);
 static const uint16_t GATT_HANDLE_COMMAND_VALUE =
-    (GATT_HANDLE_IDX_COMMAND_VALUE) | (PROFILE_MACHINE_IDX << 8);
+    (GATT_HANDLE_IDX_COMMAND_VALUE) | (PROFILE_MACHINE_IDX << 4);
 static const uint16_t GATT_HANDLE_HANDLE_STATUS_VALUE =
-    (GATT_HANDLE_IDX_HANDLE_STATUS_VALUE) | (PROFILE_MACHINE_IDX << 8);
+    (GATT_HANDLE_IDX_HANDLE_STATUS_VALUE) | (PROFILE_MACHINE_IDX << 4);
+
+
+void printadiocaneMACHINE() {
+  ESP_LOGI("DIOCANE", "UID SERVICE %04x , HSTATUS %04x , HCONFIG %04x , HSH %04x",
+           GATT_HANDLE_UUID_SERVICE, GATT_HANDLE_STATUS_VALUE,
+           GATT_HANDLE_CONFIG_VALUE, GATT_HANDLE_HANDLE_STATUS_VALUE);
+}
+
 
 static const uint16_t primary_service_uuid = ESP_GATT_UUID_PRI_SERVICE;
 
@@ -132,5 +140,5 @@ handle_descriptor_t* get_machine_handle_ptr(){
 void machine_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if,
                            esp_ble_gatts_cb_param_t *param) {
   handle_event_handler(GATTS_MACHINE_TAG, &machine_descriptor, event, gatts_if,
-                       param);
+                       param, PROFILE_MACHINE_IDX, gatt_machine_db);
 }

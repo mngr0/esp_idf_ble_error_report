@@ -1,3 +1,4 @@
+
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
@@ -31,7 +32,6 @@ uint8_t find_char_and_desr_index(uint16_t *handle_table, uint16_t handle) {
   return error;
 }
 
-
 // void init_handler(handle_descriptor_t *handle_descriptor, uint16_t* boh){
 //   handle_descriptor->gatts_if=boh;
 // }
@@ -47,9 +47,9 @@ bool gatt_handle_send_status_update_to_client(
       current_size_sent =
           min(handle_descriptor->mtu_size - 5, strlen(json_status));
       esp_ble_gatts_send_indicate(
-          //*(handle_descriptor->gatts_if),
-           handle_descriptor->conn_id,
-          heart_rate_profile_tab[PROFILE_MACHINE_IDX].gatts_if,
+          (handle_descriptor->profile_inst->gatts_if),
+          handle_descriptor->conn_id,
+
           handle_descriptor->handle_table[GATT_HANDLE_IDX_STATUS_VALUE],
           current_size_sent, (uint8_t *)json_status, true);
       return true;
@@ -73,8 +73,7 @@ bool gatt_handle_send_logger_update_to_client(
       current_size_sent =
           min(handle_descriptor->mtu_size - 5, strlen(json_status));
       esp_ble_gatts_send_indicate(
-          // *(handle_descriptor->gatts_if), 
-          heart_rate_profile_tab[PROFILE_MACHINE_IDX].gatts_if,
+          (handle_descriptor->profile_inst->gatts_if),
           handle_descriptor->conn_id,
           handle_descriptor->handle_table[GATT_HANDLE_IDX_HANDLE_STATUS_VALUE],
           current_size_sent, (uint8_t *)json_status, true);
@@ -144,7 +143,7 @@ void reply_read(handle_descriptor_t *handle_descriptor, esp_gatt_if_t gatts_if,
 
 void handle_event_handler(char *TAG, handle_descriptor_t *handle_descriptor,
                           esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if,
-                          esp_ble_gatts_cb_param_t *param) {
+                          esp_ble_gatts_cb_param_t *param, uint8_t srv_inst_id, const esp_gatts_attr_db_t* gatt_db) {
   esp_ble_gatts_cb_param_t *p_data = (esp_ble_gatts_cb_param_t *)param;
   uint8_t res = 0xff;
   switch (event) {
@@ -153,7 +152,7 @@ void handle_event_handler(char *TAG, handle_descriptor_t *handle_descriptor,
              param->reg.app_id);
 
     esp_err_t create_attr_ret = esp_ble_gatts_create_attr_tab(
-        gatt_machine_db, gatts_if, GATT_HANDLE_NB, PROFILE_MACHINE_IDX);
+        gatt_db, gatts_if, GATT_HANDLE_NB, srv_inst_id);
     if (create_attr_ret) {
       ESP_LOGE(TAG, "create attr table failed, error code = %x",
                create_attr_ret);
@@ -278,6 +277,7 @@ void handle_event_handler(char *TAG, handle_descriptor_t *handle_descriptor,
     esp_log_buffer_hex(TAG, param->connect.remote_bda, 6);
     handle_descriptor->conn_id = p_data->connect.conn_id;
 
+    // TODO CONSIDER IF NEEDED
     esp_ble_conn_update_params_t conn_params = {0};
     memcpy(conn_params.bda, param->connect.remote_bda, sizeof(esp_bd_addr_t));
     /* For the iOS system, please refer to Apple official documents about the
@@ -288,6 +288,7 @@ void handle_event_handler(char *TAG, handle_descriptor_t *handle_descriptor,
     conn_params.timeout = 400;  // timeout = 400*10ms = 4000ms
     // start sent the update connection parameters to the peer device.
     esp_ble_gap_update_conn_params(&conn_params);
+
     current_len = 0;
     ESP_LOGI(TAG, "RESET CURRENT LEN %d", current_len);
     break;
@@ -304,8 +305,7 @@ void handle_event_handler(char *TAG, handle_descriptor_t *handle_descriptor,
   case ESP_GATTS_CONF_EVT:
 
     esp_gatt_confirm_event(
-        param, heart_rate_profile_tab[PROFILE_MACHINE_IDX].gatts_if,
-        handle_descriptor->conn_id,
+        param, gatts_if, handle_descriptor->conn_id,
         handle_descriptor->handle_table[GATT_HANDLE_IDX_STATUS_VALUE],
         handle_descriptor->mtu_size);
 

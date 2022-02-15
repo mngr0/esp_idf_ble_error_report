@@ -24,3 +24,13 @@
 #include "cJSON.h"
 
 #define AIR_REF_TAG "LOGGER:"
+
+
+void jsonify_command(char *status, int32_t advancement, char *output) {
+  cJSON *root;
+  root = cJSON_CreateObject();
+  cJSON_AddStringToObject(root, "cmd", status);
+  cJSON_AddNumberToObject(root, "perc", advancement);
+  cJSON_PrintPreallocated(root, output, JSON_STRING_SIZE, false);
+  cJSON_Delete(root);
+}
