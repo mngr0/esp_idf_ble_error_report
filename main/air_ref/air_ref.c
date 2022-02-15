@@ -212,8 +212,8 @@ static void query_task(void *arg) {
 
   char json_update[JSON_STRING_SIZE];
 
-  get_machine_handle_ptr()->gatts_if=&heart_rate_profile_tab[PROFILE_MACHINE_IDX].gatts_if;
-  get_routine_handle_ptr()->gatts_if=&heart_rate_profile_tab[PROFILE_ROUTINE_IDX].gatts_if;
+  //get_machine_handle_ptr()->gatts_if=&heart_rate_profile_tab[PROFILE_MACHINE_IDX].gatts_if;
+  //get_routine_handle_ptr()->gatts_if=&heart_rate_profile_tab[PROFILE_ROUTINE_IDX].gatts_if;
 
 
   // read device type

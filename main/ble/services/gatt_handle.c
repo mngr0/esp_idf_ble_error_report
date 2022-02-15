@@ -40,14 +40,16 @@ bool gatt_handle_send_status_update_to_client(
     handle_descriptor_t *handle_descriptor, char *json_status) {
   if (ble_is_connected()) {
     if (current_len == 0) {
-      ESP_LOGI(GATT_UTILS_TAG, " INDICATING ");
+      ESP_LOGI(GATT_UTILS_TAG, " INDICATING STATUS UPDATE");
       strcpy((char *)current_buffer, json_status);
       current_idx = 0;
       current_len = strlen(json_status);
       current_size_sent =
           min(handle_descriptor->mtu_size - 5, strlen(json_status));
       esp_ble_gatts_send_indicate(
-          *(handle_descriptor->gatts_if), handle_descriptor->conn_id,
+          //*(handle_descriptor->gatts_if),
+           handle_descriptor->conn_id,
+          heart_rate_profile_tab[PROFILE_MACHINE_IDX].gatts_if,
           handle_descriptor->handle_table[GATT_HANDLE_IDX_STATUS_VALUE],
           current_size_sent, (uint8_t *)json_status, true);
       return true;
@@ -64,14 +66,15 @@ bool gatt_handle_send_logger_update_to_client(
     handle_descriptor_t *handle_descriptor, char *json_status) {
   if (ble_is_connected()) {
     if (current_len == 0) {
-      ESP_LOGI(GATT_UTILS_TAG, " INDICATING ");
+      ESP_LOGI(GATT_UTILS_TAG, " INDICATING LOGGER UPDATE");
       strcpy((char *)current_buffer, json_status);
       current_idx = 0;
       current_len = strlen(json_status);
       current_size_sent =
           min(handle_descriptor->mtu_size - 5, strlen(json_status));
       esp_ble_gatts_send_indicate(
-           *(handle_descriptor->gatts_if), 
+          // *(handle_descriptor->gatts_if), 
+          heart_rate_profile_tab[PROFILE_MACHINE_IDX].gatts_if,
           handle_descriptor->conn_id,
           handle_descriptor->handle_table[GATT_HANDLE_IDX_HANDLE_STATUS_VALUE],
           current_size_sent, (uint8_t *)json_status, true);
