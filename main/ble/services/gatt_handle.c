@@ -40,19 +40,26 @@ bool gatt_handle_send_status_update_to_client(
     handle_descriptor_t *handle_descriptor, char *json_status) {
   if (ble_is_connected()) {
     if (current_len == 0) {
-      ESP_LOGI(GATT_UTILS_TAG, " INDICATING STATUS UPDATE");
-      strcpy((char *)current_buffer, json_status);
-      current_idx = 0;
-      current_len = strlen(json_status);
-      current_size_sent =
-          min(handle_descriptor->mtu_size - 5, strlen(json_status));
-      esp_ble_gatts_send_indicate(
-          (handle_descriptor->profile_inst->gatts_if),
-          handle_descriptor->conn_id,
+      if (handle_descriptor->mtu_size == 200) {
+        ESP_LOGI(GATT_UTILS_TAG, " INDICATING STATUS UPDATE");
+        strcpy((char *)current_buffer, json_status);
+        current_idx = 0;
+        current_len = strlen(json_status);
+        current_size_sent =
+            min(handle_descriptor->mtu_size - 5, strlen(json_status));
+        esp_ble_gatts_send_indicate(
+            (handle_descriptor->profile_inst->gatts_if),
+            handle_descriptor->conn_id,
 
-          handle_descriptor->handle_table[GATT_HANDLE_IDX_STATUS_VALUE],
-          current_size_sent, (uint8_t *)json_status, true);
-      return true;
+            handle_descriptor->handle_table[GATT_HANDLE_IDX_STATUS_VALUE],
+            current_size_sent, (uint8_t *)json_status, true);
+        return true;
+      } else {
+        ESP_LOGI(GATT_UTILS_TAG, "NOTIFICATION DISCARTED MTU NOT 200 %d",
+                 handle_descriptor->mtu_size);
+        return false;
+      }
+
     } else {
       ESP_LOGI(GATT_UTILS_TAG, "NOTIFICATION DISCARTED BUSY %d", current_len);
       return false;
@@ -66,18 +73,27 @@ bool gatt_handle_send_logger_update_to_client(
     handle_descriptor_t *handle_descriptor, char *json_status) {
   if (ble_is_connected()) {
     if (current_len == 0) {
-      ESP_LOGI(GATT_UTILS_TAG, " INDICATING LOGGER UPDATE");
-      strcpy((char *)current_buffer, json_status);
-      current_idx = 0;
-      current_len = strlen(json_status);
-      current_size_sent =
-          min(handle_descriptor->mtu_size - 5, strlen(json_status));
-      esp_ble_gatts_send_indicate(
-          (handle_descriptor->profile_inst->gatts_if),
-          handle_descriptor->conn_id,
-          handle_descriptor->handle_table[GATT_HANDLE_IDX_HANDLE_STATUS_VALUE],
-          current_size_sent, (uint8_t *)json_status, true);
-      return true;
+      if (handle_descriptor->mtu_size == 200) {
+
+        ESP_LOGI(GATT_UTILS_TAG, " INDICATING LOGGER UPDATE");
+        strcpy((char *)current_buffer, json_status);
+        current_idx = 0;
+        current_len = strlen(json_status);
+        current_size_sent =
+            min(handle_descriptor->mtu_size - 5, strlen(json_status));
+        esp_ble_gatts_send_indicate(
+            (handle_descriptor->profile_inst->gatts_if),
+            handle_descriptor->conn_id,
+            handle_descriptor
+                ->handle_table[GATT_HANDLE_IDX_HANDLE_STATUS_VALUE],
+            current_size_sent, (uint8_t *)json_status, true);
+        return true;
+      } else {
+        ESP_LOGI(GATT_UTILS_TAG, "NOTIFICATION DISCARTED MTU NOT 200 %d",
+                 handle_descriptor->mtu_size);
+        return false;
+      }
+
     } else {
       ESP_LOGI(GATT_UTILS_TAG, "NOTIFICATION DISCARTED BUSY %d", current_len);
       return false;
@@ -143,7 +159,8 @@ void reply_read(handle_descriptor_t *handle_descriptor, esp_gatt_if_t gatts_if,
 
 void handle_event_handler(char *TAG, handle_descriptor_t *handle_descriptor,
                           esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if,
-                          esp_ble_gatts_cb_param_t *param, uint8_t srv_inst_id, const esp_gatts_attr_db_t* gatt_db) {
+                          esp_ble_gatts_cb_param_t *param, uint8_t srv_inst_id,
+                          const esp_gatts_attr_db_t *gatt_db) {
   esp_ble_gatts_cb_param_t *p_data = (esp_ble_gatts_cb_param_t *)param;
   uint8_t res = 0xff;
   switch (event) {
@@ -324,7 +341,8 @@ void handle_event_handler(char *TAG, handle_descriptor_t *handle_descriptor,
                param->add_attr_tab.num_handle);
       memcpy(handle_descriptor->handle_table, param->add_attr_tab.handles,
              sizeof(handle_descriptor->handle_table));
-      esp_ble_gatts_start_service(handle_descriptor->handle_table[GATT_HANDLE_IDX_SERVICE]);
+      esp_ble_gatts_start_service(
+          handle_descriptor->handle_table[GATT_HANDLE_IDX_SERVICE]);
     }
     break;
   }
