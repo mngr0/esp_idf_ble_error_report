@@ -324,8 +324,7 @@ void handle_event_handler(char *TAG, handle_descriptor_t *handle_descriptor,
                param->add_attr_tab.num_handle);
       memcpy(handle_descriptor->handle_table, param->add_attr_tab.handles,
              sizeof(handle_descriptor->handle_table));
-      esp_ble_gatts_start_service(
-          handle_descriptor->handle_table[GATT_HANDLE_IDX_SERVICE]);
+      esp_ble_gatts_start_service(handle_descriptor->handle_table[GATT_HANDLE_IDX_SERVICE]);
     }
     break;
   }
