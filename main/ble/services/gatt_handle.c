@@ -214,7 +214,16 @@ void handle_event_handler(char *TAG, handle_descriptor_t *handle_descriptor,
   }
   case ESP_GATTS_WRITE_EVT: { // EDIT CONF
 
-    if (p_data->write.is_prep == false) {
+
+
+    ESP_LOGI("GATT_HANDLE_WRITE",
+             "conn_id:%d ,trans_id:%d "
+             ",handle:%d,offset:%d,need_rsp:%d,is_prep:%d,len:%d ",
+             p_data->write.conn_id, p_data->write.trans_id,
+             p_data->write.handle, p_data->write.offset, p_data->write.need_rsp,
+             p_data->write.is_prep, p_data->write.len);
+
+    //if (p_data->write.is_prep == false) {
       res = find_char_and_desr_index(handle_descriptor->handle_table,
                                      p_data->write.handle);
       switch (res) {
@@ -253,16 +262,16 @@ void handle_event_handler(char *TAG, handle_descriptor_t *handle_descriptor,
         break;
       }
       }
-    }
+   // }
 
-    ESP_LOGI(TAG, "GATT_WRITE_EVT, conn_id %d, trans_id %d, handle %d\n",
-             param->write.conn_id, param->write.trans_id, param->write.handle);
-    if (!param->write.is_prep) {
-      ESP_LOGI(TAG, "GATT_WRITE_EVT, value len %d, value :", param->write.len);
-      esp_log_buffer_hex(TAG, param->write.value, param->write.len);
-    }
-    example_write_event_env(gatts_if, &handle_descriptor->b_prepare_write_env,
-                            param);
+    // ESP_LOGI(TAG, "GATT_WRITE_EVT, conn_id %d, trans_id %d, handle %d\n",
+    //          param->write.conn_id, param->write.trans_id, param->write.handle);
+    // if (!param->write.is_prep) {
+    //   ESP_LOGI(TAG, "GATT_WRITE_EVT, value len %d, value :", param->write.len);
+    //   esp_log_buffer_hex(TAG, param->write.value, param->write.len);
+    // }
+    // example_write_event_env(gatts_if, &handle_descriptor->b_prepare_write_env,
+    //                         param);
     break;
   }
   case ESP_GATTS_EXEC_WRITE_EVT:

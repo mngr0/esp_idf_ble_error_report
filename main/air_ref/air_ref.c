@@ -127,7 +127,7 @@ bool query_next(logger_memory_t *logger_memory) {
   }
 }
 
-void write_next(logger_memory_t *logger_memory) {
+void write_nextQUELLOVERO(logger_memory_t *logger_memory) {
   uint8_t data[1000 * 4];
 
   int length;
@@ -153,6 +153,17 @@ void write_next(logger_memory_t *logger_memory) {
                                    // timeout
                                    // resend
     send_write_request(logger_memory);
+  }
+}
+
+bool write_next(logger_memory_t *logger_memory) {
+  if (logger_memory->current_idx_read < logger_memory->current_size) {
+    // logger_memory->current_list[logger_memory->current_idx_read] = ciao;
+    logger_memory->current_idx_read++;
+    ciao++;
+    return true;
+  } else {
+    return false;
   }
 }
 
@@ -225,9 +236,6 @@ static void query_task(void *arg) {
       if (logger_memory.current_idx_read == logger_memory.current_size) {
         start_query_routine_conf(&logger_memory);
         logger_memory.logger_state = logger_state_starting_poll_routine_conf;
-
-        // print_array("machine_config:", m_config, m_config_names,
-        // m_config_size);
         ESP_LOGI("LOGGER", "poll machine conf done");
         jsonify_machine_conf(get_machine_handle_ptr()->config);
       }
@@ -239,8 +247,6 @@ static void query_task(void *arg) {
       if (logger_memory.current_idx_read == logger_memory.current_size) {
         start_query_machine_status(&logger_memory);
         logger_memory.logger_state = logger_state_poll_machine_status;
-        // print_array("air_ref_config:", ar_config, ar_config_names,
-        // ar_config_size);
         ESP_LOGI("LOGGER", "poll routine conf done");
         jsonify_routine_conf(get_routine_handle_ptr()->config);
       }
@@ -251,11 +257,7 @@ static void query_task(void *arg) {
       query_next(&logger_memory);
       if (logger_memory.current_idx_read == logger_memory.current_size) {
         start_query_routine_status(&logger_memory);
-        // print_array("machine_status:", m_status, m_status_names,
-        // m_status_size);
         jsonify_machine_status(json_update);
-        // ESP_LOGI("HERE COMES THE JSON", "LEDN:%u - %s", strlen(json_update),
-        // json_update);
         ESP_LOGI("LOGGER", "poll machine status done");
         gatt_machine_send_status_update_to_client(json_update);
       }
@@ -269,8 +271,6 @@ static void query_task(void *arg) {
       query_next(&logger_memory);
       if (logger_memory.current_idx_read == logger_memory.current_size) {
         start_query_machine_status(&logger_memory);
-        // print_array("air_ref_status:", ar_status, ar_status_names,
-        // ar_status_size);
         jsonify_routine_status(json_update);
         ESP_LOGI("LOGGER", "poll routine status done");
         gatt_routine_send_status_update_to_client(json_update);
@@ -281,14 +281,13 @@ static void query_task(void *arg) {
       }
       break;
     }
+
     case logger_state_read_routine_conf: {
       if (query_next(&logger_memory)) {
         jsonify_command("read_routine_conf",
                         (logger_memory.current_idx_read * 100) /
                             logger_memory.current_size,
                         json_update);
-        // ESP_LOGI("HERE COMES THE JSON", "LEDN:%u - %s", strlen(json_update),
-        // json_update);
         gatt_routine_send_logger_update_to_client(json_update);
       }
       if (logger_memory.current_idx_read == logger_memory.current_size) {
@@ -297,53 +296,42 @@ static void query_task(void *arg) {
         start_query_machine_status(&logger_memory);
         jsonify_command("complete_read_routine_conf", 100, json_update);
         ESP_LOGI("LOGGER", "read routine conf done");
-        // ESP_LOGI("HERE COMES THE JSON", "LEDN:%u - %s", strlen(json_update),
-        // json_update);
         gatt_routine_send_logger_update_to_client(json_update);
       }
       break;
     }
+
     case logger_state_read_machine_conf: {
       if (query_next(&logger_memory)) {
         jsonify_command("read_machine_conf",
                         (logger_memory.current_idx_read * 100) /
                             logger_memory.current_size,
                         json_update);
-        // ESP_LOGI("HERE COMES THE JSON", "LEN:%u - %s", strlen(json_update),
-        // json_update);
-
         gatt_machine_send_logger_update_to_client(json_update);
       }
       if (logger_memory.current_idx_read == logger_memory.current_size) {
         jsonify_machine_conf(get_machine_handle_ptr()->config);
-        // ESP_LOGI("HERE COMES THE JSON", "LEN:%u - %s",
-        // strlen(get_machine_handle_ptr()->config),
-        // get_machine_handle_ptr()->config); print_array("machine_config:",
-        // m_config, m_config_names, m_config_size);
         start_query_machine_status(&logger_memory);
-        jsonify_command("complete_read_machine_conf",
-                        (logger_memory.current_idx_read * 100) /
-                            logger_memory.current_size,
-                        json_update);
-        // ESP_LOGI("HERE COMES THE JSON", "LEN:%u - %s", strlen(json_update),
-        // json_update);
+        jsonify_command("complete_read_machine_conf", 100, json_update);
         ESP_LOGI("LOGGER", "read machine conf done");
         bool done;
         do {
           done = gatt_machine_send_logger_update_to_client(json_update);
+          vTaskDelay(5 / portTICK_PERIOD_MS);
         } while (!done);
       }
 
       break;
     }
     case logger_state_write_routine_conf: {
-      query_next(&logger_memory);
+      write_next(&logger_memory);
       jsonify_command("write_routine_conf",
                       (logger_memory.current_idx_read * 100) /
                           logger_memory.current_size,
                       json_update);
       ESP_LOGI("HERE COMES THE JSON", "LEN:%u - %s", strlen(json_update),
                json_update);
+      gatt_routine_send_logger_update_to_client(json_update);
       if (logger_memory.current_idx_read == logger_memory.current_size) {
         start_query_machine_status(&logger_memory);
         jsonify_command("complete_write_routine_conf", 100, json_update);
@@ -351,13 +339,14 @@ static void query_task(void *arg) {
                  json_update);
         bool done;
         do {
-          done = gatt_machine_send_logger_update_to_client(json_update);
+          done = gatt_routine_send_logger_update_to_client(json_update);
+          vTaskDelay(5 / portTICK_PERIOD_MS);
         } while (!done);
       }
       break;
     }
     case logger_state_write_machine_conf: {
-      query_next(&logger_memory);
+      write_next(&logger_memory);
       jsonify_command("write_machine_conf",
                       (logger_memory.current_idx_read * 100) /
                           logger_memory.current_size,
@@ -372,6 +361,7 @@ static void query_task(void *arg) {
         bool done;
         do {
           done = gatt_machine_send_logger_update_to_client(json_update);
+          vTaskDelay(5 / portTICK_PERIOD_MS);
         } while (!done);
       }
       break;
