@@ -67,7 +67,6 @@ bool gatt_handle_send_conf_update_to_client(
   return false;
 }
 
-
 bool gatt_handle_send_status_update_to_client(
     handle_descriptor_t *handle_descriptor, char *json_status) {
   if (ble_is_connected()) {
@@ -150,7 +149,8 @@ void esp_gatt_confirm_event(esp_ble_gatts_cb_param_t *param,
     // esp_log_buffer_hex(GATTS_ROUTINE_TAG, param->conf.value,
     // param->conf.len);
   } else {
-   // ESP_LOGI(GATT_UTILS_TAG, "ESP_GATTS_CONF_EVT OK status %2x attr_handle %d",
+    // ESP_LOGI(GATT_UTILS_TAG, "ESP_GATTS_CONF_EVT OK status %2x attr_handle
+    // %d",
     //         param->conf.status, param->conf.handle);
     // send next piece
     current_idx += current_size_sent;
@@ -162,7 +162,7 @@ void esp_gatt_confirm_event(esp_ble_gatts_cb_param_t *param,
                                   &current_buffer[current_idx], true);
     } else {
       current_len = 0;
-     // ESP_LOGI(GATT_UTILS_TAG, "RESET CURRENT LEN %d", current_len);
+      // ESP_LOGI(GATT_UTILS_TAG, "RESET CURRENT LEN %d", current_len);
     }
   }
 }
@@ -215,13 +215,14 @@ void handle_event_handler(char *TAG, handle_descriptor_t *handle_descriptor,
     //          res);
     // switch (res) {
     // case GATT_HANDLE_IDX_STATUS_VALUE: {
-    //   //reply_read(handle_descriptor, gatts_if, param, handle_descriptor->status);
+    //   //reply_read(handle_descriptor, gatts_if, param,
+    //   handle_descriptor->status);
     //   // send machine status
     //   break;
     // }
     // case GATT_HANDLE_IDX_CONFIG_VALUE: {
-    //   //reply_read(handle_descriptor, gatts_if, param, handle_descriptor->config);
-    //   break;
+    //   //reply_read(handle_descriptor, gatts_if, param,
+    //   handle_descriptor->config); break;
     // }
     // case GATT_HANDLE_IDX_COMMAND_VALUE: {
     //   // nothing to say
@@ -252,30 +253,46 @@ void handle_event_handler(char *TAG, handle_descriptor_t *handle_descriptor,
              p_data->write.handle, p_data->write.offset, p_data->write.need_rsp,
              p_data->write.is_prep, p_data->write.len);
 
-    if (!param->write.is_prep) {
-      if (param->write.need_rsp) {
-        esp_ble_gatts_send_response(gatts_if, param->write.conn_id,
-                                    param->write.trans_id, ESP_GATT_OK, NULL);
-        break;
-      }
-    } else {
-      /* handle prepare write */
-      example_prepare_write_event_env(
-          gatts_if, &handle_descriptor->prepare_write_env, param);
+    res = find_char_and_desr_index(handle_descriptor->handle_table,
+                                   p_data->write.handle);
+    switch (res) {
+    case GATT_HANDLE_IDX_CONFIG_VALUE: {
+      ESP_LOGI(TAG, "RECEIVING WRITE CONFIG");
+      // logger_set_state(logger_state_write_machine_conf);
+      // write single parameter
+      break;
     }
+    case GATT_HANDLE_IDX_COMMAND_VALUE: { // if i need to re-read conf
+      ESP_LOGI(TAG, "RECEIVING WRITE ON COMMAND");
+      esp_log_buffer_hex(TAG, param->write.value, param->write.len);
+      // if (param->write.len < strlen((char*)param->write.value)){
 
+      cJSON *root;
+      root =
+          cJSON_ParseWithLength((char *)param->write.value, param->write.len);
+      cJSON *width = cJSON_GetObjectItemCaseSensitive(root, "cmd");
+      if (cJSON_IsNumber(width)) {
+        if (width->valueint == 2) {
+          logger_set_state(logger_state_read_machine_conf);
+        }
+      }
+      cJSON_Delete(root);
+
+      break;
+    }
+    }
+    if (param->write.need_rsp) {
+      esp_ble_gatts_send_response(gatts_if, param->write.conn_id,
+                                  param->write.trans_id, ESP_GATT_OK, NULL);
+    }
     break;
   }
   case ESP_GATTS_EXEC_WRITE_EVT:
     ESP_LOGI(TAG, "ESP_GATTS_EXEC_WRITE_EVT");
-    //esp_ble_gatts_send_response(gatts_if, param->write.conn_id,
+    // esp_ble_gatts_send_response(gatts_if, param->write.conn_id,
     //                            param->write.trans_id, ESP_GATT_OK, NULL);
-    example_exec_write_event_env_HANDLE(&handle_descriptor->prepare_write_env,
-                                 param);
-
-
-
-
+    // example_exec_write_event_env_HANDLE(&handle_descriptor->prepare_write_env,
+    //                              param);
 
     break;
   case ESP_GATTS_MTU_EVT:

@@ -320,7 +320,7 @@ static void query_task(void *arg) {
           vTaskDelay(5 / portTICK_PERIOD_MS);
         } while (!done);
         do {
-          done = true;//gatt_machine_send_conf_to_client(json_update);
+          done = gatt_machine_send_conf_to_client(json_update);
           vTaskDelay(5 / portTICK_PERIOD_MS);
         } while (!done);
       }
