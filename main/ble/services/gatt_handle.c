@@ -35,6 +35,38 @@ uint8_t find_char_and_desr_index(uint16_t *handle_table, uint16_t handle) {
 // void init_handler(handle_descriptor_t *handle_descriptor, uint16_t* boh){
 //   handle_descriptor->gatts_if=boh;
 // }
+bool gatt_handle_send_conf_update_to_client(
+    handle_descriptor_t *handle_descriptor, char *json_status) {
+  if (ble_is_connected()) {
+    if (current_len == 0) {
+      if (handle_descriptor->mtu_size == 200) {
+        ESP_LOGI(GATT_UTILS_TAG, " INDICATING CONF UPDATE");
+        strcpy((char *)current_buffer, json_status);
+        current_idx = 0;
+        current_len = strlen(json_status);
+        current_size_sent =
+            min(handle_descriptor->mtu_size - 5, strlen(json_status));
+        esp_ble_gatts_send_indicate(
+            (handle_descriptor->profile_inst->gatts_if),
+            handle_descriptor->conn_id,
+
+            handle_descriptor->handle_table[GATT_HANDLE_IDX_CONFIG_VALUE],
+            current_size_sent, (uint8_t *)json_status, true);
+        return true;
+      } else {
+        ESP_LOGI(GATT_UTILS_TAG, "NOTIFICATION DISCARTED MTU NOT 200 %d",
+                 handle_descriptor->mtu_size);
+        return false;
+      }
+    } else {
+      ESP_LOGI(GATT_UTILS_TAG, "NOTIFICATION DISCARTED BUSY %d", current_len);
+      return false;
+    }
+  }
+  ESP_LOGI(GATT_UTILS_TAG, "NOTIFICATION DISCARTED DISCONNECTED");
+  return false;
+}
+
 
 bool gatt_handle_send_status_update_to_client(
     handle_descriptor_t *handle_descriptor, char *json_status) {
@@ -59,7 +91,6 @@ bool gatt_handle_send_status_update_to_client(
                  handle_descriptor->mtu_size);
         return false;
       }
-
     } else {
       ESP_LOGI(GATT_UTILS_TAG, "NOTIFICATION DISCARTED BUSY %d", current_len);
       return false;
@@ -184,12 +215,12 @@ void handle_event_handler(char *TAG, handle_descriptor_t *handle_descriptor,
              res);
     switch (res) {
     case GATT_HANDLE_IDX_STATUS_VALUE: {
-      reply_read(handle_descriptor, gatts_if, param, handle_descriptor->status);
+      //reply_read(handle_descriptor, gatts_if, param, handle_descriptor->status);
       // send machine status
       break;
     }
     case GATT_HANDLE_IDX_CONFIG_VALUE: {
-      reply_read(handle_descriptor, gatts_if, param, handle_descriptor->config);
+      //reply_read(handle_descriptor, gatts_if, param, handle_descriptor->config);
       break;
     }
     case GATT_HANDLE_IDX_COMMAND_VALUE: {
@@ -214,8 +245,6 @@ void handle_event_handler(char *TAG, handle_descriptor_t *handle_descriptor,
   }
   case ESP_GATTS_WRITE_EVT: { // EDIT CONF
 
-
-
     ESP_LOGI("GATT_HANDLE_WRITE",
              "conn_id:%d ,trans_id:%d "
              ",handle:%d,offset:%d,need_rsp:%d,is_prep:%d,len:%d ",
@@ -223,76 +252,31 @@ void handle_event_handler(char *TAG, handle_descriptor_t *handle_descriptor,
              p_data->write.handle, p_data->write.offset, p_data->write.need_rsp,
              p_data->write.is_prep, p_data->write.len);
 
-
-    // if (!param->write.is_prep) {
-    //   if (param->write.need_rsp) {
-    //     esp_ble_gatts_send_response(gatts_if, param->write.conn_id,
-    //                                 param->write.trans_id, ESP_GATT_OK, NULL);
-    //   }
-    // } else {
-    //   /* handle prepare write */
-    //   example_prepare_write_event_env(gatts_if, &prepare_write_env, param);
-    // }
-
-
-
-    //if (p_data->write.is_prep == false) {
-      res = find_char_and_desr_index(handle_descriptor->handle_table,
-                                     p_data->write.handle);
-      switch (res) {
-      case GATT_HANDLE_IDX_STATUS_VALUE: {
-        // non write
+    if (!param->write.is_prep) {
+      if (param->write.need_rsp) {
+        esp_ble_gatts_send_response(gatts_if, param->write.conn_id,
+                                    param->write.trans_id, ESP_GATT_OK, NULL);
         break;
       }
-      case GATT_HANDLE_IDX_CONFIG_VALUE: {
-        ESP_LOGI(TAG, "RECEIVING WRITE CONFIG");
-        logger_set_state(logger_state_write_machine_conf);
-        break;
-      }
-      case GATT_HANDLE_IDX_COMMAND_VALUE: {
-        ESP_LOGI(TAG, "RECEIVING WRITE ON COMMAND");
-        esp_log_buffer_hex(TAG, param->write.value, param->write.len);
-        // if (param->write.len < strlen((char*)param->write.value)){
+    } else {
+      /* handle prepare write */
+      example_prepare_write_event_env(
+          gatts_if, &handle_descriptor->prepare_write_env, param);
+    }
 
-        cJSON *root;
-        root =
-            cJSON_ParseWithLength((char *)param->write.value, param->write.len);
-        cJSON *width = cJSON_GetObjectItemCaseSensitive(root, "cmd");
-        if (cJSON_IsNumber(width)) {
-          if (width->valueint == 2) {
-            logger_set_state(logger_state_read_machine_conf);
-          }
-        }
-        cJSON_Delete(root);
-
-        break;
-      }
-      case GATT_HANDLE_IDX_HANDLE_STATUS_VALUE: {
-        // non write
-        break;
-      }
-      default: {
-        break;
-      }
-      }
-   // }
-
-    // ESP_LOGI(TAG, "GATT_WRITE_EVT, conn_id %d, trans_id %d, handle %d\n",
-    //          param->write.conn_id, param->write.trans_id, param->write.handle);
-    // if (!param->write.is_prep) {
-    //   ESP_LOGI(TAG, "GATT_WRITE_EVT, value len %d, value :", param->write.len);
-    //   esp_log_buffer_hex(TAG, param->write.value, param->write.len);
-    // }
-    // example_write_event_env(gatts_if, &handle_descriptor->b_prepare_write_env,
-    //                         param);
     break;
   }
   case ESP_GATTS_EXEC_WRITE_EVT:
     ESP_LOGI(TAG, "ESP_GATTS_EXEC_WRITE_EVT");
-    esp_ble_gatts_send_response(gatts_if, param->write.conn_id,
-                                param->write.trans_id, ESP_GATT_OK, NULL);
-    example_exec_write_event_env(&handle_descriptor->b_prepare_write_env,
+    //esp_ble_gatts_send_response(gatts_if, param->write.conn_id,
+    //                            param->write.trans_id, ESP_GATT_OK, NULL);
+    example_exec_write_event_env_HANDLE(&handle_descriptor->prepare_write_env,
                                  param);
+
+
+
+
+
     break;
   case ESP_GATTS_MTU_EVT:
     ESP_LOGI(TAG, "ESP_GATTS_MTU_EVT, MTU %d", param->mtu.mtu);

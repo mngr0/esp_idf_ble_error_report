@@ -10,7 +10,7 @@
 #define min(a, b) (a < b ? a : b)
 
 typedef enum {
-  GATT_HANDLE_IDX_SERVICE=1,
+  GATT_HANDLE_IDX_SERVICE = 1,
 
   GATT_HANDLE_IDX_STATUS_CHAR,
   GATT_HANDLE_IDX_STATUS_VALUE,
@@ -29,7 +29,7 @@ typedef enum {
 
 typedef struct {
   uint16_t handle_table[GATT_HANDLE_NB];
-  prepare_type_env_t b_prepare_write_env;
+  prepare_type_env_t prepare_write_env;
   uint16_t conn_id;
   int mtu_size;
   struct gatts_profile_inst *profile_inst;
@@ -37,13 +37,15 @@ typedef struct {
   char config[1024];
   char command[1024];
   char handle_status[1024];
-
 } handle_descriptor_t;
 
 bool gatt_handle_send_status_update_to_client(
     handle_descriptor_t *handle_descriptor, char *json_status);
 
 bool gatt_handle_send_logger_update_to_client(
+    handle_descriptor_t *handle_descriptor, char *json_status);
+
+bool gatt_handle_send_conf_update_to_client(
     handle_descriptor_t *handle_descriptor, char *json_status);
 
 bool gatt_routine_send_status_update_to_client(char *json_status);
@@ -64,7 +66,8 @@ void esp_gatt_confirm_event(esp_ble_gatts_cb_param_t *param,
 
 void handle_event_handler(char *TAG, handle_descriptor_t *handle_descriptor,
                           esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if,
-                          esp_ble_gatts_cb_param_t *param, uint8_t srv_inst_id, const esp_gatts_attr_db_t *gatt_machine_db) ;
+                          esp_ble_gatts_cb_param_t *param, uint8_t srv_inst_id,
+                          const esp_gatts_attr_db_t *gatt_machine_db);
 
 // status is notified, readonly
 // logger status is notified, as json {logger_status:[reading|writing],
@@ -74,13 +77,11 @@ void handle_event_handler(char *TAG, handle_descriptor_t *handle_descriptor,
 
 // possible command are : [read_conf | ]
 
-handle_descriptor_t* get_machine_handle_ptr();
+handle_descriptor_t *get_machine_handle_ptr();
 
-handle_descriptor_t* get_routine_handle_ptr();
-
+handle_descriptor_t *get_routine_handle_ptr();
 
 void printadiocaneMACHINE();
-
 
 void printadiocaneROUTINE();
 

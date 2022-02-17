@@ -319,6 +319,10 @@ static void query_task(void *arg) {
           done = gatt_machine_send_logger_update_to_client(json_update);
           vTaskDelay(5 / portTICK_PERIOD_MS);
         } while (!done);
+        do {
+          done = true;//gatt_machine_send_conf_to_client(json_update);
+          vTaskDelay(5 / portTICK_PERIOD_MS);
+        } while (!done);
       }
 
       break;
@@ -375,6 +379,8 @@ static void query_task(void *arg) {
     vTaskDelay(100 / portTICK_PERIOD_MS);
   }
 }
+
+
 
 void logger_set_state(logger_state_t new_state) {
   if (logger_memory.logger_state_next == -1) {

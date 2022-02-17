@@ -61,3 +61,14 @@ typedef struct {
   configuration_field_t routine_conf[32];
   configuration_field_t routine_status[32];
 } configuration;
+
+
+
+
+//thread BLE
+//started by serail routine, after start done
+//waits for connection, at connecion notify configs
+//periodically receives updates from serial, guarantees fairness between them
+//when write...
+
+//no, parte subito, deve reportare errori di comunicazione
