@@ -21,8 +21,8 @@ typedef enum {
     logger_state_poll_routine_status,
     logger_state_read_routine_conf,
     logger_state_read_machine_conf,
-    logger_state_write_routine_conf,
-    logger_state_write_machine_conf
+    // logger_state_write_routine_conf,
+    // logger_state_write_machine_conf
 }logger_state_t;
 
 typedef struct {
