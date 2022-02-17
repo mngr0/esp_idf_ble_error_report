@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "freertos/portmacro.h"
 #include "serial_SATA_protocol/serial_SATA_protocol.h"
 
 #include "air_ref.h"
@@ -72,20 +73,36 @@ bool send_request(logger_memory_t *logger_memory) {
   }
 }
 
-void send_write_request(logger_memory_t *logger_memory) {
-  if (logger_memory->current_idx_read < logger_memory->current_size) {
-    message_t query_msg;
-    query_msg.command_type = logger_memory->current_command_type;
-    query_msg.device_address = 4;
-    query_msg.value =
-        logger_memory->current_list[logger_memory->current_idx_read];
-    query_msg.parameter_address = logger_memory->current_idx_read;
-    logger_memory->last_send_timestamp = xTaskGetTickCount();
-    packet_manager_send_data((uint8_t *)&query_msg, 8);
-  }
-}
+bool query_nextQUELLOFACILE(logger_memory_t *logger_memory) {
+  uint8_t data[1000 * 4];
 
-bool query_nextQUELLOVERO(logger_memory_t *logger_memory) {
+  send_request(logger_memory);
+  int length;
+
+  while (xTaskGetTickCount() - logger_memory->last_send_timestamp >
+         (1000 / portTICK_RATE_MS)) {
+
+    length =
+        uart_read_bytes(uart_num, data, LOGGER_BUF_SIZE, 20 / portTICK_RATE_MS);
+
+    if (length > 0) {
+      // reset timeout
+      if ((length = packet_manager_pop(&packet_structure, data)) > 0) {
+        packet_received_t reply;
+        if (packet_is_valid(&reply, data, length)) { // TODO CHECK NACK???
+          // if ((message_t *)reply.buffer)->command_type ==
+          // logger_memory->current_expected_reply_type;
+          logger_memory->current_list[logger_memory->current_idx_read] =
+              ((message_t *)reply.buffer)->value;
+          logger_memory->current_idx_read++;
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+bool query_nextQUELLOVECCHIO(logger_memory_t *logger_memory) {
   uint8_t data[1000 * 4];
 
   int length;
@@ -115,6 +132,7 @@ bool query_nextQUELLOVERO(logger_memory_t *logger_memory) {
   }
   return false;
 }
+
 uint8_t ciao = 42;
 
 bool query_next(logger_memory_t *logger_memory) {
@@ -128,102 +146,82 @@ bool query_next(logger_memory_t *logger_memory) {
   }
 }
 
-void write_nextQUELLOVERO(logger_memory_t *logger_memory) {
+void send_command(uint8_t *buf) {
+  bool done, sent;
+  char json_update[1000];
   uint8_t data[1000 * 4];
-
+  TickType_t timestamp;
   int length;
-  length =
-      uart_read_bytes(uart_num, data, LOGGER_BUF_SIZE, 20 / portTICK_RATE_MS);
 
-  if (length > 0) {
-    packet_manager_put(&packet_structure, data, length);
-    if ((length = packet_manager_pop(&packet_structure, data)) > 0) {
-      packet_received_t reply;
-      if (packet_is_valid(&reply, data, length)) {
-        // TODO REPLY CAN BE NACK
-        // if ((message_t *)reply.buffer)->command_type ==
-        // logger_memory->current_expected_reply_type;
-        logger_memory->current_idx_read++;
-        send_write_request(logger_memory);
+  message_t query_msg;
+  query_msg.command_type = buf[4];
+  query_msg.device_address = 4;
+  query_msg.value = *(int32_t *)buf;
+  query_msg.parameter_address = buf[5];
+  packet_manager_send_data((uint8_t *)&query_msg, 8);
+  timestamp = xTaskGetTickCount();
+  sent = false;
+  // wait for reply
+  while (xTaskGetTickCount() - timestamp > (1000 / portTICK_RATE_MS)) {
+    length =
+        uart_read_bytes(uart_num, data, LOGGER_BUF_SIZE, 20 / portTICK_RATE_MS);
+
+    if (length > 0) {
+      timestamp = xTaskGetTickCount();
+      if ((length = packet_manager_pop(&packet_structure, data)) > 0) {
+        packet_received_t reply;
+        if (packet_is_valid(&reply, data, length)) { // TODO CHECK NACK???
+          sent = true;
+        }
       }
     }
   }
 
-  if (xTaskGetTickCount() - logger_memory->last_send_timestamp >
-      (1000 / portTICK_RATE_MS)) { // 1 secondo di
-                                   // timeout
-                                   // resend
-    send_write_request(logger_memory);
-  }
-}
-
-bool write_next(logger_memory_t *logger_memory) {
-  if (logger_memory->current_idx_read < logger_memory->current_size) {
-    // logger_memory->current_list[logger_memory->current_idx_read] = ciao;
-    logger_memory->current_idx_read++;
-    ciao++;
-    return true;
+  if (sent) { // TODO translate index in name
+    jsonify_report("written",
+                    m_config_names[buf[5]],
+                    json_update);
   } else {
-    return false;
+    jsonify_report("read_machine_conf",
+                    m_config_names[buf[5]],
+                    json_update);
   }
+
+  do {
+    done = gatt_machine_send_logger_update_to_client(json_update);
+  } while (!done);
 }
-
-// void go_state_next(char *json_update) {
-
-//   logger_memory.current_idx_read = 0;
-
-//   switch (logger_memory.logger_state) {
-
-//   case logger_state_poll_machine_status: {
-//     jsonify_machine_status(json_update);
-//     gatt_machine_send_status_update_to_client(json_update);
-//     start_query_routine_conf(&logger_memory);
-//     break;
-//   }
-//   case logger_state_poll_routine_status: {
-//     jsonify_routine_status(json_update);
-//     gatt_routine_send_status_update_to_client(json_update);
-//     start_query_machine_conf(&logger_memory);
-//     break;
-//   }
-//   // case logger_state_write_routine_conf: {
-
-//   //   logger_memory.current_command_type = write_routine_conf_parameter;
-//   //   logger_memory.current_expected_reply_type = ack;
-//   //   logger_memory.current_list = ar_config;
-//   //   logger_memory.current_size = ar_config_size;
-
-//   //   break;
-//   // }
-//   // case logger_state_write_machine_conf: {
-
-//   //   logger_memory.current_command_type = write_machine_conf_parameter;
-//   //   logger_memory.current_expected_reply_type = ack;
-//   //   logger_memory.current_list = m_config;
-//   //   logger_memory.current_size = m_config_size;
-
-//   //   break;
-//   // }
-//   default: {
-//     break;
-//   }
-//   }
-// }
 
 inline static void status_read(char *json_update) {
+  query_next(&logger_memory);
   if (logger_memory.current_idx_read == logger_memory.current_size) {
 
     if (logger_memory.logger_state == logger_state_poll_routine_status) {
-
       jsonify_routine_status(json_update);
       gatt_routine_send_status_update_to_client(json_update);
+    }
+    if (logger_memory.logger_state == logger_state_poll_machine_status) {
+      jsonify_machine_status(json_update);
+      gatt_machine_send_status_update_to_client(json_update);
+    }
+
+    if (logger_memory.logger_state_next == logger_state_read_machine_conf) {
+      start_query_machine_conf(&logger_memory);
+      logger_memory.logger_state_next=-1;
+      return;
+    }
+    if (logger_memory.logger_state_next == logger_state_read_routine_conf) {
+      start_query_routine_conf(&logger_memory);
+      logger_memory.logger_state_next=-1;
+      return;
+    }
+
+    if (logger_memory.logger_state == logger_state_poll_routine_status) {
+
       start_query_machine_status(&logger_memory);
       return;
     }
     if (logger_memory.logger_state == logger_state_poll_machine_status) {
-
-      jsonify_machine_status(json_update);
-      gatt_machine_send_status_update_to_client(json_update);
       start_query_routine_status(&logger_memory);
       return;
     }
@@ -246,22 +244,18 @@ static inline void conf_read(char *json_update) {
                       json_update);
       gatt_machine_send_logger_update_to_client(json_update);
     }
-
-    jsonify_command("read_routine_conf",
-                    (logger_memory.current_idx_read * 100) /
-                        logger_memory.current_size,
-                    json_update);
-    gatt_routine_send_logger_update_to_client(json_update);
   }
   if (logger_memory.current_idx_read == logger_memory.current_size) {
     bool done;
     if (logger_memory.logger_state == logger_state_read_routine_conf) {
+      jsonify_routine_conf(json_update);
       do {
         done = gatt_routine_send_conf_update_to_client(json_update);
         vTaskDelay(5 / portTICK_PERIOD_MS);
       } while (!done);
     }
     if (logger_memory.logger_state == logger_state_read_machine_conf) {
+      jsonify_machine_conf(json_update);
       do {
         done = gatt_machine_send_conf_update_to_client(json_update);
         vTaskDelay(5 / portTICK_PERIOD_MS);
@@ -272,8 +266,11 @@ static inline void conf_read(char *json_update) {
   }
 }
 
-static void query_task(void *arg) {
+static QueueHandle_t command_queue;
 
+static void query_task(void *arg) {
+  // 6 = data(4) + type (routine/machine)(1) + index (1)
+  command_queue = xQueueCreate(64, 6);
   char json_update[JSON_STRING_SIZE];
 
   ar_config_size = air_ref_conf_parameters_size;
@@ -285,7 +282,10 @@ static void query_task(void *arg) {
   logger_memory.logger_state = logger_state_starting_poll_machine_conf;
 
   while (1) {
-
+    uint8_t tmp_buffer[6];
+    if (xQueueReceive(command_queue, tmp_buffer, 0)) {
+      send_command(tmp_buffer);
+    }
     // if queue has values, write command nad reply
 
     switch (logger_memory.logger_state) {
@@ -313,133 +313,27 @@ static void query_task(void *arg) {
     }
 
     case logger_state_poll_machine_status: {
-      query_next(&logger_memory);
       status_read(json_update);
-      // if (logger_memory.current_idx_read == logger_memory.current_size) {
-      //   start_query_routine_status(&logger_memory);
-      //   jsonify_machine_status(json_update);
-      //   ESP_LOGI("LOGGER", "poll machine status done");
-      //   gatt_machine_send_status_update_to_client(json_update);
-      // }
-      // if (logger_memory.logger_state_next != -1) {
-      //   go_state_next(logger_memory.logger_state_next);
-      //   logger_memory.logger_state_next = -1;
-      // }
       break;
     }
     case logger_state_poll_routine_status: {
-      query_next(&logger_memory);
       status_read(json_update);
-      // if (logger_memory.current_idx_read == logger_memory.current_size) {
-      //   start_query_machine_status(&logger_memory);
-      //   jsonify_routine_status(json_update);
-      //   ESP_LOGI("LOGGER", "poll routine status done");
-      //   gatt_routine_send_status_update_to_client(json_update);
-      // }
-      // if (logger_memory.logger_state_next != -1) {
-      //   go_state_next(logger_memory.logger_state_next);
-      //   logger_memory.logger_state_next = -1;
-      // }
       break;
     }
-
     case logger_state_read_routine_conf: {
       conf_read(json_update);
-      // if (query_next(&logger_memory)) {
-      //   jsonify_command("read_routine_conf",
-      //                   (logger_memory.current_idx_read * 100) /
-      //                       logger_memory.current_size,
-      //                   json_update);
-      //   gatt_routine_send_logger_update_to_client(json_update);
-      // }
-      // if (logger_memory.current_idx_read == logger_memory.current_size) {
-      //   print_array("air_ref_config:", ar_config, ar_config_names,
-      //               ar_config_size);
-      //   start_query_machine_status(&logger_memory);
-      //   jsonify_command("complete_read_routine_conf", 100, json_update);
-      //   ESP_LOGI("LOGGER", "read routine conf done");
-      //   gatt_routine_send_logger_update_to_client(json_update);
-      // }
       break;
     }
-
     case logger_state_read_machine_conf: {
+      ESP_LOGI("LOGGER", "polling machine conf");
       conf_read(json_update);
-
-      // if (query_next(&logger_memory)) {
-      //   jsonify_command("read_machine_conf",
-      //                   (logger_memory.current_idx_read * 100) /
-      //                       logger_memory.current_size,
-      //                   json_update);
-      //   gatt_machine_send_logger_update_to_client(json_update);
-      // }
-      // if (logger_memory.current_idx_read == logger_memory.current_size) {
-      //   jsonify_machine_conf(get_machine_handle_ptr()->config);
-      //   start_query_machine_status(&logger_memory);
-      //   jsonify_command("complete_read_machine_conf", 100, json_update);
-      //   ESP_LOGI("LOGGER", "read machine conf done");
-      //   bool done;
-      //   do {
-      //     done = gatt_machine_send_logger_update_to_client(json_update);
-      //     vTaskDelay(5 / portTICK_PERIOD_MS);
-      //   } while (!done);
-      //   do {
-      //     done = gatt_machine_send_conf_update_to_client(json_update);
-      //     vTaskDelay(5 / portTICK_PERIOD_MS);
-      //   } while (!done);
-      // }
-
       break;
     }
-    // case logger_state_write_routine_conf: {
-    //   write_next(&logger_memory);
-    //   jsonify_command("write_routine_conf",
-    //                   (logger_memory.current_idx_read * 100) /
-    //                       logger_memory.current_size,
-    //                   json_update);
-    //   ESP_LOGI("HERE COMES THE JSON", "LEN:%u - %s", strlen(json_update),
-    //            json_update);
-    //   gatt_routine_send_logger_update_to_client(json_update);
-    //   if (logger_memory.current_idx_read == logger_memory.current_size) {
-    //     start_query_machine_status(&logger_memory);
-    //     jsonify_command("complete_write_routine_conf", 100, json_update);
-    //     ESP_LOGI("HERE COMES THE JSON", "LEN:%u - %s", strlen(json_update),
-    //              json_update);
-    //     bool done;
-    //     do {
-    //       done = gatt_routine_send_logger_update_to_client(json_update);
-    //       vTaskDelay(5 / portTICK_PERIOD_MS);
-    //     } while (!done);
-    //   }
-    //   break;
-    // }
-    // case logger_state_write_machine_conf: {
-    //   write_next(&logger_memory);
-    //   jsonify_command("write_machine_conf",
-    //                   (logger_memory.current_idx_read * 100) /
-    //                       logger_memory.current_size,
-    //                   json_update);
-    //   ESP_LOGI("HERE COMES THE JSON", "LEN:%u - %s", strlen(json_update),
-    //            json_update);
-    //   if (logger_memory.current_idx_read == logger_memory.current_size) {
-    //     start_query_machine_status(&logger_memory);
-    //     jsonify_command("complete_write_machine_conf", 100, json_update);
-    //     ESP_LOGI("HERE COMES THE JSON", "LEN:%u - %s", strlen(json_update),
-    //              json_update);
-    //     bool done;
-    //     do {
-    //       done = gatt_machine_send_logger_update_to_client(json_update);
-    //       vTaskDelay(5 / portTICK_PERIOD_MS);
-    //     } while (!done);
-    //   }
-    //   break;
-    // }
+
     default: {
       break;
     }
     }
-    // ESP_LOGI("QUERY - count", "here %d", logger_memory.logger_state);
-    // gatt_machine_send_status_update_to_client("ciao");
     vTaskDelay(100 / portTICK_PERIOD_MS);
   }
 }
@@ -452,7 +346,36 @@ void logger_set_state(logger_state_t new_state) {
 }
 
 void logger_init() {
+  logger_memory.logger_state_next=-1;
   packet_manager_init(&packet_structure);
   xTaskCreate(query_task, "query_task", SENDER_TASK_STACK_SIZE, NULL,
               TASK_SENDER_STACK_PRIORITY, &(xQueryTask));
+}
+
+void enqueue_cmd(char *name, int32_t value) {
+  uint8_t frame[6];
+  bool found = false;
+  frame[0] = ((uint8_t *)&value)[0];
+  frame[1] = ((uint8_t *)&value)[1];
+  frame[2] = ((uint8_t *)&value)[2];
+  frame[3] = ((uint8_t *)&value)[3];
+  for (int i = 0; i < machine_conf_parameters_size; i++) {
+    if (strcmp(name, m_config_names[i])) {
+
+      frame[4] = write_machine_conf_parameter;
+      frame[5] = i;
+      found = true;
+    }
+  }
+  for (int i = 0; i < air_ref_conf_parameters_size; i++) {
+    if (strcmp(name, ar_config_names[i])) {
+
+      frame[4] = write_routine_conf_parameter;
+      frame[5] = i;
+      found = true;
+    }
+  }
+  if (found) {
+    xQueueSend(command_queue, frame, 10);
+  }
 }

@@ -39,6 +39,7 @@ bool gatt_handle_send_conf_update_to_client(
       if (handle_descriptor->mtu_size == 200) {
         ESP_LOGI(GATT_UTILS_TAG, " INDICATING CONF UPDATE");
         strcpy((char *)current_buffer, json_status);
+        current_handle=GATT_HANDLE_IDX_CONFIG_VALUE;
         current_idx = 0;
         current_len = strlen(json_status);
         current_size_sent =
@@ -46,7 +47,6 @@ bool gatt_handle_send_conf_update_to_client(
         esp_ble_gatts_send_indicate(
             (handle_descriptor->profile_inst->gatts_if),
             handle_descriptor->conn_id,
-
             handle_descriptor->handle_table[GATT_HANDLE_IDX_CONFIG_VALUE],
             current_size_sent, (uint8_t *)json_status, true);
         return true;
@@ -71,6 +71,7 @@ bool gatt_handle_send_status_update_to_client(
       if (handle_descriptor->mtu_size == 200) {
         ESP_LOGI(GATT_UTILS_TAG, " INDICATING STATUS UPDATE");
         strcpy((char *)current_buffer, json_status);
+        current_handle=GATT_HANDLE_IDX_STATUS_VALUE;
         current_idx = 0;
         current_len = strlen(json_status);
         current_size_sent =
@@ -104,6 +105,7 @@ bool gatt_handle_send_logger_update_to_client(
 
         ESP_LOGI(GATT_UTILS_TAG, " INDICATING LOGGER UPDATE");
         strcpy((char *)current_buffer, json_status);
+        current_handle=GATT_HANDLE_IDX_HANDLE_STATUS_VALUE;
         current_idx = 0;
         current_len = strlen(json_status);
         current_size_sent =
@@ -132,7 +134,7 @@ bool gatt_handle_send_logger_update_to_client(
 
 void esp_gatt_confirm_event(esp_ble_gatts_cb_param_t *param,
                             esp_gatt_if_t gatts_if, uint16_t conn_id,
-                            uint16_t attr_handle, int mtu_size) {
+                            int mtu_size) {
 
   if (param->conf.status != ESP_GATT_OK) {
     ESP_LOGI(GATT_UTILS_TAG,
@@ -140,7 +142,7 @@ void esp_gatt_confirm_event(esp_ble_gatts_cb_param_t *param,
              param->conf.status, param->conf.handle);
     // resend last indication or?
     // if(param->conf.status != ESP_GATT_BUSY)
-    esp_ble_gatts_send_indicate(gatts_if, conn_id, attr_handle,
+    esp_ble_gatts_send_indicate(gatts_if, conn_id, current_handle,
                                 current_size_sent, &current_buffer[current_idx],
                                 true);
     // esp_log_buffer_hex(GATTS_ROUTINE_TAG, param->conf.value,
@@ -154,7 +156,7 @@ void esp_gatt_confirm_event(esp_ble_gatts_cb_param_t *param,
     current_size_sent =
         min(mtu_size - 5, strlen((char *)current_buffer) - current_idx);
     if (current_size_sent > 0) {
-      esp_ble_gatts_send_indicate(gatts_if, conn_id, attr_handle,
+      esp_ble_gatts_send_indicate(gatts_if, conn_id, current_handle,
                                   current_size_sent,
                                   &current_buffer[current_idx], true);
     } else {
@@ -204,40 +206,7 @@ void handle_event_handler(char *TAG, handle_descriptor_t *handle_descriptor,
     }
     break;
   }
-  case ESP_GATTS_READ_EVT: { // READ MACHINE STATE
-    // res = find_char_and_desr_index(handle_descriptor->handle_table,
-    //                                p_data->read.handle);
-    // ESP_LOGI(TAG, "GATT_READ_EVT, conn_id %d, trans_id %d, handle %d res=%d",
-    //          param->read.conn_id, param->read.trans_id, param->read.handle,
-    //          res);
-    // switch (res) {
-    // case GATT_HANDLE_IDX_STATUS_VALUE: {
-    //   //reply_read(handle_descriptor, gatts_if, param,
-    //   handle_descriptor->status);
-    //   // send machine status
-    //   break;
-    // }
-    // case GATT_HANDLE_IDX_CONFIG_VALUE: {
-    //   //reply_read(handle_descriptor, gatts_if, param,
-    //   handle_descriptor->config); break;
-    // }
-    // case GATT_HANDLE_IDX_COMMAND_VALUE: {
-    //   // nothing to say
-    //   break;
-    // }
-    // case GATT_HANDLE_IDX_HANDLE_STATUS_VALUE: {
-    //   // case starting_polling (both)
-    //   //
-    //   // send logger status
-    //   // polling conf
-    //   // polling status
-    //   // writing conf
-    //   break;
-    // }
-    // default: {
-    //   break;
-    // }
-    // }
+  case ESP_GATTS_READ_EVT: { 
 
     break;
   }
@@ -255,8 +224,11 @@ void handle_event_handler(char *TAG, handle_descriptor_t *handle_descriptor,
     switch (res) {
     case GATT_HANDLE_IDX_CONFIG_VALUE: {
       ESP_LOGI(TAG, "RECEIVING WRITE CONFIG");
-      // logger_set_state(logger_state_write_machine_conf);
-      // write single parameter
+      cJSON *root;
+      root =
+          cJSON_ParseWithLength((char *)param->write.value, param->write.len);
+      enqueue_cmd(root->string, root->valueint);
+      cJSON_Delete(root);
       break;
     }
     case GATT_HANDLE_IDX_COMMAND_VALUE: { // if i need to re-read conf
@@ -270,6 +242,7 @@ void handle_event_handler(char *TAG, handle_descriptor_t *handle_descriptor,
       cJSON *width = cJSON_GetObjectItemCaseSensitive(root, "cmd");
       if (cJSON_IsNumber(width)) {
         if (width->valueint == 2) {
+          ESP_LOGI(TAG, "SET READ MACHINE CONF");
           logger_set_state(logger_state_read_machine_conf);
         }
       }
@@ -343,7 +316,6 @@ void handle_event_handler(char *TAG, handle_descriptor_t *handle_descriptor,
 
     esp_gatt_confirm_event(
         param, gatts_if, handle_descriptor->conn_id,
-        handle_descriptor->handle_table[GATT_HANDLE_IDX_STATUS_VALUE],
         handle_descriptor->mtu_size);
 
     break;

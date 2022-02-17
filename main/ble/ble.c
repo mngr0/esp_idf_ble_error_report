@@ -30,6 +30,7 @@ uint8_t current_buffer[2048];
 uint16_t current_idx = 0;
 uint16_t current_size_sent = 0;
 uint16_t current_len = 0;
+uint16_t current_handle=0;
 
 void gatts_profile_event_handler(esp_gatts_cb_event_t event,
                                  esp_gatt_if_t gatts_if,

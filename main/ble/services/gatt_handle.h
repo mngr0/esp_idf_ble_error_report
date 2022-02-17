@@ -59,12 +59,13 @@ bool gatt_machine_send_conf_update_to_client(char *json_status);
 
 extern uint8_t current_buffer[2048];
 extern uint16_t current_idx;
+extern uint16_t current_handle;
 extern uint16_t current_size_sent;
 extern uint16_t current_len;
 
-void esp_gatt_confirm_event(esp_ble_gatts_cb_param_t *param,
-                            esp_gatt_if_t gatts_if, uint16_t spp_conn_id,
-                            uint16_t attr_handle, int mtu_size);
+// void esp_gatt_confirm_event(esp_ble_gatts_cb_param_t *param,
+//                             esp_gatt_if_t gatts_if, uint16_t spp_conn_id,
+//                             uint16_t attr_handle, int mtu_size);
 
 void handle_event_handler(char *TAG, handle_descriptor_t *handle_descriptor,
                           esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if,

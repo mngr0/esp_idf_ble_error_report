@@ -21,8 +21,6 @@ typedef enum {
     logger_state_poll_routine_status,
     logger_state_read_routine_conf,
     logger_state_read_machine_conf,
-    // logger_state_write_routine_conf,
-    // logger_state_write_machine_conf
 }logger_state_t;
 
 typedef struct {
@@ -82,6 +80,7 @@ void start_query_logger_status(logger_memory_t *logger, logger_state_t state,
       reply_machine_conf_parameter, m_config, m_config_size);
 
 void jsonify_command(char *status, int32_t advancement, char *output);
+void jsonify_report(char *status, char* arg, char *output) ;
 
 void enqueue_cmd(char* name, int32_t value);
 
