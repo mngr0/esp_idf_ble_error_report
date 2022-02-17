@@ -39,7 +39,7 @@ bool gatt_handle_send_conf_update_to_client(
       if (handle_descriptor->mtu_size == 200) {
         ESP_LOGI(GATT_UTILS_TAG, " INDICATING CONF UPDATE");
         strcpy((char *)current_buffer, json_status);
-        current_handle=GATT_HANDLE_IDX_CONFIG_VALUE;
+        current_handle = handle_descriptor->handle_table[GATT_HANDLE_IDX_CONFIG_VALUE];
         current_idx = 0;
         current_len = strlen(json_status);
         current_size_sent =
@@ -71,7 +71,7 @@ bool gatt_handle_send_status_update_to_client(
       if (handle_descriptor->mtu_size == 200) {
         ESP_LOGI(GATT_UTILS_TAG, " INDICATING STATUS UPDATE");
         strcpy((char *)current_buffer, json_status);
-        current_handle=GATT_HANDLE_IDX_STATUS_VALUE;
+        current_handle = handle_descriptor->handle_table[GATT_HANDLE_IDX_STATUS_VALUE];
         current_idx = 0;
         current_len = strlen(json_status);
         current_size_sent =
@@ -105,7 +105,7 @@ bool gatt_handle_send_logger_update_to_client(
 
         ESP_LOGI(GATT_UTILS_TAG, " INDICATING LOGGER UPDATE");
         strcpy((char *)current_buffer, json_status);
-        current_handle=GATT_HANDLE_IDX_HANDLE_STATUS_VALUE;
+        current_handle = handle_descriptor->handle_table[GATT_HANDLE_IDX_HANDLE_STATUS_VALUE];
         current_idx = 0;
         current_len = strlen(json_status);
         current_size_sent =
@@ -135,7 +135,7 @@ bool gatt_handle_send_logger_update_to_client(
 void esp_gatt_confirm_event(esp_ble_gatts_cb_param_t *param,
                             esp_gatt_if_t gatts_if, uint16_t conn_id,
                             int mtu_size) {
-
+ 
   if (param->conf.status != ESP_GATT_OK) {
     ESP_LOGI(GATT_UTILS_TAG,
              "ESP_GATTS_CONF_EVT ERROR status %2x attr_handle %d",
@@ -155,6 +155,7 @@ void esp_gatt_confirm_event(esp_ble_gatts_cb_param_t *param,
     current_idx += current_size_sent;
     current_size_sent =
         min(mtu_size - 5, strlen((char *)current_buffer) - current_idx);
+
     if (current_size_sent > 0) {
       esp_ble_gatts_send_indicate(gatts_if, conn_id, current_handle,
                                   current_size_sent,
@@ -206,7 +207,7 @@ void handle_event_handler(char *TAG, handle_descriptor_t *handle_descriptor,
     }
     break;
   }
-  case ESP_GATTS_READ_EVT: { 
+  case ESP_GATTS_READ_EVT: {
 
     break;
   }
@@ -314,9 +315,8 @@ void handle_event_handler(char *TAG, handle_descriptor_t *handle_descriptor,
     break;
   case ESP_GATTS_CONF_EVT:
 
-    esp_gatt_confirm_event(
-        param, gatts_if, handle_descriptor->conn_id,
-        handle_descriptor->mtu_size);
+    esp_gatt_confirm_event(param, gatts_if, handle_descriptor->conn_id,
+                           handle_descriptor->mtu_size);
 
     break;
   case ESP_GATTS_CREAT_ATTR_TAB_EVT: {
