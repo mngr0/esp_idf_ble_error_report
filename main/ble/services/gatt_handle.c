@@ -150,8 +150,8 @@ void esp_gatt_confirm_event(esp_ble_gatts_cb_param_t *param,
     // esp_log_buffer_hex(GATTS_ROUTINE_TAG, param->conf.value,
     // param->conf.len);
   } else {
-    ESP_LOGI(GATT_UTILS_TAG, "ESP_GATTS_CONF_EVT OK status %2x attr_handle %d",
-             param->conf.status, param->conf.handle);
+   // ESP_LOGI(GATT_UTILS_TAG, "ESP_GATTS_CONF_EVT OK status %2x attr_handle %d",
+    //         param->conf.status, param->conf.handle);
     // send next piece
     current_idx += current_size_sent;
     current_size_sent =
@@ -162,7 +162,7 @@ void esp_gatt_confirm_event(esp_ble_gatts_cb_param_t *param,
                                   &current_buffer[current_idx], true);
     } else {
       current_len = 0;
-      ESP_LOGI(GATT_UTILS_TAG, "RESET CURRENT LEN %d", current_len);
+     // ESP_LOGI(GATT_UTILS_TAG, "RESET CURRENT LEN %d", current_len);
     }
   }
 }
@@ -208,38 +208,38 @@ void handle_event_handler(char *TAG, handle_descriptor_t *handle_descriptor,
     break;
   }
   case ESP_GATTS_READ_EVT: { // READ MACHINE STATE
-    res = find_char_and_desr_index(handle_descriptor->handle_table,
-                                   p_data->read.handle);
-    ESP_LOGI(TAG, "GATT_READ_EVT, conn_id %d, trans_id %d, handle %d res=%d",
-             param->read.conn_id, param->read.trans_id, param->read.handle,
-             res);
-    switch (res) {
-    case GATT_HANDLE_IDX_STATUS_VALUE: {
-      //reply_read(handle_descriptor, gatts_if, param, handle_descriptor->status);
-      // send machine status
-      break;
-    }
-    case GATT_HANDLE_IDX_CONFIG_VALUE: {
-      //reply_read(handle_descriptor, gatts_if, param, handle_descriptor->config);
-      break;
-    }
-    case GATT_HANDLE_IDX_COMMAND_VALUE: {
-      // nothing to say
-      break;
-    }
-    case GATT_HANDLE_IDX_HANDLE_STATUS_VALUE: {
-      // case starting_polling (both)
-      //
-      // send logger status
-      // polling conf
-      // polling status
-      // writing conf
-      break;
-    }
-    default: {
-      break;
-    }
-    }
+    // res = find_char_and_desr_index(handle_descriptor->handle_table,
+    //                                p_data->read.handle);
+    // ESP_LOGI(TAG, "GATT_READ_EVT, conn_id %d, trans_id %d, handle %d res=%d",
+    //          param->read.conn_id, param->read.trans_id, param->read.handle,
+    //          res);
+    // switch (res) {
+    // case GATT_HANDLE_IDX_STATUS_VALUE: {
+    //   //reply_read(handle_descriptor, gatts_if, param, handle_descriptor->status);
+    //   // send machine status
+    //   break;
+    // }
+    // case GATT_HANDLE_IDX_CONFIG_VALUE: {
+    //   //reply_read(handle_descriptor, gatts_if, param, handle_descriptor->config);
+    //   break;
+    // }
+    // case GATT_HANDLE_IDX_COMMAND_VALUE: {
+    //   // nothing to say
+    //   break;
+    // }
+    // case GATT_HANDLE_IDX_HANDLE_STATUS_VALUE: {
+    //   // case starting_polling (both)
+    //   //
+    //   // send logger status
+    //   // polling conf
+    //   // polling status
+    //   // writing conf
+    //   break;
+    // }
+    // default: {
+    //   break;
+    // }
+    // }
 
     break;
   }
