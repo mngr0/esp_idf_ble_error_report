@@ -168,61 +168,69 @@ bool write_next(logger_memory_t *logger_memory) {
   }
 }
 
-void go_state_next(char *json_update) {
+// void go_state_next(char *json_update) {
 
-  logger_memory.current_idx_read = 0;
+//   logger_memory.current_idx_read = 0;
 
-  switch (logger_memory.logger_state) {
+//   switch (logger_memory.logger_state) {
 
-  case logger_state_poll_machine_status: {
-    jsonify_machine_status(json_update);
-    gatt_machine_send_status_update_to_client(json_update);
-    start_query_routine_conf(&logger_memory);
-    break;
-  }
-  case logger_state_poll_routine_status: {
-    jsonify_routine_status(json_update);
-    gatt_routine_send_status_update_to_client(json_update);
-    start_query_machine_conf(&logger_memory);
-    break;
-  }
-  // case logger_state_write_routine_conf: {
+//   case logger_state_poll_machine_status: {
+//     jsonify_machine_status(json_update);
+//     gatt_machine_send_status_update_to_client(json_update);
+//     start_query_routine_conf(&logger_memory);
+//     break;
+//   }
+//   case logger_state_poll_routine_status: {
+//     jsonify_routine_status(json_update);
+//     gatt_routine_send_status_update_to_client(json_update);
+//     start_query_machine_conf(&logger_memory);
+//     break;
+//   }
+//   // case logger_state_write_routine_conf: {
 
-  //   logger_memory.current_command_type = write_routine_conf_parameter;
-  //   logger_memory.current_expected_reply_type = ack;
-  //   logger_memory.current_list = ar_config;
-  //   logger_memory.current_size = ar_config_size;
+//   //   logger_memory.current_command_type = write_routine_conf_parameter;
+//   //   logger_memory.current_expected_reply_type = ack;
+//   //   logger_memory.current_list = ar_config;
+//   //   logger_memory.current_size = ar_config_size;
 
-  //   break;
-  // }
-  // case logger_state_write_machine_conf: {
+//   //   break;
+//   // }
+//   // case logger_state_write_machine_conf: {
 
-  //   logger_memory.current_command_type = write_machine_conf_parameter;
-  //   logger_memory.current_expected_reply_type = ack;
-  //   logger_memory.current_list = m_config;
-  //   logger_memory.current_size = m_config_size;
+//   //   logger_memory.current_command_type = write_machine_conf_parameter;
+//   //   logger_memory.current_expected_reply_type = ack;
+//   //   logger_memory.current_list = m_config;
+//   //   logger_memory.current_size = m_config_size;
 
-  //   break;
-  // }
-  default: {
-    break;
-  }
-  }
-}
+//   //   break;
+//   // }
+//   default: {
+//     break;
+//   }
+//   }
+// }
 
-inline void status_read(char *json_update) {
+inline static void status_read(char *json_update) {
   if (logger_memory.current_idx_read == logger_memory.current_size) {
-    start_query_machine_status(&logger_memory);
-    jsonify_routine_status(json_update);
-    gatt_routine_send_status_update_to_client(json_update);
-  }
-  if (logger_memory.logger_state_next != -1) {
-    go_state_next(json_update);
-    logger_memory.logger_state_next = -1;
+
+    if (logger_memory.logger_state == logger_state_poll_routine_status) {
+
+      jsonify_routine_status(json_update);
+      gatt_routine_send_status_update_to_client(json_update);
+      start_query_machine_status(&logger_memory);
+      return;
+    }
+    if (logger_memory.logger_state == logger_state_poll_machine_status) {
+
+      jsonify_machine_status(json_update);
+      gatt_machine_send_status_update_to_client(json_update);
+      start_query_routine_status(&logger_memory);
+      return;
+    }
   }
 }
 
-inline void conf_read(char *json_update) {
+static inline void conf_read(char *json_update) {
   if (query_next(&logger_memory)) {
     if (logger_memory.logger_state == logger_state_read_routine_conf) {
       jsonify_command("read_routine_conf",
@@ -277,6 +285,8 @@ static void query_task(void *arg) {
   logger_memory.logger_state = logger_state_starting_poll_machine_conf;
 
   while (1) {
+
+    // if queue has values, write command nad reply
 
     switch (logger_memory.logger_state) {
 

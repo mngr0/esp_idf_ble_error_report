@@ -133,3 +133,8 @@ bool gatt_routine_send_logger_update_to_client(char *json_status) {
   return gatt_handle_send_logger_update_to_client(&routine_descriptor,
                                                   json_status);
 }
+
+bool gatt_routine_send_conf_update_to_client(char *json_status) {
+  return gatt_handle_send_conf_update_to_client(&routine_descriptor,
+                                                json_status);
+}

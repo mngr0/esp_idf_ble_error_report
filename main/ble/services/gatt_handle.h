@@ -51,6 +51,7 @@ bool gatt_handle_send_conf_update_to_client(
 bool gatt_routine_send_status_update_to_client(char *json_status);
 bool gatt_routine_send_logger_update_to_client(char *json_status);
 bool gatt_routine_send_conf_update_to_client(char *json_status);
+
 bool gatt_machine_send_status_update_to_client(char *json_status);
 bool gatt_machine_send_logger_update_to_client(char *json_status);
 bool gatt_machine_send_conf_update_to_client(char *json_status);
