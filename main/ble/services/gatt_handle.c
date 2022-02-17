@@ -223,6 +223,19 @@ void handle_event_handler(char *TAG, handle_descriptor_t *handle_descriptor,
              p_data->write.handle, p_data->write.offset, p_data->write.need_rsp,
              p_data->write.is_prep, p_data->write.len);
 
+
+    // if (!param->write.is_prep) {
+    //   if (param->write.need_rsp) {
+    //     esp_ble_gatts_send_response(gatts_if, param->write.conn_id,
+    //                                 param->write.trans_id, ESP_GATT_OK, NULL);
+    //   }
+    // } else {
+    //   /* handle prepare write */
+    //   example_prepare_write_event_env(gatts_if, &prepare_write_env, param);
+    // }
+
+
+
     //if (p_data->write.is_prep == false) {
       res = find_char_and_desr_index(handle_descriptor->handle_table,
                                      p_data->write.handle);

@@ -90,7 +90,7 @@ const esp_gatts_attr_db_t gatt_machine_db[GATT_HANDLE_NB] = {
       ESP_GATT_PERM_READ, CHAR_DECLARATION_SIZE, CHAR_DECLARATION_SIZE,
       (uint8_t *)&char_prop_read_write}},
 
-    [GATT_HANDLE_IDX_CONFIG_VALUE] = {{ESP_GATT_RSP_BY_APP},
+    [GATT_HANDLE_IDX_CONFIG_VALUE] = {{ESP_GATT_AUTO_RSP},
                                       {ESP_UUID_LEN_16,
                                        (uint8_t *)&GATT_HANDLE_CONFIG_VALUE,
                                        ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE,
