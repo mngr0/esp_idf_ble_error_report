@@ -83,5 +83,6 @@ void start_query_logger_status(logger_memory_t *logger, logger_state_t state,
 
 void jsonify_command(char *status, int32_t advancement, char *output);
 
+void enqueue_cmd(char* name, int32_t value);
 
 #endif

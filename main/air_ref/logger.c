@@ -34,3 +34,9 @@ void jsonify_command(char *status, int32_t advancement, char *output) {
   cJSON_PrintPreallocated(root, output, JSON_STRING_SIZE, false);
   cJSON_Delete(root);
 }
+
+
+void enqueue_cmd(char* name, int32_t value){
+  //translate name in index
+  //enqueue 8 byte
+}

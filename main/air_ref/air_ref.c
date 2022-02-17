@@ -27,11 +27,9 @@
 packet_ringbuffer_t packet_structure;
 
 TaskHandle_t xQueryTask;
-// TaskHandle_t xReceiverTask;
+// TaskHandle_t xBLETask;
 
-// uint32_t timestamp_last_update_m_state;
-// uint32_t timestamp_last_update_ar_state;
-// uint32_t timestamp_last_update_ar_conf;
+
 extern const uart_port_t uart_num;
 
 int32_t ar_config[256];
@@ -39,8 +37,12 @@ int32_t m_config[256];
 int32_t ar_status[256];
 int32_t m_status[256];
 
+static uint8_t ar_config_size;
+static uint8_t m_config_size;
+static uint8_t ar_status_size;
+static uint8_t m_status_size;
+
 logger_memory_t logger_memory;
-// logger_memory_t logger_memory_tmp;
 
 extern char *memory_machine_conf;
 
@@ -167,11 +169,6 @@ bool write_next(logger_memory_t *logger_memory) {
   }
 }
 
-static uint8_t ar_config_size;
-static uint8_t m_config_size;
-static uint8_t ar_status_size;
-static uint8_t m_status_size;
-
 void go_state_next(logger_state_t new_state) {
 
   logger_memory.logger_state = new_state;
@@ -213,11 +210,6 @@ void go_state_next(logger_state_t new_state) {
 static void query_task(void *arg) {
 
   char json_update[JSON_STRING_SIZE];
-
-  printadiocaneMACHINE();
-
-  printadiocaneROUTINE();
-  // read device type
 
   ar_config_size = air_ref_conf_parameters_size;
   m_config_size = machine_conf_parameters_size;
@@ -320,7 +312,7 @@ static void query_task(void *arg) {
           vTaskDelay(5 / portTICK_PERIOD_MS);
         } while (!done);
         do {
-          done = gatt_machine_send_conf_to_client(json_update);
+          done = gatt_machine_send_conf_update_to_client(json_update);
           vTaskDelay(5 / portTICK_PERIOD_MS);
         } while (!done);
       }

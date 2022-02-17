@@ -40,13 +40,6 @@ static const uint16_t GATT_HANDLE_COMMAND_VALUE =
 static const uint16_t GATT_HANDLE_HANDLE_STATUS_VALUE =
     (GATT_HANDLE_IDX_HANDLE_STATUS_VALUE) | (PROFILE_MACHINE_IDX << 4);
 
-void printadiocaneMACHINE() {
-  ESP_LOGI("DIOCANE",
-           "UID SERVICE %04x , HSTATUS %04x , HCONFIG %04x , HSH %04x",
-           GATT_HANDLE_UUID_SERVICE, GATT_HANDLE_STATUS_VALUE,
-           GATT_HANDLE_CONFIG_VALUE, GATT_HANDLE_HANDLE_STATUS_VALUE);
-}
-
 static const uint16_t primary_service_uuid = ESP_GATT_UUID_PRI_SERVICE;
 
 static const uint16_t character_declaration_uuid = ESP_GATT_UUID_CHAR_DECLARE;

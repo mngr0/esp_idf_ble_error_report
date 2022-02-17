@@ -32,9 +32,6 @@ uint8_t find_char_and_desr_index(uint16_t *handle_table, uint16_t handle) {
   return error;
 }
 
-// void init_handler(handle_descriptor_t *handle_descriptor, uint16_t* boh){
-//   handle_descriptor->gatts_if=boh;
-// }
 bool gatt_handle_send_conf_update_to_client(
     handle_descriptor_t *handle_descriptor, char *json_status) {
   if (ble_is_connected()) {

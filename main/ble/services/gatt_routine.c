@@ -42,19 +42,11 @@ static const uint16_t GATT_HANDLE_COMMAND_VALUE =
 static const uint16_t GATT_HANDLE_HANDLE_STATUS_VALUE =
     (GATT_HANDLE_IDX_HANDLE_STATUS_VALUE) | (PROFILE_ROUTINE_IDX << 4);
 
-void printadiocaneROUTINE() {
-  ESP_LOGI("DIOCANE", "UID SERVICE %04x , HSTATUS %04x , HCONFIG %04x , HSH %04x",
-           GATT_HANDLE_UUID_SERVICE, GATT_HANDLE_STATUS_VALUE,
-           GATT_HANDLE_CONFIG_VALUE, GATT_HANDLE_HANDLE_STATUS_VALUE);
-}
 
 static const uint16_t primary_service_uuid = ESP_GATT_UUID_PRI_SERVICE;
 
 static const uint16_t character_declaration_uuid = ESP_GATT_UUID_CHAR_DECLARE;
-// static const uint8_t char_prop_read_notify = ESP_GATT_CHAR_PROP_BIT_READ |
-//                                              ESP_GATT_CHAR_PROP_BIT_NOTIFY |
-//                                              ESP_GATT_CHAR_PROP_BIT_INDICATE;
-//static const uint8_t char_prop_read_write =  ESP_GATT_CHAR_PROP_BIT_READ | ESP_GATT_CHAR_PROP_BIT_WRITE;
+
 static const uint8_t char_prop_notify = ESP_GATT_CHAR_PROP_BIT_NOTIFY | ESP_GATT_CHAR_PROP_BIT_INDICATE;
 static const uint8_t char_prop_write = ESP_GATT_CHAR_PROP_BIT_WRITE;
 static const uint8_t char_prop_notify_write = ESP_GATT_CHAR_PROP_BIT_NOTIFY |
@@ -74,7 +66,7 @@ const esp_gatts_attr_db_t gatt_routine_db[GATT_HANDLE_NB] = {
     {{ESP_GATT_AUTO_RSP},
      {ESP_UUID_LEN_16, (uint8_t *)&character_declaration_uuid,
       ESP_GATT_PERM_READ |
-          ESP_GATT_PERM_WRITE, // write here should enable/disable notification
+          ESP_GATT_PERM_WRITE, 
       CHAR_DECLARATION_SIZE, CHAR_DECLARATION_SIZE,
       (uint8_t *)&char_prop_notify}},
 
@@ -85,7 +77,7 @@ const esp_gatts_attr_db_t gatt_routine_db[GATT_HANDLE_NB] = {
                                        GATTS_DEMO_CHAR_VAL_LEN_MAX, 1024,
                                        (uint8_t *)routine_descriptor.status}},
 
-    [GATT_HANDLE_IDX_CONFIG_CHAR] = // read notify write?
+    [GATT_HANDLE_IDX_CONFIG_CHAR] = //notify write?
     {{ESP_GATT_AUTO_RSP},
      {ESP_UUID_LEN_16, (uint8_t *)&character_declaration_uuid,
       ESP_GATT_PERM_READ, CHAR_DECLARATION_SIZE, CHAR_DECLARATION_SIZE,
