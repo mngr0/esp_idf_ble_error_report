@@ -43,7 +43,9 @@ static const uint16_t GATT_HANDLE_HANDLE_STATUS_VALUE =
 static const uint16_t primary_service_uuid = ESP_GATT_UUID_PRI_SERVICE;
 
 static const uint16_t character_declaration_uuid = ESP_GATT_UUID_CHAR_DECLARE;
-static const uint8_t char_prop_notify = ESP_GATT_CHAR_PROP_BIT_NOTIFY | ESP_GATT_CHAR_PROP_BIT_INDICATE;
+
+static const uint8_t char_prop_notify =
+    ESP_GATT_CHAR_PROP_BIT_NOTIFY | ESP_GATT_CHAR_PROP_BIT_INDICATE;
 static const uint8_t char_prop_write = ESP_GATT_CHAR_PROP_BIT_WRITE;
 static const uint8_t char_prop_notify_write = ESP_GATT_CHAR_PROP_BIT_NOTIFY |
                                               ESP_GATT_CHAR_PROP_BIT_INDICATE |
@@ -61,12 +63,10 @@ const esp_gatts_attr_db_t gatt_machine_db[GATT_HANDLE_NB] = {
     [GATT_HANDLE_IDX_STATUS_CHAR] = // notify only
     {{ESP_GATT_AUTO_RSP},
      {ESP_UUID_LEN_16, (uint8_t *)&character_declaration_uuid,
-      ESP_GATT_PERM_READ |
-          ESP_GATT_PERM_WRITE, // write here should enable/disable notification
-      CHAR_DECLARATION_SIZE, CHAR_DECLARATION_SIZE,
-      (uint8_t *)&char_prop_notify}},
+      ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE, CHAR_DECLARATION_SIZE,
+      CHAR_DECLARATION_SIZE, (uint8_t *)&char_prop_notify}},
 
-    [GATT_HANDLE_IDX_STATUS_VALUE] = {{ESP_GATT_RSP_BY_APP},
+    [GATT_HANDLE_IDX_STATUS_VALUE] = {{ESP_GATT_AUTO_RSP},
                                       {ESP_UUID_LEN_16,
                                        (uint8_t *)&GATT_HANDLE_STATUS_VALUE,
                                        ESP_GATT_PERM_READ,
@@ -92,7 +92,7 @@ const esp_gatts_attr_db_t gatt_machine_db[GATT_HANDLE_NB] = {
       ESP_GATT_PERM_READ, CHAR_DECLARATION_SIZE, CHAR_DECLARATION_SIZE,
       (uint8_t *)&char_prop_write}},
 
-    [GATT_HANDLE_IDX_COMMAND_VALUE] = {{ESP_GATT_RSP_BY_APP},
+    [GATT_HANDLE_IDX_COMMAND_VALUE] = {{ESP_GATT_AUTO_RSP},
                                        {ESP_UUID_LEN_16,
                                         (uint8_t *)&GATT_HANDLE_COMMAND_VALUE,
                                         ESP_GATT_PERM_WRITE,
@@ -106,7 +106,7 @@ const esp_gatts_attr_db_t gatt_machine_db[GATT_HANDLE_NB] = {
       (uint8_t *)&char_prop_notify}},
 
     [GATT_HANDLE_IDX_HANDLE_STATUS_VALUE] =
-        {{ESP_GATT_RSP_BY_APP},
+        {{ESP_GATT_AUTO_RSP},
          {ESP_UUID_LEN_16, (uint8_t *)&GATT_HANDLE_HANDLE_STATUS_VALUE,
           ESP_GATT_PERM_READ, GATTS_DEMO_CHAR_VAL_LEN_MAX, 64,
           (uint8_t *)machine_descriptor.handle_status}},

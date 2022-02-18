@@ -253,6 +253,8 @@ static inline void conf_read(char *json_update) {
         done = gatt_routine_send_conf_update_to_client(json_update);
         vTaskDelay(5 / portTICK_PERIOD_MS);
       } while (!done);
+      start_query_machine_conf(&logger_memory);
+      return;
     }
     if (logger_memory.logger_state == logger_state_read_machine_conf) {
       jsonify_machine_conf(json_update);
@@ -260,9 +262,11 @@ static inline void conf_read(char *json_update) {
         done = gatt_machine_send_conf_update_to_client(json_update);
         vTaskDelay(5 / portTICK_PERIOD_MS);
       } while (!done);
+      start_query_machine_status(&logger_memory);
+      return;
     }
 
-    start_query_machine_status(&logger_memory);
+    
   }
 }
 
@@ -321,6 +325,7 @@ static void query_task(void *arg) {
       break;
     }
     case logger_state_read_routine_conf: {
+      ESP_LOGI("LOGGER", "polling routine conf");
       conf_read(json_update);
       break;
     }

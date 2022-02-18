@@ -29,8 +29,6 @@
 
 #define GATTS_ROUTINE_TAG "GATTS_ROUTINE"
 
-#define GATTS_MACHINEINE_TAG GATTS_ROUTINE_TAG
-
 static const uint16_t GATT_HANDLE_UUID_SERVICE =
     (GATT_HANDLE_IDX_SERVICE) | (PROFILE_ROUTINE_IDX << 4);
 static const uint16_t GATT_HANDLE_STATUS_VALUE =
@@ -42,12 +40,12 @@ static const uint16_t GATT_HANDLE_COMMAND_VALUE =
 static const uint16_t GATT_HANDLE_HANDLE_STATUS_VALUE =
     (GATT_HANDLE_IDX_HANDLE_STATUS_VALUE) | (PROFILE_ROUTINE_IDX << 4);
 
-
 static const uint16_t primary_service_uuid = ESP_GATT_UUID_PRI_SERVICE;
 
 static const uint16_t character_declaration_uuid = ESP_GATT_UUID_CHAR_DECLARE;
 
-static const uint8_t char_prop_notify = ESP_GATT_CHAR_PROP_BIT_NOTIFY | ESP_GATT_CHAR_PROP_BIT_INDICATE;
+static const uint8_t char_prop_notify =
+    ESP_GATT_CHAR_PROP_BIT_NOTIFY | ESP_GATT_CHAR_PROP_BIT_INDICATE;
 static const uint8_t char_prop_write = ESP_GATT_CHAR_PROP_BIT_WRITE;
 static const uint8_t char_prop_notify_write = ESP_GATT_CHAR_PROP_BIT_NOTIFY |
                                               ESP_GATT_CHAR_PROP_BIT_INDICATE |
@@ -65,10 +63,8 @@ const esp_gatts_attr_db_t gatt_routine_db[GATT_HANDLE_NB] = {
     [GATT_HANDLE_IDX_STATUS_CHAR] = // notify only
     {{ESP_GATT_AUTO_RSP},
      {ESP_UUID_LEN_16, (uint8_t *)&character_declaration_uuid,
-      ESP_GATT_PERM_READ |
-          ESP_GATT_PERM_WRITE, 
-      CHAR_DECLARATION_SIZE, CHAR_DECLARATION_SIZE,
-      (uint8_t *)&char_prop_notify}},
+      ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE, CHAR_DECLARATION_SIZE,
+      CHAR_DECLARATION_SIZE, (uint8_t *)&char_prop_notify}},
 
     [GATT_HANDLE_IDX_STATUS_VALUE] = {{ESP_GATT_AUTO_RSP},
                                       {ESP_UUID_LEN_16,
@@ -77,13 +73,13 @@ const esp_gatts_attr_db_t gatt_routine_db[GATT_HANDLE_NB] = {
                                        GATTS_DEMO_CHAR_VAL_LEN_MAX, 1024,
                                        (uint8_t *)routine_descriptor.status}},
 
-    [GATT_HANDLE_IDX_CONFIG_CHAR] = //notify write?
+    [GATT_HANDLE_IDX_CONFIG_CHAR] = // notify write
     {{ESP_GATT_AUTO_RSP},
      {ESP_UUID_LEN_16, (uint8_t *)&character_declaration_uuid,
       ESP_GATT_PERM_READ, CHAR_DECLARATION_SIZE, CHAR_DECLARATION_SIZE,
       (uint8_t *)&char_prop_notify_write}},
 
-    [GATT_HANDLE_IDX_CONFIG_VALUE] = {{ESP_GATT_RSP_BY_APP},
+    [GATT_HANDLE_IDX_CONFIG_VALUE] = {{ESP_GATT_AUTO_RSP},
                                       {ESP_UUID_LEN_16,
                                        (uint8_t *)&GATT_HANDLE_CONFIG_VALUE,
                                        ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE,
@@ -96,14 +92,14 @@ const esp_gatts_attr_db_t gatt_routine_db[GATT_HANDLE_NB] = {
       ESP_GATT_PERM_READ, CHAR_DECLARATION_SIZE, CHAR_DECLARATION_SIZE,
       (uint8_t *)&char_prop_write}},
 
-    [GATT_HANDLE_IDX_COMMAND_VALUE] = {{ESP_GATT_RSP_BY_APP},
+    [GATT_HANDLE_IDX_COMMAND_VALUE] = {{ESP_GATT_AUTO_RSP},
                                        {ESP_UUID_LEN_16,
                                         (uint8_t *)&GATT_HANDLE_COMMAND_VALUE,
                                         ESP_GATT_PERM_WRITE,
                                         GATTS_DEMO_CHAR_VAL_LEN_MAX, 64,
                                         (uint8_t *)routine_descriptor.command}},
 
-    [GATT_HANDLE_IDX_HANDLE_STATUS_CHAR] = // read notify ()
+    [GATT_HANDLE_IDX_HANDLE_STATUS_CHAR] = // notify ()
     {{ESP_GATT_AUTO_RSP},
      {ESP_UUID_LEN_16, (uint8_t *)&character_declaration_uuid,
       ESP_GATT_PERM_READ, CHAR_DECLARATION_SIZE, CHAR_DECLARATION_SIZE,
@@ -115,14 +111,6 @@ const esp_gatts_attr_db_t gatt_routine_db[GATT_HANDLE_NB] = {
           ESP_GATT_PERM_READ, GATTS_DEMO_CHAR_VAL_LEN_MAX, 64,
           (uint8_t *)routine_descriptor.handle_status}},
 };
-
-void routine_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if,
-                           esp_ble_gatts_cb_param_t *param) {
-  handle_event_handler(GATTS_ROUTINE_TAG, &routine_descriptor, event, gatts_if,
-                       param, PROFILE_ROUTINE_IDX, gatt_routine_db);
-}
-
-handle_descriptor_t *get_routine_handle_ptr() { return &routine_descriptor; }
 
 bool gatt_routine_send_status_update_to_client(char *json_status) {
   return gatt_handle_send_status_update_to_client(&routine_descriptor,
@@ -137,4 +125,12 @@ bool gatt_routine_send_logger_update_to_client(char *json_status) {
 bool gatt_routine_send_conf_update_to_client(char *json_status) {
   return gatt_handle_send_conf_update_to_client(&routine_descriptor,
                                                 json_status);
+}
+
+handle_descriptor_t *get_routine_handle_ptr() { return &routine_descriptor; }
+
+void routine_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if,
+                           esp_ble_gatts_cb_param_t *param) {
+  handle_event_handler(GATTS_ROUTINE_TAG, &routine_descriptor, event, gatts_if,
+                       param, PROFILE_ROUTINE_IDX, gatt_routine_db);
 }

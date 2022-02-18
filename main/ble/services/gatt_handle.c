@@ -37,7 +37,7 @@ bool gatt_handle_send_conf_update_to_client(
   if (ble_is_connected()) {
     if (current_len == 0) {
       if (handle_descriptor->mtu_size == 200) {
-        ESP_LOGI(GATT_UTILS_TAG, " INDICATING CONF UPDATE");
+        ESP_LOGI(GATT_UTILS_TAG, " INDICATING CONF UPDATE %s", json_status);
         strcpy((char *)current_buffer, json_status);
         current_handle = handle_descriptor->handle_table[GATT_HANDLE_IDX_CONFIG_VALUE];
         current_idx = 0;
@@ -245,6 +245,10 @@ void handle_event_handler(char *TAG, handle_descriptor_t *handle_descriptor,
         if (width->valueint == 2) {
           ESP_LOGI(TAG, "SET READ MACHINE CONF");
           logger_set_state(logger_state_read_machine_conf);
+        }
+        if (width->valueint == 3) {
+          ESP_LOGI(TAG, "SET READ ROUTINE CONF");
+          logger_set_state(logger_state_read_routine_conf);
         }
       }
       cJSON_Delete(root);
