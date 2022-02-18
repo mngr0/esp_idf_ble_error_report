@@ -228,7 +228,9 @@ void handle_event_handler(char *TAG, handle_descriptor_t *handle_descriptor,
       cJSON *root;
       root =
           cJSON_ParseWithLength((char *)param->write.value, param->write.len);
-      enqueue_cmd(root->string, root->valueint);
+           cJSON *name = cJSON_GetObjectItemCaseSensitive(root, "name");
+           cJSON *value = cJSON_GetObjectItemCaseSensitive(root, "value");
+      enqueue_cmd(name->string, value->valueint);
       cJSON_Delete(root);
       break;
     }

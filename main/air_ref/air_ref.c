@@ -182,7 +182,7 @@ void send_command(uint8_t *buf) {
                     m_config_names[buf[5]],
                     json_update);
   } else {
-    jsonify_report("read_machine_conf",
+    jsonify_report("not_written",
                     m_config_names[buf[5]],
                     json_update);
   }
@@ -253,6 +253,7 @@ static inline void conf_read(char *json_update) {
         done = gatt_routine_send_conf_update_to_client(json_update);
         vTaskDelay(5 / portTICK_PERIOD_MS);
       } while (!done);
+      ESP_LOGI("LOGGER", "ROUTINE SEND CONF FATTO");
       start_query_machine_conf(&logger_memory);
       return;
     }
