@@ -66,6 +66,7 @@ bool send_request(logger_memory_t *logger_memory) {
     query_msg.value = 0;
     query_msg.parameter_address = logger_memory->current_idx_read;
     logger_memory->last_send_timestamp = xTaskGetTickCount();
+    //ESP_LOG_BUFFER_HEX("LOGGER DATA SENT", &query_msg, 8);
     packet_manager_send_data((uint8_t *)&query_msg, 8);
     return true;
   } else {
@@ -73,20 +74,21 @@ bool send_request(logger_memory_t *logger_memory) {
   }
 }
 
-bool query_nextQUELLOFACILE(logger_memory_t *logger_memory) {
+bool query_next(logger_memory_t *logger_memory) {
   uint8_t data[1000 * 4];
 
   send_request(logger_memory);
   int length;
 
-  while (xTaskGetTickCount() - logger_memory->last_send_timestamp >
+  while (xTaskGetTickCount() - logger_memory->last_send_timestamp <
          (1000 / portTICK_RATE_MS)) {
 
     length =
         uart_read_bytes(uart_num, data, LOGGER_BUF_SIZE, 20 / portTICK_RATE_MS);
 
     if (length > 0) {
-      // reset timeout
+      packet_manager_put(&packet_structure,data,length); 
+      logger_memory->last_send_timestamp = xTaskGetTickCount();
       if ((length = packet_manager_pop(&packet_structure, data)) > 0) {
         packet_received_t reply;
         if (packet_is_valid(&reply, data, length)) { // TODO CHECK NACK???
@@ -100,8 +102,11 @@ bool query_nextQUELLOFACILE(logger_memory_t *logger_memory) {
       }
     }
   }
+  ESP_LOGI("LOGGER", "TIMEOUT");
   return false;
 }
+
+
 bool query_nextQUELLOVECCHIO(logger_memory_t *logger_memory) {
   uint8_t data[1000 * 4];
 
@@ -135,7 +140,7 @@ bool query_nextQUELLOVECCHIO(logger_memory_t *logger_memory) {
 
 uint8_t ciao = 42;
 
-bool query_next(logger_memory_t *logger_memory) {
+bool query_nextQUELLOFINTO(logger_memory_t *logger_memory) {
   if (logger_memory->current_idx_read < logger_memory->current_size) {
     logger_memory->current_list[logger_memory->current_idx_read] = ciao;
     logger_memory->current_idx_read++;
@@ -198,10 +203,12 @@ inline static void status_read(char *json_update) {
 
     if (logger_memory.logger_state == logger_state_poll_routine_status) {
       jsonify_routine_status(json_update);
+      ESP_LOGI("JSON:","%s",json_update);
       gatt_routine_send_status_update_to_client(json_update);
     }
     if (logger_memory.logger_state == logger_state_poll_machine_status) {
       jsonify_machine_status(json_update);
+      ESP_LOGI("JSON:","%s",json_update);
       gatt_machine_send_status_update_to_client(json_update);
     }
 

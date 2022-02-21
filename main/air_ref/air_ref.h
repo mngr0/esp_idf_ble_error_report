@@ -133,6 +133,7 @@ OPERATION(fan_status)			                    \
 OPERATION(compressor_I_value)			            \
 OPERATION(compressor_speed_to_command)			    \
 OPERATION(compressor_calculated_speed)			    \
+OPERATION(compressor_target_speed)				    \
 OPERATION(fan_speed_to_command)			            \
 OPERATION(fan_time_last_command)			        \
 OPERATION(termostatica_I_value)			            \
