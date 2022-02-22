@@ -66,7 +66,7 @@ bool send_request(logger_memory_t *logger_memory) {
     query_msg.value = 0;
     query_msg.parameter_address = logger_memory->current_idx_read;
     logger_memory->last_send_timestamp = xTaskGetTickCount();
-    //ESP_LOG_BUFFER_HEX("LOGGER DATA SENT", &query_msg, 8);
+    // ESP_LOG_BUFFER_HEX("LOGGER DATA SENT", &query_msg, 8);
     packet_manager_send_data((uint8_t *)&query_msg, 8);
     return true;
   } else {
@@ -87,7 +87,7 @@ bool query_next(logger_memory_t *logger_memory) {
         uart_read_bytes(uart_num, data, LOGGER_BUF_SIZE, 20 / portTICK_RATE_MS);
 
     if (length > 0) {
-      packet_manager_put(&packet_structure,data,length); 
+      packet_manager_put(&packet_structure, data, length);
       logger_memory->last_send_timestamp = xTaskGetTickCount();
       if ((length = packet_manager_pop(&packet_structure, data)) > 0) {
         packet_received_t reply;
@@ -105,7 +105,6 @@ bool query_next(logger_memory_t *logger_memory) {
   ESP_LOGI("LOGGER", "TIMEOUT");
   return false;
 }
-
 
 bool query_nextQUELLOVECCHIO(logger_memory_t *logger_memory) {
   uint8_t data[1000 * 4];
@@ -163,19 +162,22 @@ void send_command(uint8_t *buf) {
   query_msg.device_address = 4;
   query_msg.value = *(int32_t *)buf;
   query_msg.parameter_address = buf[5];
+  //ESP_LOG_BUFFER_HEX("MESSAGE DATA SENT", &query_msg, 8);
   packet_manager_send_data((uint8_t *)&query_msg, 8);
   timestamp = xTaskGetTickCount();
   sent = false;
   // wait for reply
-  while (xTaskGetTickCount() - timestamp > (1000 / portTICK_RATE_MS)) {
+  while ((xTaskGetTickCount() - timestamp < (3000 / portTICK_RATE_MS)&&(!sent)) ) {
     length =
         uart_read_bytes(uart_num, data, LOGGER_BUF_SIZE, 20 / portTICK_RATE_MS);
 
     if (length > 0) {
+      packet_manager_put(&packet_structure, data, length);
       timestamp = xTaskGetTickCount();
       if ((length = packet_manager_pop(&packet_structure, data)) > 0) {
         packet_received_t reply;
         if (packet_is_valid(&reply, data, length)) { // TODO CHECK NACK???
+          //ESP_LOG_BUFFER_HEX("MESSAGE DATA RECVED", &reply.buffer, 8);
           sent = true;
         }
       }
@@ -183,13 +185,11 @@ void send_command(uint8_t *buf) {
   }
 
   if (sent) { // TODO translate index in name
-    jsonify_report("written",
-                    m_config_names[buf[5]],
-                    json_update);
+    ESP_LOGI("SATA COMM", "WRITTEN");
+    jsonify_report("written", m_config_names[buf[5]], json_update);
   } else {
-    jsonify_report("not_written",
-                    m_config_names[buf[5]],
-                    json_update);
+    ESP_LOGI("SATA COMM", "NOT WRITTEN");
+    jsonify_report("not_written", m_config_names[buf[5]], json_update);
   }
 
   do {
@@ -203,23 +203,23 @@ inline static void status_read(char *json_update) {
 
     if (logger_memory.logger_state == logger_state_poll_routine_status) {
       jsonify_routine_status(json_update);
-      ESP_LOGI("JSON:","%s",json_update);
+      ESP_LOGI("JSON:", "%s", json_update);
       gatt_routine_send_status_update_to_client(json_update);
     }
     if (logger_memory.logger_state == logger_state_poll_machine_status) {
       jsonify_machine_status(json_update);
-      ESP_LOGI("JSON:","%s",json_update);
+      ESP_LOGI("JSON:", "%s", json_update);
       gatt_machine_send_status_update_to_client(json_update);
     }
 
     if (logger_memory.logger_state_next == logger_state_read_machine_conf) {
       start_query_machine_conf(&logger_memory);
-      logger_memory.logger_state_next=-1;
+      logger_memory.logger_state_next = -1;
       return;
     }
     if (logger_memory.logger_state_next == logger_state_read_routine_conf) {
       start_query_routine_conf(&logger_memory);
-      logger_memory.logger_state_next=-1;
+      logger_memory.logger_state_next = -1;
       return;
     }
 
@@ -273,8 +273,6 @@ static inline void conf_read(char *json_update) {
       start_query_machine_status(&logger_memory);
       return;
     }
-
-    
   }
 }
 
@@ -296,6 +294,7 @@ static void query_task(void *arg) {
   while (1) {
     uint8_t tmp_buffer[6];
     if (xQueueReceive(command_queue, tmp_buffer, 0)) {
+      ESP_LOGI("LOGGER", "sending CMD");
       send_command(tmp_buffer);
     }
     // if queue has values, write command nad reply
@@ -359,36 +358,38 @@ void logger_set_state(logger_state_t new_state) {
 }
 
 void logger_init() {
-  logger_memory.logger_state_next=-1;
+  logger_memory.logger_state_next = -1;
   packet_manager_init(&packet_structure);
   xTaskCreate(query_task, "query_task", SENDER_TASK_STACK_SIZE, NULL,
               TASK_SENDER_STACK_PRIORITY, &(xQueryTask));
 }
 
 void enqueue_cmd(char *name, int32_t value) {
+  ESP_LOGI("ENQUEUE", "CMD: assign %d TO %s",value,name);
   uint8_t frame[6];
   bool found = false;
   frame[0] = ((uint8_t *)&value)[0];
   frame[1] = ((uint8_t *)&value)[1];
   frame[2] = ((uint8_t *)&value)[2];
   frame[3] = ((uint8_t *)&value)[3];
-  for (int i = 0; i < machine_conf_parameters_size; i++) {
-    if (strcmp(name, m_config_names[i])) {
-
+  for (int i = 0; i < (machine_conf_parameters_size) && (!found); i++) {
+    if (strcmp(name, m_config_names[i]) == 0) {
+      // ESP_LOGI("ENQUEUE", "FOUND in m_conf: %d:%s",i,m_config_names[i]);
       frame[4] = write_machine_conf_parameter;
       frame[5] = i;
       found = true;
     }
   }
-  for (int i = 0; i < air_ref_conf_parameters_size; i++) {
-    if (strcmp(name, ar_config_names[i])) {
-
+  for (int i = 0; (i < air_ref_conf_parameters_size) && (!found); i++) {
+    if (strcmp(name, ar_config_names[i]) == 0) {
+      // ESP_LOGI("ENQUEUE", "FOUND in ar_conf: %d:%s",i,ar_config_names[i]);
       frame[4] = write_routine_conf_parameter;
       frame[5] = i;
       found = true;
     }
   }
   if (found) {
+
     xQueueSend(command_queue, frame, 10);
   }
 }

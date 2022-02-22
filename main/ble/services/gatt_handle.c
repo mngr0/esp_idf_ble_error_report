@@ -224,13 +224,13 @@ void handle_event_handler(char *TAG, handle_descriptor_t *handle_descriptor,
                                    p_data->write.handle);
     switch (res) {
     case GATT_HANDLE_IDX_CONFIG_VALUE: {
-      ESP_LOGI(TAG, "RECEIVING WRITE CONFIG");
+      //ESP_LOGI(TAG, "RECEIVING WRITE CONFIG %s",(char *)param->write.value);
       cJSON *root;
       root =
           cJSON_ParseWithLength((char *)param->write.value, param->write.len);
            cJSON *name = cJSON_GetObjectItemCaseSensitive(root, "name");
            cJSON *value = cJSON_GetObjectItemCaseSensitive(root, "value");
-      enqueue_cmd(name->string, value->valueint);
+      enqueue_cmd(name->valuestring, value->valueint);
       cJSON_Delete(root);
       break;
     }
