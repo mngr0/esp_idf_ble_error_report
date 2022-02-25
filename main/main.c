@@ -91,12 +91,12 @@ static void blink_task(void *arg) {
     gpio_set_level(LED_G, led_blink[counter][1]);
     gpio_set_level(LED_B, led_blink[counter][2]);
     vTaskDelay(500 / portTICK_PERIOD_MS);
-    //counter++;
+    counter++;
     counter %= 8;
     //ESP_LOGI("TEST_CS", "doing: %d %d %d", led_blink[counter][0],
     //         led_blink[counter][1], led_blink[counter][2]);
     mcp7940_get_time(rtc_driver,&pTime);
-    //ESP_LOGI("TIME","%d/%d/%d - %d:%d:%d",pTime.day,pTime.month,pTime.year,pTime.hour, pTime.min,  pTime.sec);
+    ESP_LOGI("TIME","%d/%d/%d - %d:%d:%d",pTime.day,pTime.month,pTime.year,pTime.hour, pTime.min,  pTime.sec);
   }
 }
 

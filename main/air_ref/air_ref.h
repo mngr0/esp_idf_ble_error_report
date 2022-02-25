@@ -100,6 +100,7 @@ OPERATION(LP_low_pressure_recover)
 
 #define FOREACH_M_CONF(OPERATION)			\
 OPERATION(can_address)						\
+OPERATION(termostatica_enabled)				\
 OPERATION(evap_pres_V1)						\
 OPERATION(evap_pres_V2)						\
 OPERATION(evap_pres_P1)						\

@@ -189,7 +189,7 @@ void send_command(uint8_t *buf) {
     jsonify_report("written", m_config_names[buf[5]], json_update);
   } else {
     ESP_LOGI("SATA COMM", "NOT WRITTEN");
-    jsonify_report("not_written", m_config_names[buf[5]], json_update);
+    jsonify_report("refused", m_config_names[buf[5]], json_update);
   }
 
   do {
