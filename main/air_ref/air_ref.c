@@ -183,13 +183,19 @@ void send_command(uint8_t *buf) {
       }
     }
   }
-
+  char** names;
+  if(buf[4]==write_routine_conf_parameter){
+    names=ar_config_names;
+  }
+  if(buf[4]==write_machine_conf_parameter){
+    names=m_config_names;
+  }
   if (sent) { // TODO translate index in name
-    ESP_LOGI("SATA COMM", "WRITTEN");
-    jsonify_report("written", m_config_names[buf[5]], json_update);
+    jsonify_report("written", names[buf[5]], json_update);
+    ESP_LOGI("SATA COMM OK", "%s",json_update);
   } else {
-    ESP_LOGI("SATA COMM", "NOT WRITTEN");
-    jsonify_report("refused", m_config_names[buf[5]], json_update);
+    jsonify_report("refused", names[buf[5]], json_update);
+    ESP_LOGI("SATA COMM NOK", "%s",json_update);
   }
 
   do {
