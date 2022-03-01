@@ -15,6 +15,40 @@ typedef enum {
 }control_type_t;
 
 typedef enum {
+	control_type_relay_iniezione_liquido_manual_off =0,
+	control_type_relay_iniezione_liquido_manual_on,
+	control_type_relay_iniezione_liquido_automatic,
+	control_type_relay_iniezione_liquido_size,
+}control_type_relay_iniezione_liquido_t;
+
+typedef enum {
+	control_type_relay_defrost_manual_off =0,
+	control_type_relay_defrost_manual_on,
+	control_type_relay_defrost_automatic,
+	control_type_relay_defrost_size,
+}control_type_relay_defrost_t;
+
+typedef enum {
+	control_type_compressor_manual_off =0,
+	control_type_compressor_manual_speed,
+	control_type_compressor_automatic,
+	control_type_compressor_size,
+}control_type_compressor_t;
+
+typedef enum {
+	control_type_fan_manual_off =0,
+	control_type_fan_manual_speed,
+	control_type_fan_automatic,
+	control_type_fan_size,
+}control_type_fan_t;
+
+typedef enum {
+	control_type_termostatica_manual=0,
+	control_type_termostatica_automatic,
+	control_type_termostatica_size,
+}control_type_termostatica_t;
+
+typedef enum {
 	error_sonda_none=0,
 	error_sonda_scollegata,
 	error_sonda_corto
@@ -22,7 +56,6 @@ typedef enum {
 
 typedef enum {
 	error_level_none=0,
-	error_level_warning,
 	error_level_critical
 } error_level_t;
 
@@ -68,9 +101,15 @@ typedef enum {
 	air_ref_gas_max
 }air_ref_gas_type_t;
 
+
 #define FOREACH_AR_CONF(OPERATION)					\
 OPERATION(operator_password)						\
 OPERATION(control_type)								\
+OPERATION(control_type_relay_defrost)				\
+OPERATION(control_type_relay_iniezione_liquido)		\
+OPERATION(control_type_compressor)					\
+OPERATION(control_type_fan)							\
+OPERATION(control_type_termostatica)				\
 OPERATION(gas_type)									\
 OPERATION(air_ref_start_interval)					\
 OPERATION(air_ref_timeout_interval)					\
@@ -82,20 +121,83 @@ OPERATION(termostatica_coeff_I_max)					\
 OPERATION(termostatica_max_step)					\
 OPERATION(termostatica_interval_fixed_poistion)		\
 OPERATION(termostatica_initial_fixed_position)		\
+OPERATION(termostatica_manual_position)				\
 OPERATION(fan_target_pressure)						\
 OPERATION(fan_coeff_P)								\
 OPERATION(fan_coeff_offset)							\
 OPERATION(fan_min_pressure)							\
 OPERATION(fan_max_pressure)							\
+OPERATION(fan_manual_speed)							\
 OPERATION(compressor_speed_full)					\
 OPERATION(compressor_start_speed)					\
 OPERATION(compressor_defrost_speed)					\
 OPERATION(compressor_pressure_spike)				\
-OPERATION(valvola_gas_scarico_open_temperature)		\
-OPERATION(valvola_gas_scarico_close_temperature)	\
-OPERATION(period_log)								\
+OPERATION(compressor_manual_speed)					\
+OPERATION(compressor_temperature_warning)			\
+OPERATION(compressor_temperature_critical)			\
+OPERATION(compressor_temperature_histersys)			\
+OPERATION(valvola_iniezione_liquido_open_temperature)		\
+OPERATION(valvola_iniezione_liquido_close_temperature)	\
 OPERATION(LP_low_pressure_limit)					\
-OPERATION(LP_low_pressure_recover)
+OPERATION(LP_low_pressure_differential)				\
+OPERATION(HP_high_pressure_limit)					\
+OPERATION(HP_high_pressure_differential)
+
+
+#define FOREACH_AR_STATUS(OPERATION)					\
+OPERATION(air_ref_start_timestamp)						\
+OPERATION(air_ref_status)								\
+OPERATION(compressor_status)							\
+OPERATION(termostatica_status)							\
+OPERATION(fan_status)									\
+OPERATION(compressor_I_value)							\
+OPERATION(compressor_speed_to_command)					\
+OPERATION(compressor_calculated_speed)					\
+OPERATION(compressor_target_speed)						\
+OPERATION(fan_speed_to_command)							\
+OPERATION(fan_time_last_command)						\
+OPERATION(termostatica_I_value)							\
+OPERATION(termostatica_step_target)						\
+OPERATION(termostatica_step_current_position)			\
+OPERATION(termostatica_timestamp_initial_position)		\
+OPERATION(debounce_input_timestamp)						\
+OPERATION(debounce_input_current_state)
+
+
+#define FOREACH_M_STATUS(OPERATION)						\
+OPERATION(device_type)									\
+OPERATION(device_version)								\
+OPERATION(evaporation_pressure)							\
+OPERATION(evaporation_temperature)						\
+OPERATION(condensation_pressure)						\
+OPERATION(temperature_gas_scarico)						\
+OPERATION(temperature_environment)						\
+OPERATION(temperature_gas_ritorno)						\
+OPERATION(temperature_extra)							\
+OPERATION(imc102_status_INDEX_MOTOR_FAULT)				\
+OPERATION(imc102_status_INDEX_MOTOR_SPEED)				\
+OPERATION(imc102_status_INDEX_MOTOR_MOTOR_CURRENT)		\
+OPERATION(imc102_status_INDEX_MOTOR_TARGET_SPEED)		\
+OPERATION(imc102_status_routine)						\
+OPERATION(imm101_status_INDEX_MOTOR_FAULT)				\
+OPERATION(imm101_status_INDEX_MOTOR_SPEED)				\
+OPERATION(imm101_status_INDEX_MOTOR_MOTOR_CURRENT)		\
+OPERATION(imm101_status_INDEX_MOTOR_TARGET_SPEED)		\
+OPERATION(imm101_status_routine)						\
+OPERATION(pin_enable)									\
+OPERATION(index_error_pressure_evap)					\
+OPERATION(index_error_pressure_cond)					\
+OPERATION(index_error_temperature_gas_scarico)			\
+OPERATION(index_error_temperature_environment)			\
+OPERATION(index_error_temperature_gas_ritorno)			\
+OPERATION(index_error_temperature_extra)				\
+OPERATION(index_error_imm101_motor)						\
+OPERATION(index_error_imc102_motor)						\
+OPERATION(index_error_overtemperature_gas_scarico_warning)		\
+OPERATION(index_error_overtemperature_gas_scarico_critical)		\
+OPERATION(index_low_pressure_protection)				\
+OPERATION(index_high_pressure_protection)
+
 
 
 #define FOREACH_M_CONF(OPERATION)			\
@@ -120,66 +222,7 @@ OPERATION(temperature_gas_ritorno_beta)		\
 OPERATION(temperature_gas_ritorno_offset)	\
 OPERATION(temperature_extra_res25)			\
 OPERATION(temperature_extra_beta)			\
-OPERATION(temperature_extra_offset)				
-
-
-
-
-#define FOREACH_AR_STATUS(OPERATION)                \
-OPERATION(air_ref_start_timestamp)		        	\
-OPERATION(air_ref_status)			                \
-OPERATION(compressor_status)		            	\
-OPERATION(termostatica_status)			            \
-OPERATION(fan_status)			                    \
-OPERATION(compressor_I_value)			            \
-OPERATION(compressor_speed_to_command)			    \
-OPERATION(compressor_calculated_speed)			    \
-OPERATION(compressor_target_speed)				    \
-OPERATION(fan_speed_to_command)			            \
-OPERATION(fan_time_last_command)			        \
-OPERATION(termostatica_I_value)			            \
-OPERATION(termostatica_step_target)		        	\
-OPERATION(termostatica_step_current_position)		\
-OPERATION(termostatica_timestamp_initial_position)  \
-OPERATION(debounce_input_timestamp)			        \
-OPERATION(debounce_input_current_state)		    	\
-
-
-
-
-
-#define FOREACH_M_STATUS(OPERATION)                \
-OPERATION(device_type)		        	\
-OPERATION(evaporation_pressure)		        	\
-OPERATION(evaporation_temperature)		        	\
-OPERATION(condensation_pressure)		        	\
-OPERATION(temperature_gas_scarico)		        	\
-OPERATION(temperature_environment)		        	\
-OPERATION(temperature_gas_ritorno)		        	\
-OPERATION(temperature_extra)		        	\
-OPERATION(imc102_status_INDEX_MOTOR_FAULT)		        	\
-OPERATION(imc102_status_INDEX_MOTOR_SPEED)		        	\
-OPERATION(imc102_status_INDEX_MOTOR_MOTOR_CURRENT)		        	\
-OPERATION(imc102_status_INDEX_MOTOR_TARGET_SPEED)		        	\
-OPERATION(imc102_status_routine)		        	\
-OPERATION(imm101_status_INDEX_MOTOR_FAULT)		        	\
-OPERATION(imm101_status_INDEX_MOTOR_SPEED)		        	\
-OPERATION(imm101_status_INDEX_MOTOR_MOTOR_CURRENT)		        	\
-OPERATION(imm101_status_INDEX_MOTOR_TARGET_SPEED)		        	\
-OPERATION(imm101_status_routine)		        	\
-OPERATION(pin_enable)		        	\
-OPERATION(index_error_pressure_evap)		        	\
-OPERATION(index_error_pressure_cond)		        	\
-OPERATION(index_error_temperature_gas_scarico)		        	\
-OPERATION(index_error_temperature_environment)		        	\
-OPERATION(index_error_temperature_gas_ritorno)		        	\
-OPERATION(index_error_temperature_extra)		        	\
-OPERATION(index_error_imm101_motor)		        	\
-OPERATION(index_error_imc102_motor)		        	\
-OPERATION(index_error_overtemperature_gas_scarico)		        	\
-OPERATION(index_low_pressure_protection)		        	\
-
-
+OPERATION(temperature_extra_offset)
 
 
 typedef enum{//public
