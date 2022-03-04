@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include "serial_SATA_protocol/serial_SATA_protocol.h"
 
-#define JSON_STRING_SIZE 1024
+#define JSON_STRING_SIZE 2048
 
 
 #define RECEIVER_TASK_STACK_SIZE (32800 / sizeof(portSTACK_TYPE))

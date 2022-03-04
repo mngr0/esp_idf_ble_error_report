@@ -164,66 +164,63 @@ OPERATION(debounce_input_timestamp)						\
 OPERATION(debounce_input_current_state)
 
 
-#define FOREACH_M_STATUS(OPERATION)						\
-OPERATION(device_type)									\
-OPERATION(device_version)								\
-OPERATION(evaporation_pressure)							\
-OPERATION(evaporation_temperature)						\
-OPERATION(condensation_pressure)						\
-OPERATION(temperature_gas_scarico)						\
-OPERATION(temperature_environment)						\
-OPERATION(temperature_gas_ritorno)						\
-OPERATION(temperature_extra)							\
-OPERATION(imc102_status_INDEX_MOTOR_FAULT)				\
-OPERATION(imc102_status_INDEX_MOTOR_SPEED)				\
-OPERATION(imc102_status_INDEX_MOTOR_MOTOR_CURRENT)		\
-OPERATION(imc102_status_INDEX_MOTOR_TARGET_SPEED)		\
-OPERATION(imc102_status_routine)						\
-OPERATION(imm101_status_INDEX_MOTOR_FAULT)				\
-OPERATION(imm101_status_INDEX_MOTOR_SPEED)				\
-OPERATION(imm101_status_INDEX_MOTOR_MOTOR_CURRENT)		\
-OPERATION(imm101_status_INDEX_MOTOR_TARGET_SPEED)		\
-OPERATION(imm101_status_routine)						\
-OPERATION(pin_enable)									\
-OPERATION(index_error_pressure_evap)					\
-OPERATION(index_error_pressure_cond)					\
-OPERATION(index_error_temperature_gas_scarico)			\
-OPERATION(index_error_temperature_environment)			\
-OPERATION(index_error_temperature_gas_ritorno)			\
-OPERATION(index_error_temperature_extra)				\
-OPERATION(index_error_imm101_motor)						\
-OPERATION(index_error_imc102_motor)						\
-OPERATION(index_error_overtemperature_gas_scarico_warning)		\
-OPERATION(index_error_overtemperature_gas_scarico_critical)		\
-OPERATION(index_low_pressure_protection)				\
-OPERATION(index_high_pressure_protection)
+#define FOREACH_M_STATUS(OPERATION)								\
+OPERATION(device_type)											\
+OPERATION(device_version)										\
+OPERATION(evaporation_pressure)									\
+OPERATION(evaporation_temperature)								\
+OPERATION(condensation_pressure)								\
+OPERATION(temperature_gas_scarico)								\
+OPERATION(temperature_environment)								\
+OPERATION(temperature_gas_ritorno)								\
+OPERATION(temperature_extra)									\
+OPERATION(imc102_status_INDEX_MOTOR_FAULT)						\
+OPERATION(imc102_status_INDEX_MOTOR_SPEED)						\
+OPERATION(imc102_status_INDEX_MOTOR_MOTOR_CURRENT)				\
+OPERATION(imc102_status_INDEX_MOTOR_TARGET_SPEED)				\
+OPERATION(imc102_status_routine)								\
+OPERATION(imm101_status_INDEX_MOTOR_FAULT)						\
+OPERATION(imm101_status_INDEX_MOTOR_SPEED)						\
+OPERATION(imm101_status_INDEX_MOTOR_MOTOR_CURRENT)				\
+OPERATION(imm101_status_INDEX_MOTOR_TARGET_SPEED)				\
+OPERATION(imm101_status_routine)								\
+OPERATION(pin_enable)											\
+OPERATION(stato_sonda_pressione_evap)							\
+OPERATION(stato_sonda_pressione_cond)							\
+OPERATION(stato_sonda_ntc_gas_scarico)							\
+OPERATION(stato_sonda_ntc_environment)							\
+OPERATION(stato_sonda_ntc_gas_ritorno)							\
+OPERATION(stato_sonda_ntc_extra)								\
+OPERATION(stato_routine_imm101_motor)							\
+OPERATION(stato_routine_imc102_motor)							\
+OPERATION(protezione_overtemperature_gas_scarico_warning)		\
+OPERATION(protezione_overtemperature_gas_scarico_critical)		\
+OPERATION(protezione_evap_low_pressure)							\
+OPERATION(protezione_cond_high_pressure)						\
+OPERATION(protezione_pressure_difference_start)
 
 
+#define SONDA_NTC(op, name)	\
+op(name ## _res25)			\
+op(name ## _beta)			\
+op(name ## _offset)
 
-#define FOREACH_M_CONF(OPERATION)			\
-OPERATION(can_address)						\
-OPERATION(termostatica_enabled)				\
-OPERATION(evap_pres_V1)						\
-OPERATION(evap_pres_V2)						\
-OPERATION(evap_pres_P1)						\
-OPERATION(evap_pres_P2)						\
-OPERATION(cond_pres_V1)						\
-OPERATION(cond_pres_V2)						\
-OPERATION(cond_pres_P1)						\
-OPERATION(cond_pres_P2)						\
-OPERATION(temperature_gas_scarico_res25)	\
-OPERATION(temperature_gas_scarico_beta)		\
-OPERATION(temperature_gas_scarico_offset)	\
-OPERATION(temperature_environment_res25)	\
-OPERATION(temperature_environment_beta)		\
-OPERATION(temperature_environment_offset)	\
-OPERATION(temperature_gas_ritorno_res25)	\
-OPERATION(temperature_gas_ritorno_beta)		\
-OPERATION(temperature_gas_ritorno_offset)	\
-OPERATION(temperature_extra_res25)			\
-OPERATION(temperature_extra_beta)			\
-OPERATION(temperature_extra_offset)
+#define SONDA_PRESSIONE(op, name)	\
+op(name ## _V1)						\
+op(name ## _V2)						\
+op(name ## _P1)						\
+op(name ## _P2)						\
+op(name ## _offset)
 
+#define FOREACH_M_CONF(OPERATION)				\
+OPERATION(can_address)							\
+OPERATION(termostatica_enabled)					\
+SONDA_PRESSIONE(OPERATION, evap_pres)			\
+SONDA_PRESSIONE(OPERATION, cond_pres)			\
+SONDA_NTC(OPERATION, temperature_gas_scarico)	\
+SONDA_NTC(OPERATION, temperature_environment)	\
+SONDA_NTC(OPERATION, temperature_gas_ritorno)	\
+SONDA_NTC(OPERATION, temperature_extra)	
 
 typedef enum{//public
     FOREACH_M_STATUS(ENUMERATE)
