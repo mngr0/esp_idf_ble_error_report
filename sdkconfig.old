@@ -1431,7 +1431,7 @@ CONFIG_I2C_DEVICES_RTC_MCP7940=y
 # Ports
 #
 # CONFIG_I2C_DEVICES_PIC_BITBANG_PORT is not set
-# CONFIG_I2C_DEVICES_ESP_IDF_PORT is not set
+CONFIG_I2C_DEVICES_ESP_IDF_PORT=y
 # end of Ports
 # end of I2C library
 # end of Component config

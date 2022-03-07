@@ -22,7 +22,7 @@ void search_last(char* dir_path, char* last_used_file_path);
 int search_file(const char *directory_to_scan ,char *file_path, bool newest) ; //newest ... XOR oldest
 
 void spi_sd_init(sdmmc_card_t **card);
-
+int create_new_file_raw(char *dir_path, char *new_file_name);
 int create_new_file(char* dir_path, char *new_file_name);
 
 void example_get_fatfs_usage(uint64_t *out_total_bytes,

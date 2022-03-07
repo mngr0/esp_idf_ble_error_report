@@ -20,20 +20,27 @@
 
 #define TAG "SD_SPI"
 
-void search_last(char* dir_path, char* last_used_file_path){}
+void search_last(char *dir_path, char *last_used_file_path) {}
 
 // scan_dir
 // search more recent
-int search_file(const char *directory_to_scan, char *file_path, bool most_recent) {//if most_recent is false this will get the least recent
+
+// return code: -1: error / 0: not_found / 1: found
+int search_file(const char *directory_to_scan, char *file_path,
+                bool most_recent) { // if most_recent is false this will get the
+                                    // least recent
 
   // IT MUST START WITH LOG
   ESP_LOGI(TAG, "STARTED SEARCH FILE in %s", directory_to_scan);
   DIR *d;
   struct dirent *dp;
   struct stat properties;
+  bool found = false;
+  time_t last_found = 0;
 
-  time_t last_found=0;
+      char full_name[80];
   if ((d = opendir(directory_to_scan)) == NULL) {
+    ESP_LOGE(TAG, "Cannot open %s directory", directory_to_scan);
     // fprintf(stderr, "Cannot open %s directory\n", directory_to_scan);
     return -1;
   }
@@ -41,34 +48,41 @@ int search_file(const char *directory_to_scan, char *file_path, bool most_recent
 
     if (strstr(dp->d_name, "LOG")) {
 
-      char full_name[80];
 
       strcpy(full_name, directory_to_scan);
       strcat(full_name, dp->d_name);
       if (stat(full_name, &properties) < 0) {
+        closedir(d);
         return -1;
       }
-      // ESP_LOGI(TAG,
-      //          "\t st_atime:%ld \n\t st_mtime:%ld \n\t st_ctime:%ld \n\t, "
-      //          "st_size:%ld \n\t ",
-      //          properties.st_atime, properties.st_mtime, properties.st_ctime,
-      //          properties.st_size);
+      ESP_LOGI(TAG,
+               "\t%s st_atime:%ld \n\t st_mtime:%ld \n\t st_ctime:%ld \n\t, "
+               "st_size:%ld \n\t ",full_name,
+               properties.st_atime, properties.st_mtime, properties.st_ctime,
+               properties.st_size);
 
       if (most_recent) {
-        if ((properties.st_mtime > last_found)|| (last_found==0)) {
+        if ((properties.st_mtime > last_found) || (last_found == 0)) {
           last_found = properties.st_mtime;
           strcpy(file_path, full_name);
         }
       } else {
-        if ((properties.st_mtime < last_found)|| (last_found==0)) {
+        if ((properties.st_mtime < last_found) || (last_found == 0)) {
           last_found = properties.st_mtime;
           strcpy(file_path, full_name);
         }
       }
+      found = true;
     }
   }
   closedir(d);
-  return 0;
+  if (found) {
+    ESP_LOGI(TAG, "FOUND %s",full_name);
+    return 1;
+  } else {
+    ESP_LOGI(TAG, "NOT FOUND");
+    return 0;
+  }
 }
 
 void example_get_fatfs_usage(uint64_t *out_total_bytes,
@@ -150,16 +164,35 @@ int create_new_file(char *dir_path, char *new_file_name) {
   // FILE FIRST
   strncat(tmp_str, new_file_name, MAX_FILENAME_SIZE - strlen(dir_path));
   FILE *f;
-  f = fopen(tmp_str, "w");
+  f = fopen(tmp_str, "w+");
   if (f == NULL) {
     return -1;
   }
-
+  fclose(f);
   // touch it
 
   // snprintf(tmp_str, MAX_FILENAME_SIZE, "LOG_2%3d%2d%2d%2d%2d.TXT",
   // time->year,
   //          time->month, time->day, time->hour, time->min);
 
+  return 0;
+}
+
+int create_new_file_raw(char *dir_path, char *new_file_name) {
+
+  char tmp_str[MAX_FILENAME_SIZE];
+
+  strncpy(tmp_str, dir_path, MAX_FILENAME_SIZE);
+  strncat(tmp_str, new_file_name, MAX_FILENAME_SIZE - strlen(dir_path));
+  FILE *f;
+  ESP_LOGI(TAG, "CREATING FILE  %s", tmp_str);
+  f = fopen(tmp_str, "w");
+  if (f == NULL) {
+    ESP_LOGI(TAG, "ERRORE IN CREAZIONE");
+    perror("creazione:");
+    return -1;
+  }
+  fprintf(f, "\n");
+  fclose(f);
   return 0;
 }

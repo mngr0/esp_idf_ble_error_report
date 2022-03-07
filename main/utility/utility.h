@@ -5,7 +5,7 @@
 #include "i2c_common/i2c_common.h"
 #include "packet_manager/packet_manager.h"
 
-#define MAX_FILE_SIZE  104876//Bytes //1 MiB
+#define MAX_FILE_SIZE  104876//Bytes //1 MiB???
 
 #define SEPARATOR_DEF {0xa4,0xa4,0xa4,0xa4,0xa4,0xa4,0xa4,0xa4,0xa4,0xa4,0xa4,0xa4,} 
 

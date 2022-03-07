@@ -69,18 +69,7 @@ static void blink_task(void *arg) {
   // pTime_set.day = 16;
   // pTime_set.min = 20;
 
-  if (i2c_master_init()) {
-    ESP_LOGI("TEST_CS", "i2c INIT NOT GOOD ----------------------------");
-  } else {
-    ESP_LOGI("TEST_CS", "i2c INIT GOOD/////////////////////////");
-  }
-  //mcp7940_set_time(rtc_driver,&pTime_set);
 
-  if (mcp7940_init(rtc_driver,1)) {
-    ESP_LOGI("TEST_CS", "MCP INIT NOT GOOD ----------------------------");
-  } else {
-    ESP_LOGI("TEST_CS", "MCP INIT GOOD/////////////////////////");
-  }
   // set time?
   uint8_t counter = 5; // ALL 1
   
@@ -114,7 +103,26 @@ void app_main(void) {
 
   configure_led();
 
-  xTaskCreate(blink_task, "blink_task", SENDER_TASK_STACK_SIZE, NULL, 2, NULL);
+  //init SD
+  sdmmc_card_t* card;
+  spi_sd_init(&card);
+
+  if (i2c_master_init()) {
+    ESP_LOGI("TEST_CS", "i2c INIT NOT GOOD ----------------------------");
+  } else {
+    ESP_LOGI("TEST_CS", "i2c INIT GOOD/////////////////////////");
+  }
+  //mcp7940_set_time(rtc_driver,&pTime_set);
+
+  if (mcp7940_init(rtc_driver,1)) {
+    ESP_LOGI("TEST_CS", "MCP INIT NOT GOOD ----------------------------");
+  } else {
+    ESP_LOGI("TEST_CS", "MCP INIT GOOD/////////////////////////");
+  }
+
+
+
+  //xTaskCreate(blink_task, "blink_task", SENDER_TASK_STACK_SIZE, NULL, 2, NULL);
 
   configure_serial();
 

@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "freertos/portmacro.h"
+#include "driver/gpio.h"
 #include "serial_SATA_protocol/serial_SATA_protocol.h"
 
 #include "air_ref.h"
@@ -16,7 +17,7 @@
 
 #include "i2c_devices/rtc/MCP7940/mcp7940.h"
 #include "peripherals/i2c_devices.h"
-
+#include "peripherals/led.h"
 #include "utility/utility.h"
 
 #include "ble/services/gatt_handle.h"
@@ -97,48 +98,22 @@ bool query_next(logger_memory_t *logger_memory) {
           logger_memory->current_list[logger_memory->current_idx_read] =
               ((message_t *)reply.buffer)->value;
           logger_memory->current_idx_read++;
+          // LED RED OFF
+          // LED GREEN ON
+          gpio_set_level(LED_R, LED_OFF);
+          gpio_set_level(LED_G, LED_ON);
           return true;
         }
       }
     }
   }
   ESP_LOGI("LOGGER", "TIMEOUT");
-  return false;
-}
-
-bool query_nextQUELLOVECCHIO(logger_memory_t *logger_memory) {
-  uint8_t data[1000 * 4];
-
-  int length;
-  length =
-      uart_read_bytes(uart_num, data, LOGGER_BUF_SIZE, 20 / portTICK_RATE_MS);
-
-  if (length > 0) {
-    packet_manager_put(&packet_structure, data, length);
-    if ((length = packet_manager_pop(&packet_structure, data)) > 0) {
-      packet_received_t reply;
-      if (packet_is_valid(&reply, data, length)) {
-        // if ((message_t *)reply.buffer)->command_type ==
-        // logger_memory->current_expected_reply_type;
-        logger_memory->current_list[logger_memory->current_idx_read] =
-            ((message_t *)reply.buffer)->value;
-        logger_memory->current_idx_read++;
-        return send_request(logger_memory);
-      }
-    }
-  }
-
-  if (xTaskGetTickCount() - logger_memory->last_send_timestamp >
-      (1000 / portTICK_RATE_MS)) { // 1 secondo di
-                                   // timeout
-                                   // resend
-    return send_request(logger_memory);
-  }
+  gpio_set_level(LED_R, LED_ON);
+  gpio_set_level(LED_G, LED_OFF);
   return false;
 }
 
 uint8_t ciao = 42;
-
 bool query_nextQUELLOFINTO(logger_memory_t *logger_memory) {
   if (logger_memory->current_idx_read < logger_memory->current_size) {
     logger_memory->current_list[logger_memory->current_idx_read] = ciao;
@@ -162,12 +137,13 @@ void send_command(uint8_t *buf) {
   query_msg.device_address = 4;
   query_msg.value = *(int32_t *)buf;
   query_msg.parameter_address = buf[5];
-  //ESP_LOG_BUFFER_HEX("MESSAGE DATA SENT", &query_msg, 8);
+  // ESP_LOG_BUFFER_HEX("MESSAGE DATA SENT", &query_msg, 8);
   packet_manager_send_data((uint8_t *)&query_msg, 8);
   timestamp = xTaskGetTickCount();
   sent = false;
   // wait for reply
-  while ((xTaskGetTickCount() - timestamp < (3000 / portTICK_RATE_MS)&&(!sent)) ) {
+  while ((xTaskGetTickCount() - timestamp < (3000 / portTICK_RATE_MS) &&
+          (!sent))) {
     length =
         uart_read_bytes(uart_num, data, LOGGER_BUF_SIZE, 20 / portTICK_RATE_MS);
 
@@ -177,25 +153,25 @@ void send_command(uint8_t *buf) {
       if ((length = packet_manager_pop(&packet_structure, data)) > 0) {
         packet_received_t reply;
         if (packet_is_valid(&reply, data, length)) { // TODO CHECK NACK???
-          //ESP_LOG_BUFFER_HEX("MESSAGE DATA RECVED", &reply.buffer, 8);
+          // ESP_LOG_BUFFER_HEX("MESSAGE DATA RECVED", &reply.buffer, 8);
           sent = true;
         }
       }
     }
   }
-  char** names;
-  if(buf[4]==write_routine_conf_parameter){
-    names=ar_config_names;
+  char **names;
+  if (buf[4] == write_routine_conf_parameter) {
+    names = ar_config_names;
   }
-  if(buf[4]==write_machine_conf_parameter){
-    names=m_config_names;
+  if (buf[4] == write_machine_conf_parameter) {
+    names = m_config_names;
   }
   if (sent) { // TODO translate index in name
     jsonify_report("written", names[buf[5]], json_update);
-    ESP_LOGI("SATA COMM OK", "%s",json_update);
+    ESP_LOGI("SATA COMM OK", "%s", json_update);
   } else {
     jsonify_report("refused", names[buf[5]], json_update);
-    ESP_LOGI("SATA COMM NOK", "%s",json_update);
+    ESP_LOGI("SATA COMM NOK", "%s", json_update);
   }
 
   do {
@@ -371,7 +347,7 @@ void logger_init() {
 }
 
 void enqueue_cmd(char *name, int32_t value) {
-  ESP_LOGI("ENQUEUE", "CMD: assign %d TO %s",value,name);
+  ESP_LOGI("ENQUEUE", "CMD: assign %d TO %s", value, name);
   uint8_t frame[6];
   bool found = false;
   frame[0] = ((uint8_t *)&value)[0];
