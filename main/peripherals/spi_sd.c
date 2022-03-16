@@ -22,62 +22,79 @@
 
 void search_last(char *dir_path, char *last_used_file_path) {}
 
+int8_t stat_compare_is_gt(char *name1, char *name2) {
+  struct stat properties1;
+  struct stat properties2;
+
+  if (stat(name1, &properties1) < 0) {
+    return -1;
+  }
+
+  ESP_LOGI(TAG,
+           "\t%s st_atime:%ld \n\t st_mtime:%ld \n\t st_ctime:%ld \n\t, "
+           "st_size:%ld \n\t ",
+           name1, properties1.st_atime, properties1.st_mtime,
+           properties1.st_ctime, properties1.st_size);
+
+  if (stat(name2, &properties2) < 0) {
+    return -1;
+  }
+
+  ESP_LOGI(TAG,
+           "\t%s st_atime:%ld \n\t st_mtime:%ld \n\t st_ctime:%ld \n\t, "
+           "st_size:%ld \n\t ",
+           name2, properties2.st_atime, properties2.st_mtime,
+           properties2.st_ctime, properties2.st_size);
+  return properties1.st_mtime > properties2.st_mtime;
+}
+
 // scan_dir
 // search more recent
 
 // return code: -1: error / 0: not_found / 1: found
-int search_file(const char *directory_to_scan, char *file_path,
-                bool most_recent) { // if most_recent is false this will get the
-                                    // least recent
+int search_file(
+    const char *directory_to_scan, char *file_path,  int8_t (*is_gt)(char *name1,
+                  char *name2)) { // if most_recent is false this will get the
+                                  // least recent
 
   // IT MUST START WITH LOG
   ESP_LOGI(TAG, "STARTED SEARCH FILE in %s", directory_to_scan);
   DIR *d;
   struct dirent *dp;
-  struct stat properties;
   bool found = false;
-  time_t last_found = 0;
+  char memory_name[80];
+  memset(memory_name, 0, 80);
+  char full_name[80];
+  int8_t ret_value;
 
-      char full_name[80];
   if ((d = opendir(directory_to_scan)) == NULL) {
     ESP_LOGE(TAG, "Cannot open %s directory", directory_to_scan);
-    // fprintf(stderr, "Cannot open %s directory\n", directory_to_scan);
     return -1;
   }
   while ((dp = readdir(d)) != NULL) {
 
     if (strstr(dp->d_name, "LOG")) {
 
-
       strcpy(full_name, directory_to_scan);
       strcat(full_name, dp->d_name);
-      if (stat(full_name, &properties) < 0) {
-        closedir(d);
-        return -1;
+      if(memory_name[0]==0){
+        strcpy(memory_name, full_name);
       }
-      ESP_LOGI(TAG,
-               "\t%s st_atime:%ld \n\t st_mtime:%ld \n\t st_ctime:%ld \n\t, "
-               "st_size:%ld \n\t ",full_name,
-               properties.st_atime, properties.st_mtime, properties.st_ctime,
-               properties.st_size);
-
-      if (most_recent) {
-        if ((properties.st_mtime > last_found) || (last_found == 0)) {
-          last_found = properties.st_mtime;
-          strcpy(file_path, full_name);
+      else{
+        ret_value = is_gt(full_name, memory_name);
+        if(ret_value<0){
+          found = false;
+          break;
         }
-      } else {
-        if ((properties.st_mtime < last_found) || (last_found == 0)) {
-          last_found = properties.st_mtime;
-          strcpy(file_path, full_name);
-        }
+        strcpy(memory_name, full_name);
       }
       found = true;
     }
   }
   closedir(d);
   if (found) {
-    ESP_LOGI(TAG, "FOUND %s",full_name);
+    ESP_LOGI(TAG, "FOUND %s", memory_name);
+      strcpy(file_path, memory_name);
     return 1;
   } else {
     ESP_LOGI(TAG, "NOT FOUND");

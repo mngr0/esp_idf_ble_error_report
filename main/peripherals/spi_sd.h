@@ -4,6 +4,7 @@
 
 #include "esp_vfs_fat.h"
 #include "sdmmc_cmd.h"
+#include <stdint.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/unistd.h>
@@ -17,9 +18,11 @@
 
 #define MAX_FILENAME_SIZE 256
 
+int8_t stat_compare_is_gt(char *name1, char *name2);
+
 void search_last(char* dir_path, char* last_used_file_path);
 
-int search_file(const char *directory_to_scan ,char *file_path, bool newest) ; //newest ... XOR oldest
+int search_file(const char *directory_to_scan ,char *file_path, int8_t(*is_gt)(char*name1,char*name2)) ; //newest ... XOR oldest
 
 void spi_sd_init(sdmmc_card_t **card);
 int create_new_file_raw(char *dir_path, char *new_file_name);

@@ -73,15 +73,78 @@ const char *dir_path = MOUNT_POINT "/";
 //   return 0;
 // }
 
+void time2name(char *name, rtc_time_t *time) {
+  snprintf(name, MAX_FILENAME_SIZE, "LOG_2%03dy%02dm%02dd%02dh%02dm%02ds.TXT",
+           time->year, time->month, time->day, time->hour, time->min,
+           time->sec);
+}
+
+void name2time(char *name, rtc_time_t *time) {
+  sscanf(name, "LOG_2%sy%2sm%2sd%2sh%2sm%2ss.TXT", &time->year, &time->month,
+         &time->day, &time->hour, &time->min, &time->sec);
+}
+
+bool rtc_time_time_compare_newer(rtc_time_t *time1, rtc_time_t *time2) {
+  if (time1->year > time2->year) {
+    return true;
+  } 
+  if (time1->year < time2->year) {
+    return false;
+  }
+
+  if (time1->month > time2->month) {
+    return true;
+  } 
+  if (time1->month < time2->month) {
+    return false;
+  }
+
+  if (time1->day > time2->day) {
+    return true;
+  } 
+  if (time1->day < time2->day) {
+    return false;
+  }
+
+  if (time1->hour > time2->hour) {
+    return true;
+  } 
+  if (time1->hour < time2->hour) {
+    return false;
+  }
+
+  if (time1->min > time2->min) {
+    return true;
+  } 
+  if (time1->min < time2->min) {
+    return false;
+  }
+  if (time1->sec > time2->sec) {
+    return true;
+  } 
+  if (time1->sec < time2->sec) {
+    return false;
+  }
+  return false;
+}
+
+int8_t is_gt(char *name1, char *name2) {
+  rtc_time_t time1, time2;
+  name2time(name1, &time1);
+  name2time(name2, &time2);
+  return rtc_time_time_compare_newer(&time1,&time2);
+}
+
+
 int log_received_messageHR(rtc_time_t *time, const char *message) {
   // search for valid file
   bool found = false;
-  if (last_used_file_path[0] ==
-      0) { // if first time log, go search for last used
-    // check equals to string not empty
-    // int ret=search_file(dir_path, last_used_file_path, true);//if most_recent
+  if (last_used_file_path[0] == 0) { // if first time log, go search for last
+                                     // used check equals to string not empty
+    int ret = search_file(dir_path, last_used_file_path, is_gt); // if most_recent
     // is false this will get the least recent
-    int ret = 0; // TODO NOT FOUND BECAUSE I NEED to set time on SD operations
+    // int ret = 0; // TODO NOT FOUND BECAUSE I NEED to set time on SD
+    // operations
     // https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/system_time.html
     ESP_LOGI(TAG, "SEARCH FILE RETURNED:%d %s", ret, last_used_file_path);
     if (ret == -1) {
@@ -110,9 +173,7 @@ int log_received_messageHR(rtc_time_t *time, const char *message) {
 
   if (!found) { // if no valid file exists, must create one
     char new_file_name[MAX_FILENAME_SIZE];
-    snprintf(new_file_name, MAX_FILENAME_SIZE,
-             "LOG_2%03d%02d%02d%02d%02d%02d.TXT", time->year, time->month,
-             time->day, time->hour, time->min, time->sec);
+    time2name(new_file_name, time);
     ESP_LOGI(TAG, "CREATING NEW FILE %s", new_file_name);
     int ret = create_new_file_raw((char *)dir_path, new_file_name);
     strncpy(last_used_file_path, dir_path, MAX_FILENAME_SIZE);
@@ -132,7 +193,7 @@ int log_received_messageHR(rtc_time_t *time, const char *message) {
   ESP_LOGI(TAG, "WRITING CONTENT on %s", last_used_file_path);
   fprintf(f, "[2%03d/%02d/%02d-%02d:%02d:%02d]:", time->year, time->month,
           time->day, time->hour, time->min, time->sec);
-  fprintf(f, message);
+  fprintf(f, "%s", message);
   fprintf(f, "\n");
   fclose(f);
   // TODO consider if putting the structure sizes on a separate file

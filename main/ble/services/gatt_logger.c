@@ -9,7 +9,7 @@
 
 #include "cJSON.h"
 #include <stdint.h>
-
+#include <string.h>
 #define CONFIGURATION_FIELD_SIZE 32
 #define NAME_SIZE 32
 #define MAX_ENUM_VALUES 32
@@ -72,7 +72,7 @@ typedef struct {
   configuration_field_t machine_status[CONFIGURATION_FIELD_SIZE];
   configuration_field_t routine_conf[CONFIGURATION_FIELD_SIZE];
   configuration_field_t routine_status[CONFIGURATION_FIELD_SIZE];
-} configuration;
+} configuration_t;
 
 void parseJSON() {}
 
@@ -100,19 +100,11 @@ void parseLIST(cJSON *array, configuration_field_t *list) {
       // exit loop
       break;
     }
-    case field_type_int32: {
-      tmp = cJSON_CreateObject();
-      cJSON_AddStringToObject(tmp, "name", list[i].int32_tval.name);
-      cJSON_AddNumberToObject(tmp, "idx", list[i].int32_tval.idx);
-      cJSON_AddNumberToObject(tmp, "min", list[i].int32_tval.min);
-      cJSON_AddNumberToObject(tmp, "max", list[i].int32_tval.max);
-      cJSON_AddItemToArray(array, tmp);
 
-      break;
-    }
     case field_type_enum: {
       tmp = cJSON_CreateObject();
       cJSON_AddStringToObject(tmp, "name", list[i].enum_val.name);
+      cJSON_AddStringToObject(tmp, "type", "enum");
       cJSON_AddNumberToObject(tmp, "idx", list[i].enum_val.idx);
       cJSON *values = cJSON_AddArrayToObject(tmp, "values");
       for (int j = 0; j < MAX_ENUM_VALUES; j++) {
@@ -125,8 +117,21 @@ void parseLIST(cJSON *array, configuration_field_t *list) {
 
       break;
     }
+    case field_type_int32: {
+      tmp = cJSON_CreateObject();
+      cJSON_AddStringToObject(tmp, "type", "int32");
+      cJSON_AddStringToObject(tmp, "name", list[i].int32_tval.name);
+      cJSON_AddNumberToObject(tmp, "idx", list[i].int32_tval.idx);
+      cJSON_AddNumberToObject(tmp, "min", list[i].int32_tval.min);
+      cJSON_AddNumberToObject(tmp, "max", list[i].int32_tval.max);
+      cJSON_AddItemToArray(array, tmp);
+
+      break;
+    }
+
     case field_type_int32_dinamic_min: {
       tmp = cJSON_CreateObject();
+      cJSON_AddStringToObject(tmp, "type", "int32Dmin");
       cJSON_AddStringToObject(tmp, "name", list[i].int32_tval_dmin.name);
       cJSON_AddNumberToObject(tmp, "idx", list[i].int32_tval_dmin.idx);
       cJSON_AddStringToObject(tmp, "min", list[i].int32_tval_dmin.min);
@@ -135,6 +140,7 @@ void parseLIST(cJSON *array, configuration_field_t *list) {
     }
     case field_type_int32_dinamic_max: {
       tmp = cJSON_CreateObject();
+      cJSON_AddStringToObject(tmp, "type", "int32Dmax");
       cJSON_AddStringToObject(tmp, "name", list[i].int32_tval_dmax.name);
       cJSON_AddNumberToObject(tmp, "idx", list[i].int32_tval_dmax.idx);
       cJSON_AddNumberToObject(tmp, "min", list[i].int32_tval_dmax.min);
@@ -145,18 +151,68 @@ void parseLIST(cJSON *array, configuration_field_t *list) {
   }
 }
 
-void parseSTRUCT(configuration *conf) {
+void parseSTRUCT(configuration_t *conf) {
   // createJSON MAIN
 
   cJSON *root;
   root = cJSON_CreateObject();
   parseLIST(cJSON_AddArrayToObject(root, "machine_conf"), conf->machine_conf);
-  parseLIST(cJSON_AddArrayToObject(root, "routine_conf"), conf->machine_conf);
-  parseLIST(cJSON_AddArrayToObject(root, "machine_status"), conf->machine_conf);
-  parseLIST(cJSON_AddArrayToObject(root, "routine_status"), conf->machine_conf);
+  parseLIST(cJSON_AddArrayToObject(root, "routine_conf"), conf->routine_conf);
+  parseLIST(cJSON_AddArrayToObject(root, "machine_status"),
+            conf->machine_status);
+  parseLIST(cJSON_AddArrayToObject(root, "routine_status"),
+            conf->routine_status);
 }
 
+field_type_t getFieldType(cJSON *element) {
+  if (strcmp(element->valuestring, "enum")) {
+    return field_type_enum;
+  }
+  return field_type_int32_dinamic_max;
+}
 
+void readLIST(cJSON *array, configuration_field_t *list) {
+  int i = 0;
+  cJSON *element;
+  cJSON_ArrayForEach(element, array) {
+    cJSON *name = cJSON_GetObjectItemCaseSensitive(element, "name");
+    cJSON *idx = cJSON_GetObjectItemCaseSensitive(element, "idx");
+
+    cJSON *type = cJSON_GetObjectItemCaseSensitive(element, "type");
+    switch (getFieldType(type)) {
+    case field_type_enum: {
+      cJSON *values = cJSON_GetObjectItemCaseSensitive(element, "values");
+      cJSON *value;
+      cJSON_ArrayForEach(value, values) {
+        cJSON *value_name, *value_value;
+        value_name = cJSON_GetObjectItemCaseSensitive(value, "name");
+        value_value = cJSON_GetObjectItemCaseSensitive(value, "value");
+      }
+    }
+    default: {
+    }
+    }
+  }
+}
+void readJSON(char *input_string) {
+  configuration_t input_conf;
+  // cJSON *json = cJSON_ParseWithLength(string, buffer_length);
+  cJSON *root = cJSON_Parse(input_string);
+
+  cJSON *machine_conf = cJSON_GetObjectItemCaseSensitive(root, "machine_conf");
+  readLIST(machine_conf, input_conf.machine_conf);
+
+  cJSON *routine_conf = cJSON_GetObjectItemCaseSensitive(root, "routine_conf");
+  readLIST(routine_conf, input_conf.routine_conf);
+
+  cJSON *machine_status =
+      cJSON_GetObjectItemCaseSensitive(root, "machine_status");
+  readLIST(machine_status, input_conf.machine_status);
+
+  cJSON *routine_status =
+      cJSON_GetObjectItemCaseSensitive(root, "routine_status");
+  readLIST(routine_status, input_conf.routine_status);
+}
 
 // thread BLE
 // started by serail routine, after start done
