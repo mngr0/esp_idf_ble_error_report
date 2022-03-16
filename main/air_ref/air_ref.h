@@ -111,6 +111,7 @@ OPERATION(control_type_compressor)					\
 OPERATION(control_type_fan)							\
 OPERATION(control_type_termostatica)				\
 OPERATION(gas_type)									\
+OPERATION(air_ref_start_interval)					\
 OPERATION(air_ref_timeout_interval)					\
 OPERATION(air_ref_pump_down_pressure_control)		\
 OPERATION(termostatica_surriscaldo_setpoint)		\

@@ -13,7 +13,6 @@ const uart_port_t uart_num = UART_NUM_2;
 
 
 void configure_serial() {
-
   int intr_alloc_flags = 0;
   uart_config_t uart_config = {
       .baud_rate = 9600,
