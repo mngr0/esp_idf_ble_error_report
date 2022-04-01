@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "freertos/portmacro.h"
 #include "driver/gpio.h"
+#include "freertos/portmacro.h"
 #include "serial_SATA_protocol/serial_SATA_protocol.h"
 
 #include "air_ref.h"
@@ -93,15 +93,28 @@ bool query_next(logger_memory_t *logger_memory) {
       if ((length = packet_manager_pop(&packet_structure, data)) > 0) {
         packet_received_t reply;
         if (packet_is_valid(&reply, data, length)) { // TODO CHECK NACK???
-          // if ((message_t *)reply.buffer)->command_type ==
-          // logger_memory->current_expected_reply_type;
-          logger_memory->current_list[logger_memory->current_idx_read] =
-              ((message_t *)reply.buffer)->value;
-          logger_memory->current_idx_read++;
-          // LED RED OFF
-          // LED GREEN ON
-          gpio_set_level(LED_R, LED_OFF);
-          gpio_set_level(LED_G, LED_ON);
+          if (((message_t *)reply.buffer)->command_type ==
+              logger_memory->current_expected_reply_type) {
+            logger_memory->current_list[logger_memory->current_idx_read] =
+                ((message_t *)reply.buffer)->value;
+            logger_memory->current_idx_read++;
+            //ESP_LOGI("LOGGER", "reply CMD_TYPE %d",
+            //         ((message_t *)reply.buffer)->command_type);
+
+            // LED RED OFF
+            // LED GREEN ON
+            gpio_set_level(LED_R, LED_OFF);
+            gpio_set_level(LED_G, LED_ON);
+            return true;
+          } else {
+            ESP_LOGI("LOGGER", "WRONG CMD_TYPE %d but expected %d",
+                     ((message_t *)reply.buffer)->command_type,
+                     logger_memory->current_expected_reply_type);
+            gpio_set_level(LED_R, LED_ON);
+            gpio_set_level(LED_G, LED_OFF);
+            return false;
+          }
+
           return true;
         }
       }
