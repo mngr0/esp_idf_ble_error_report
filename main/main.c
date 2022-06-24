@@ -59,35 +59,35 @@ uint8_t led_blink[8][3] = {{0, 0, 0}, {0, 0, 1}, {0, 1, 1},
 
 };
 
-static void blink_task(void *arg) {
-  rtc_time_t pTime;
-  // rtc_time_t pTime_set;
-  // pTime_set.year = 20;
-  // pTime_set.hour = 17;
-  // pTime_set.month = 10;
-  // pTime_set.day = 16;
-  // pTime_set.min = 20;
+// static void blink_task(void *arg) {
+//   rtc_time_t pTime;
+//   // rtc_time_t pTime_set;
+//   // pTime_set.year = 20;
+//   // pTime_set.hour = 17;
+//   // pTime_set.month = 10;
+//   // pTime_set.day = 16;
+//   // pTime_set.min = 20;
 
-  // set time?
-  uint8_t counter = 5; // ALL 1
+//   // set time?
+//   uint8_t counter = 5; // ALL 1
 
-  while (1) {
-    // read RTCC. print time
+//   while (1) {
+//     // read RTCC. print time
 
-    gpio_set_level(LED_R, led_blink[counter][0]);
-    gpio_set_level(LED_G, led_blink[counter][1]);
-    gpio_set_level(LED_B, led_blink[counter][2]);
-    vTaskDelay(500 / portTICK_PERIOD_MS);
-    // counter++;
-    counter %= 8;
-    // ESP_LOGI("TEST_CS", "doing: %d %d %d", led_blink[counter][0],
-    //         led_blink[counter][1], led_blink[counter][2]);
-    mcp7940_get_time(rtc_driver, &pTime);
-    // ESP_LOGI("TIME","%d/%d/%d -
-    // %d:%d:%d",pTime.day,pTime.month,pTime.year,pTime.hour, pTime.min,
-    // pTime.sec);
-  }
-}
+//     gpio_set_level(LED_R, led_blink[counter][0]);
+//     gpio_set_level(LED_G, led_blink[counter][1]);
+//     gpio_set_level(LED_B, led_blink[counter][2]);
+//     vTaskDelay(500 / portTICK_PERIOD_MS);
+//     // counter++;
+//     counter %= 8;
+//     // ESP_LOGI("TEST_CS", "doing: %d %d %d", led_blink[counter][0],
+//     //         led_blink[counter][1], led_blink[counter][2]);
+//     mcp7940_get_time(rtc_driver, &pTime);
+//     // ESP_LOGI("TIME","%d/%d/%d -
+//     // %d:%d:%d",pTime.day,pTime.month,pTime.year,pTime.hour, pTime.min,
+//     // pTime.sec);
+//   }
+// }
 
 void prepare_time(bool tc_works) {
   // init time
