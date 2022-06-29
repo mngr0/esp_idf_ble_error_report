@@ -3,4 +3,4 @@
 	url = https://github.com/mngr0/I2C
 [submodule "components/gel"]
 	path = components/gel
-	url = https://github.com/mngr0/generic_embedded_libs
+	url = https://gitlab.com/bmi6/generic_embedded_libs

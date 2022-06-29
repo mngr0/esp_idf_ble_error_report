@@ -273,6 +273,8 @@ void gatts_profile_event_handler(esp_gatts_cb_event_t event,
                "create attribute table failed, error code=0x%x",
                param->add_attr_tab.status);
     }
+     esp_err_t add_descr_ret = esp_ble_gatts_add_char_descr(gl_profile_tab[PROFILE_A_APP_ID].service_handle, &gl_profile_tab[PROFILE_A_APP_ID].descr_uuid,
+                                                                ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE, NULL, NULL);
     break;
   }
   case ESP_GATTS_STOP_EVT:

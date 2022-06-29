@@ -82,10 +82,10 @@ bool query_next(logger_memory_t *logger_memory) {
   int length;
 
   while (xTaskGetTickCount() - logger_memory->last_send_timestamp <
-         (1000 / portTICK_RATE_MS)) {
+         (1000 / portTICK_PERIOD_MS)) {
 
     length =
-        uart_read_bytes(uart_num, data, LOGGER_BUF_SIZE, 20 / portTICK_RATE_MS);
+        uart_read_bytes(uart_num, data, LOGGER_BUF_SIZE, 20 / portTICK_PERIOD_MS);
 
     if (length > 0) {
       packet_manager_put(&packet_structure, data, length);
@@ -155,10 +155,10 @@ void send_command(uint8_t *buf) {
   timestamp = xTaskGetTickCount();
   sent = false;
   // wait for reply
-  while ((xTaskGetTickCount() - timestamp < (3000 / portTICK_RATE_MS) &&
+  while ((xTaskGetTickCount() - timestamp < (3000 / portTICK_PERIOD_MS) &&
           (!sent))) {
     length =
-        uart_read_bytes(uart_num, data, LOGGER_BUF_SIZE, 20 / portTICK_RATE_MS);
+        uart_read_bytes(uart_num, data, LOGGER_BUF_SIZE, 20 / portTICK_PERIOD_MS);
 
     if (length > 0) {
       packet_manager_put(&packet_structure, data, length);
@@ -354,7 +354,7 @@ void logger_set_state(logger_state_t new_state) {
 
 void logger_init() {
   logger_memory.logger_state_next = -1;
-  packet_manager_init(&packet_structure);
+  //packet_manager_init(&packet_structure);
   xTaskCreate(query_task, "query_task", SENDER_TASK_STACK_SIZE, NULL,
               TASK_SENDER_STACK_PRIORITY, &(xQueryTask));
 }
