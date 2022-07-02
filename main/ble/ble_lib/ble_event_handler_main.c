@@ -28,7 +28,6 @@
 #include "esp_gap_ble_api.h"
 #include "esp_gatt_common_api.h"
 #include "esp_gatts_api.h"
-#include "gatts_table_creat_demo.h"
 
 #include "ble_utils.h"
 
@@ -303,9 +302,50 @@ void gatts_profile_main_event_handler(esp_gatts_cb_event_t event,
   }
 }
 
+static const uint16_t character_declaration_uuid = ESP_GATT_UUID_CHAR_DECLARE;
+static const uint8_t char_prop_read_write_notify =
+    ESP_GATT_CHAR_PROP_BIT_WRITE | ESP_GATT_CHAR_PROP_BIT_READ |
+    ESP_GATT_CHAR_PROP_BIT_NOTIFY;
+static const uint8_t char_prop_read_notify = ESP_GATT_CHAR_PROP_BIT_READ;
+static const uint16_t descriptor_delaration = ESP_GATT_UUID_CHAR_DESCRIPTION;
+static const uint16_t character_client_config_uuid =
+    ESP_GATT_UUID_CHAR_CLIENT_CONFIG;
+
+static const uint8_t char_value[4] = {0x11, 0x22, 0x33, 0x44};
+
+void allocare_una_caratteristica_main(esp_gatts_attr_db_t *input, uint16_t base,
+                                      uint8_t *GATT_CHAR_UUID) {
+
+  ASSEGNA_COSE(input[base + allocation_main_characteristic_declaration],
+               ESP_GATT_AUTO_RSP, ESP_UUID_LEN_16,
+               (uint8_t *)&character_declaration_uuid, ESP_GATT_PERM_READ,
+               GATTS_DEMO_CHAR_VAL_LEN_MAX, sizeof(char_value),
+               (uint8_t *)&char_prop_read_write_notify);
+
+  ASSEGNA_COSE(input[base + allocation_main_characteristic_value],
+               ESP_GATT_AUTO_RSP, ESP_UUID_LEN_16, GATT_CHAR_UUID,
+               ESP_GATT_PERM_READ, CHAR_DECLARATION_SIZE, CHAR_DECLARATION_SIZE,
+               (uint8_t *)char_value);
+
+  ASSEGNA_COSE(input[base + allocation_main_characteristic_configuration],
+               ESP_GATT_AUTO_RSP, ESP_UUID_LEN_16,
+               (uint8_t *)&character_client_config_uuid, ESP_GATT_PERM_READ,
+               CHAR_DECLARATION_SIZE, CHAR_DECLARATION_SIZE,
+               (uint8_t *)&char_prop_read_write_notify);
+
+  ASSEGNA_COSE(input[base + allocation_main_descriptor_uuid_conf], ESP_GATT_AUTO_RSP,
+               ESP_UUID_LEN_16, (uint8_t *)&descriptor_delaration,
+               ESP_GATT_PERM_READ, 40, 1, (uint8_t *)&char_prop_read_notify);
+
+  ASSEGNA_COSE(input[base + allocation_main_descriptor_uuid_status], ESP_GATT_AUTO_RSP,
+               ESP_UUID_LEN_16, (uint8_t *)&descriptor_delaration,
+               ESP_GATT_PERM_READ, sizeof(int32_t), sizeof(int32_t),
+               (uint8_t *)&char_prop_read_notify);
+
+}
 
 
-void allocate_main_dynamic(uint16_t UUIDs[][2], uint16_t UUIDs_len,
+void allocate_main_dynamic(uint16_t UUIDs[][UUID_INDEX_SIZE], uint16_t UUIDs_len,
                            uint8_t p_srvc_inst_id) {
   MAIN_ENTRY_SIZE = CALC_MAIN_SIZE(UUIDs_len);
   srv_inst_id = p_srvc_inst_id;

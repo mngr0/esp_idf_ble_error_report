@@ -175,7 +175,8 @@ int log_received_messageHR(rtc_time_t *time, const char *message) {
     char new_file_name[MAX_FILENAME_SIZE];
     time2name(new_file_name, time);
     ESP_LOGI(TAG, "CREATING NEW FILE %s", new_file_name);
-    int ret = create_new_file_raw((char *)dir_path, new_file_name);
+    //int ret = 
+    create_new_file_raw((char *)dir_path, new_file_name);
     strncpy(last_used_file_path, dir_path, MAX_FILENAME_SIZE);
     strncat(last_used_file_path, new_file_name,
             MAX_FILENAME_SIZE - strlen(dir_path));

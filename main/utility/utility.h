@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 #include "i2c_common/i2c_common.h"
-#include "packet_manager/packet_manager.h"
+#include "gel/packet_manager/packet_manager.h"
 
 #define MAX_FILE_SIZE  104876//Bytes //1 MiB???
 
@@ -34,7 +34,7 @@
 //riporta lo stato della connessione wifi via bt
 
 
-int log_received_message(rtc_time_t *time, packet_received_t* packet);
+int log_received_message(rtc_time_t *time, uint8_t* packet);
 //add received message to log file (packet_received pkt)
 // - get last edited file (if file_pointer_to_last_used==NULL)
 // - check if size can be increased

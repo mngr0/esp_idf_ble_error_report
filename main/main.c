@@ -133,27 +133,35 @@ void app_main(void) {
   configure_led();
 
   // init SD
-  sdmmc_card_t *card;
-  spi_sd_init(&card);
+  // sdmmc_card_t *card;
+  // spi_sd_init(&card);
 
-  if (i2c_master_init()) {
-    ESP_LOGI("TEST_CS", "i2c INIT NOT GOOD ----------------------------");
-  } else {
-    ESP_LOGI("TEST_CS", "i2c INIT GOOD/////////////////////////");
-  }
-  // mcp7940_set_time(rtc_driver,&pTime_set);
+  // if (i2c_master_init()) {
+  //   ESP_LOGI("TEST_CS", "i2c INIT NOT GOOD ----------------------------");
+  // } else {
+  //   ESP_LOGI("TEST_CS", "i2c INIT GOOD/////////////////////////");
+  // }
+  // // mcp7940_set_time(rtc_driver,&pTime_set);
 
-  if (mcp7940_init(rtc_driver, 1)) {
-    ESP_LOGI("TEST_CS", "MCP INIT NOT GOOD ----------------------------");
-  } else {
-    ESP_LOGI("TEST_CS", "MCP INIT GOOD/////////////////////////");
-  }
+  // if (mcp7940_init(rtc_driver, 1)) {
+  //   ESP_LOGI("TEST_CS", "MCP INIT NOT GOOD ----------------------------");
+  // } else {
+  //   ESP_LOGI("TEST_CS", "MCP INIT GOOD/////////////////////////");
+  // }
 
   // xTaskCreate(blink_task, "blink_task", SENDER_TASK_STACK_SIZE, NULL, 2,
   // NULL);
 
-  configure_serial();
+  // configure_serial();
 
   BLE_init();
-  logger_init();
+  //logger_init();
 }
+
+
+//avviare lettura configurazione (e primo stato) (led giallo)
+//se stato err -> avviare BLE senza servizi conf e status (led rosso)
+//se stato reading -> provare a riconoscere device, avviare conf e status (led verde)
+
+//se connesso a cell+dev -> blu , se solo cell -> viola
+

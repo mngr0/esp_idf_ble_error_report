@@ -12,15 +12,14 @@
 #include "esp_gap_ble_api.h"
 #include "esp_gatt_common_api.h"
 #include "esp_gatts_api.h"
-#include "gatts_table_creat_demo.h"
 
-#include "ble_utils.h"
+
+#include "ble_lib/ble_utils.h"
 
 #define GATTS_TABLE_TAG "GATTS_TABLE_DEMO"
 #define TAG GATTS_TABLE_TAG
 
-#define STATUS_SIZE 2
-#define CONF_SIZE 2
+
 
 struct gatts_profile_inst {
   esp_gatts_cb_t gatts_cb;
@@ -88,8 +87,13 @@ void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if,
   } while (0);
 }
 
-void app_main(void) {
+char *nomi[MAX_STR_LEN]={"ciao", "maio", "sdfsdf"};
+char *nomi2[MAX_STR_LEN]={"ciao", "maio", "sdfsdf"};
+
+
+void BLE_init(void) {
   esp_err_t ret;
+  machine_parameters_t mp;
 
   /* Initialize NVS. */
   ret = nvs_flash_init();
@@ -133,12 +137,11 @@ void app_main(void) {
 
   uint16_t UUIDs_array[1][2];
 
-  allocate_conf_dynamic(CONF_SIZE, PROFILE_CONF, &UUIDs_array[0][0]);
-  allocate_status_dynamic(STATUS_SIZE, PROFILE_STATUS, &UUIDs_array[0][1]);
+  allocate_conf_dynamic(&mp, nomi, PROFILE_CONF, &UUIDs_array[0][0]);
+  allocate_status_dynamic(&mp, nomi2, PROFILE_STATUS, &UUIDs_array[0][1]);
   allocate_main_dynamic(UUIDs_array, 1, PROFILE_MAIN);
 
   ESP_LOGI(TAG, "ALLOCATION DONE");
-
 
   ret = esp_ble_gatts_register_callback(gatts_event_handler);
   if (ret) {

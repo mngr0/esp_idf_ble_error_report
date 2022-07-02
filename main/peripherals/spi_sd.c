@@ -102,19 +102,19 @@ int search_file(
   }
 }
 
-void example_get_fatfs_usage(uint64_t *out_total_bytes,
-                             uint64_t *out_free_bytes) {
-  FATFS *fs;
-  size_t free_clusters;
-  int res = f_getfree("0:", &free_clusters, &fs);
-  assert(res == FR_OK);
-  if (out_total_bytes != NULL) {
-    *out_total_bytes = (uint64_t)(fs->n_fatent - 2) * fs->csize * fs->ssize;
-  }
-  if (out_free_bytes != NULL) {
-    *out_free_bytes = (uint64_t)(free_clusters)*fs->csize * fs->ssize;
-  }
-}
+// void example_get_fatfs_usage(uint64_t *out_total_bytes,
+//                              uint64_t *out_free_bytes) {
+//   FATFS *fs;
+//   size_t free_clusters;
+//   // int res = f_getfree("0:", &free_clusters, &fs);
+//   // assert(res == FR_OK);
+//   if (out_total_bytes != NULL) {
+//     *out_total_bytes = (uint64_t)(fs->n_fatent - 2) * fs->csize * fs->ssize;
+//   }
+//   if (out_free_bytes != NULL) {
+//     *out_free_bytes = (uint64_t)(free_clusters)*fs->csize * fs->ssize;
+//   }
+// }
 
 void spi_sd_init(sdmmc_card_t **card) {
   esp_err_t ret;

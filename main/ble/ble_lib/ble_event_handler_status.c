@@ -1,4 +1,3 @@
-
 #include <string.h>
 
 #include "esp_bt.h"
@@ -11,26 +10,28 @@
 
 #include "ble_utils.h"
 
-#define TAG "BLE_CONF"
+#define TAG "BLE_STATUS"
 #define SRV_IDX 0
 
 static const uint16_t primary_service_uuid = ESP_GATT_UUID_PRI_SERVICE;
-static const uint16_t GATTS_SERVICE_UUID_CONF = 0x00FE;
+static const uint16_t GATTS_SERVICE_UUID_STATUS = 0x00FD;
 
 static uint16_t *handle_table;
 static esp_gatts_attr_db_t *gatt_db;
-static uint16_t *UUIDs_conf;
+static uint16_t *UUIDs_status;
 static uint8_t srv_inst_id;
-static uint16_t CONF_ENTRY_SIZE;
+static uint16_t STATUS_ENTRY_SIZE;
 static prepare_type_env_t prepare_write_env;
 
-void gatts_profile_conf_event_handler(esp_gatts_cb_event_t event,
-                                      esp_gatt_if_t gatts_if,
-                                      esp_ble_gatts_cb_param_t *param) {
+int32_t *status;
+
+void gatts_profile_status_event_handler(esp_gatts_cb_event_t event,
+                                        esp_gatt_if_t gatts_if,
+                                        esp_ble_gatts_cb_param_t *param) {
   switch (event) {
   case ESP_GATTS_REG_EVT: {
     esp_err_t create_attr_ret = esp_ble_gatts_create_attr_tab(
-        gatt_db, gatts_if, CONF_ENTRY_SIZE, srv_inst_id);
+        gatt_db, gatts_if, STATUS_ENTRY_SIZE, srv_inst_id);
     if (create_attr_ret) {
       ESP_LOGE(TAG, "create attr table failed, error code = %x",
                create_attr_ret);
@@ -97,10 +98,10 @@ void gatts_profile_conf_event_handler(esp_gatts_cb_event_t event,
     if (param->add_attr_tab.status != ESP_GATT_OK) {
       ESP_LOGE(TAG, "create attribute table failed, error code=0x%x",
                param->add_attr_tab.status);
-    } else if (param->add_attr_tab.num_handle != CONF_ENTRY_SIZE) {
+    } else if (param->add_attr_tab.num_handle != STATUS_ENTRY_SIZE) {
       ESP_LOGE(TAG, "create attribute table abnormally, num_handle (%d) \
                         doesn't equal to DYNAMIC_SIZE(%d)",
-               param->add_attr_tab.num_handle, CONF_ENTRY_SIZE);
+               param->add_attr_tab.num_handle, STATUS_ENTRY_SIZE);
     } else {
       //(size1=%d, size2=%d)
       ESP_LOGI(TAG,
@@ -108,7 +109,7 @@ void gatts_profile_conf_event_handler(esp_gatts_cb_event_t event,
                param->add_attr_tab.num_handle);
 
       memcpy(handle_table, param->add_attr_tab.handles,
-             CONF_ENTRY_SIZE * sizeof(uint16_t));
+             STATUS_ENTRY_SIZE * sizeof(uint16_t));
       ESP_LOGI(TAG, "memcpy done\n");
 
       esp_ble_gatts_start_service(handle_table[SRV_IDX]);
@@ -128,38 +129,79 @@ void gatts_profile_conf_event_handler(esp_gatts_cb_event_t event,
   }
 }
 
-void allocate_conf_dynamic(uint16_t conf_len, uint8_t p_srvc_inst_id,
-                           uint16_t *uuid_ptr) {
-  CONF_ENTRY_SIZE = CALC_CONF_SIZE(conf_len);
-  srv_inst_id = p_srvc_inst_id;
+static const uint16_t character_declaration_uuid = ESP_GATT_UUID_CHAR_DECLARE;
+static const uint8_t char_prop_read_notify =
+    ESP_GATT_CHAR_PROP_BIT_READ | ESP_GATT_CHAR_PROP_BIT_NOTIFY;
+static const uint16_t descriptor_delaration = ESP_GATT_UUID_CHAR_DESCRIPTION;
+static const uint16_t character_client_config_uuid =
+    ESP_GATT_UUID_CHAR_CLIENT_CONFIG;
 
-  handle_table = (uint16_t *)malloc(sizeof(uint16_t) * CONF_ENTRY_SIZE);
+uint16_t *notifications_enabled;
+
+void allocare_una_caratteristica_status(esp_gatts_attr_db_t *input,
+                                        uint16_t index, uint8_t *GATT_CHAR_UUID,
+                                        int32_t *value, char *name) {
+
+  ASSEGNA_COSE(input[CALC_STATUS_SIZE(index) +
+                     allocation_status_characteristic_declaration],
+               ESP_GATT_AUTO_RSP, ESP_UUID_LEN_16,
+               (uint8_t *)&character_declaration_uuid, ESP_GATT_PERM_READ,
+               CHAR_DECLARATION_SIZE, CHAR_DECLARATION_SIZE,
+               (uint8_t *)&char_prop_read_notify);
+
+  ASSEGNA_COSE(
+      input[CALC_STATUS_SIZE(index) + allocation_status_characteristic_value],
+      ESP_GATT_AUTO_RSP, ESP_UUID_LEN_16, GATT_CHAR_UUID, ESP_GATT_PERM_READ,
+      sizeof(int32_t), sizeof(int32_t), (uint8_t *)value);
+
+  ASSEGNA_COSE(input[CALC_STATUS_SIZE(index) +
+                     allocation_status_characteristic_configuration],
+               ESP_GATT_AUTO_RSP, ESP_UUID_LEN_16,
+               (uint8_t *)&character_client_config_uuid,
+               ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE, sizeof(uint16_t),
+               sizeof(uint16_t),
+               (uint8_t *)&notifications_enabled[index]); // todo malloc array
+
+  ASSEGNA_COSE(
+      input[CALC_STATUS_SIZE(index) + allocation_status_descriptor_name],
+      ESP_GATT_AUTO_RSP, ESP_UUID_LEN_16, (uint8_t *)&descriptor_delaration,
+      ESP_GATT_PERM_READ, MAX_STR_LEN, strlen(name), (uint8_t *)name);
+}
+
+void allocate_status_dynamic(machine_parameters_t *mp, char *names[MAX_STR_LEN],
+                             uint8_t p_srvc_inst_id, uint16_t *uuid_ptr) {
+  status = mp->routine_status;
+  STATUS_ENTRY_SIZE = CALC_STATUS_SIZE(mp->routine_status_size);
+  srv_inst_id = p_srvc_inst_id;
+  handle_table = (uint16_t *)malloc(sizeof(uint16_t) * STATUS_ENTRY_SIZE);
   if (!handle_table) {
     ESP_LOGI(TAG, "MO ESPLODE TUTTO 0");
   }
   gatt_db = (esp_gatts_attr_db_t *)malloc(sizeof(esp_gatts_attr_db_t) *
-                                          CONF_ENTRY_SIZE);
+                                          STATUS_ENTRY_SIZE);
   if (!gatt_db) {
     ESP_LOGI(TAG, "MO ESPLODE TUTTO 1");
   }
 
-  if (conf_len > 0) {
-    UUIDs_conf = malloc(sizeof(uint16_t) * CONF_ENTRY_SIZE);
-    if (!UUIDs_conf) {
-      ESP_LOGI(TAG, "CONF MALLOC ESPLOSA");
+  if (mp->routine_status_size > 0) {
+    UUIDs_status = malloc(sizeof(uint16_t) * STATUS_ENTRY_SIZE);
+    if (!UUIDs_status) {
+      ESP_LOGI(TAG, "STATUS MALLOC ESPLOSA");
       return;
     }
   }
-  for (int i = 0; i < conf_len; i++) {
-    UUIDs_conf[i] = generate_uuid(UUID_CONF_BASE, i);
+  for (int i = 0; i < mp->routine_status_size; i++) {
+    UUIDs_status[i] = generate_uuid(UUID_STATUS_BASE, i);
     ESP_LOGI(TAG, "callin configure index %d", i);
-    allocare_una_caratteristica_conf(gatt_db, (1 + i * allocation_conf_size),
-                                     (uint8_t *)&(UUIDs_conf[i]));
+    allocare_una_caratteristica_status(gatt_db, i,
+                                       (uint8_t *)&(UUIDs_status[i]),
+                                       &mp->routine_status[i], names[i]);
   }
   ASSEGNA_COSE(gatt_db[SRV_IDX], // SERVICE
                ESP_GATT_AUTO_RSP, ESP_UUID_LEN_16,
                (uint8_t *)&primary_service_uuid, ESP_GATT_PERM_READ,
-               sizeof(uint16_t), sizeof(GATTS_SERVICE_UUID_CONF),
-               (uint8_t *)&GATTS_SERVICE_UUID_CONF);
-  *uuid_ptr = GATTS_SERVICE_UUID_CONF;
+               sizeof(uint16_t), sizeof(GATTS_SERVICE_UUID_STATUS),
+               (uint8_t *)&GATTS_SERVICE_UUID_STATUS);
+
+  *uuid_ptr = GATTS_SERVICE_UUID_STATUS;
 }
