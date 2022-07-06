@@ -12,10 +12,10 @@ const uart_port_t uart_num = UART_NUM_2;
 #define ECHO_TEST_CTS (UART_PIN_NO_CHANGE)
 
 
-void configure_serial() {
+void serial_configure() {
   int intr_alloc_flags = 0;
   uart_config_t uart_config = {
-      .baud_rate = 9600,
+      .baud_rate = 115200,
       .data_bits = UART_DATA_8_BITS,
       .parity = UART_PARITY_DISABLE,
       .stop_bits = UART_STOP_BITS_1,
@@ -31,7 +31,7 @@ void configure_serial() {
 }
 
 
-int send_buffer(uint8_t* data, int lenght){
+int serial_send_buffer(uint8_t* data, size_t lenght){
     //ESP_LOG_BUFFER_HEX("BUFFER SENT", data,lenght);
     esp_err_t ret;
     ret=uart_write_bytes(uart_num,data,lenght);

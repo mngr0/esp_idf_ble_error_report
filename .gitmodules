@@ -4,3 +4,9 @@
 [submodule "components/gel"]
 	path = components/gel
 	url = https://gitlab.com/bmi6/generic_embedded_libs
+[submodule "components/cs011_termostatica_mplab"]
+	path = components/cs011_termostatica_mplab
+	url = https://gitlab.com/bmi6/cs011_termostatica_mplab
+[submodule "components/cs014_mplab"]
+	path = components/cs014_mplab
+	url = https://gitlab.com/bmi6/cs014_mplab
