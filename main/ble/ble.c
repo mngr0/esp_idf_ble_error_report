@@ -137,7 +137,7 @@ void BLE_init(machine_parameters_t *mp,
 
   uint16_t UUIDs_array[1][2]={{12,14}};
 
-  //allocate_conf_dynamic(mp_remote, conf_names, PROFILE_CONF, &UUIDs_array[0][0]);
+  allocate_conf_dynamic(mp_remote, conf_names, PROFILE_CONF, &UUIDs_array[0][0]);
   allocate_status_dynamic(mp_remote, status_names, PROFILE_STATUS, &UUIDs_array[0][1]);
   allocate_main_dynamic(mp, UUIDs_array, 1, PROFILE_MAIN);
 
@@ -165,9 +165,9 @@ void BLE_init(machine_parameters_t *mp,
     ESP_LOGE(GATTS_TABLE_TAG, "gatts app register error, error code = %x", ret);
     return;
   }
-  // ret = esp_ble_gatts_app_register(PROFILE_CONF);
-  // if (ret) {
-  //   ESP_LOGE(GATTS_TABLE_TAG, "gatts app register error, error code = %x", ret);
-  //   return;
-  // }
+  ret = esp_ble_gatts_app_register(PROFILE_CONF);
+  if (ret) {
+    ESP_LOGE(GATTS_TABLE_TAG, "gatts app register error, error code = %x", ret);
+    return;
+  }
 }

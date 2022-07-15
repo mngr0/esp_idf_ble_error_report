@@ -193,7 +193,7 @@ void allocate_conf_dynamic(machine_parameters_t *mp, char names[][MAX_STR_LEN],
   conf = mp->routine_conf;
   CONF_ENTRY_SIZE = CALC_CONF_SIZE(mp->routine_conf_size);
   srv_inst_id = p_srvc_inst_id;
-
+  ESP_LOGI(TAG, "CONF SIZE IS %d",CONF_ENTRY_SIZE);
   handle_table = (uint16_t *)malloc(sizeof(uint16_t) * CONF_ENTRY_SIZE);
   if (!handle_table) {
     ESP_LOGI(TAG, "MO ESPLODE TUTTO 0");
