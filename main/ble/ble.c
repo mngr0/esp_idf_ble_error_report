@@ -165,7 +165,7 @@ void BLE_init(machine_parameters_t *mp,
     ESP_LOGE(GATTS_TABLE_TAG, "gatts app register error, error code = %x", ret);
     return;
   }
-  //   ret = esp_ble_gatts_app_register(PROFILE_CONF);
+  // ret = esp_ble_gatts_app_register(PROFILE_CONF);
   // if (ret) {
   //   ESP_LOGE(GATTS_TABLE_TAG, "gatts app register error, error code = %x", ret);
   //   return;

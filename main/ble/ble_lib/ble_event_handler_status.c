@@ -160,7 +160,7 @@ void allocare_una_caratteristica_status(esp_gatts_attr_db_t *input,
                (uint8_t *)&character_client_config_uuid,
                ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE, sizeof(uint16_t),
                sizeof(uint16_t),
-               (uint8_t *)&notifications_enabled[index]); // todo malloc array
+               (uint8_t *)&notifications_enabled[index]);
 
   ASSEGNA_COSE(
       input[CALC_STATUS_SIZE(index) + allocation_status_descriptor_name],
@@ -189,6 +189,12 @@ void allocate_status_dynamic(machine_parameters_t *mp, char names[][MAX_STR_LEN]
       ESP_LOGI(TAG, "STATUS MALLOC ESPLOSA");
       return;
     }
+    notifications_enabled = malloc(sizeof(uint16_t) * mp->routine_status_size);
+    if (!notifications_enabled) {
+      ESP_LOGI(TAG, "STATUS MALLOC ESPLOSA");
+      return;
+    }
+
   }
   for (int i = 0; i < mp->routine_status_size; i++) {
     UUIDs_status[i] = generate_uuid(UUID_STATUS_BASE, i);
