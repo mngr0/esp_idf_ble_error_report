@@ -16,19 +16,22 @@
  *
  ****************************************************************************/
 
+#include <string.h>
+#include <sys/time.h>
+#include <time.h>
+
+#include "abstract_state_machine/validator_field.h"
 #include "esp_log.h"
 #include "esp_system.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/event_groups.h"
 #include "freertos/task.h"
 #include "nvs_flash.h"
-#include <string.h>
+
 
 #include "driver/gpio.h"
 
 #include "driver/uart.h"
-
-#include "termostatica.h"
 
 #include "air_ref/logger.h"
 #include "peripherals/i2c_devices.h"
@@ -36,8 +39,7 @@
 #include "peripherals/spi_sd.h"
 
 
-#include <sys/time.h>
-#include <time.h>
+
 
 #include "ble/ble.h"
 #define GATTS_TABLE_TAG "GATTS_TABLE_DEMO"
@@ -51,9 +53,9 @@
 #include "i2c_devices/rtc/MCP7940/mcp7940.h"
 #include "i2c_ports/esp-idf/esp_idf_i2c_port.h"
 
-#include "cJSON.h"
-
 #include "utility/utility.h"
+
+#include "esp32_bridge.h"
 
 uint8_t led_blink[8][3] = {{0, 0, 0}, {0, 0, 1}, {0, 1, 1},
                            {0, 1, 0}, {1, 1, 0}, {1, 1, 1},
@@ -91,6 +93,20 @@ uint8_t led_blink[8][3] = {{0, 0, 0}, {0, 0, 1}, {0, 1, 1},
 //   }
 // }
 
+int32_t termostatica_status[routine_termostatica_status_parameters_size];
+validated_field_t termostatica_conf[routine_termostatica_conf_parameters_size];
+
+
+
+
+machine_parameters_t mp_remote={
+  .routine_conf_size=10,
+  .routine_conf=termostatica_conf,
+  .routine_status_size=10,
+  .routine_status=termostatica_status,
+};
+
+
 
 
 void app_main(void) {
@@ -120,7 +136,7 @@ void app_main(void) {
 
   // configure_serial();
 
-  BLE_init();
+  BLE_init(&mp_remote,&mp_remote,termostatica_status_names,termostatica_conf_names);
   //logger_init();
 }
 

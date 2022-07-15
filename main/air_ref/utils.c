@@ -4,7 +4,6 @@
 
 #include "esp_log.h"
 #include "logger.h"
-#include "cJSON.h"
 
 #include "peripherals/i2c_devices.h"
 #include "peripherals/spi_sd.h"

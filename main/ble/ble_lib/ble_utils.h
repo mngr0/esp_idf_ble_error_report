@@ -1,3 +1,6 @@
+#ifndef _BLE_UTILS_H
+#define _BLE_UTILS_H
+
 #include "esp_bt.h"
 #include "esp_log.h"
 
@@ -7,9 +10,9 @@
 #include "esp_gatts_api.h"
 
 #include "gel/abstract_state_machine/common.h"
-#define MAX_STR_LEN 40
+#define MAX_STR_LEN 60
 
-#define GATTS_DEMO_CHAR_VAL_LEN_MAX 500
+#define GATTS_DEMO_CHAR_VAL_LEN_MAX 1200
 #define PREPARE_BUF_MAX_SIZE 1024
 #define CHAR_DECLARATION_SIZE (sizeof(uint8_t))
 
@@ -75,13 +78,13 @@ static uint16_t inline generate_uuid(uint16_t base, uint16_t index) {
   return (base & 0xff00) | (index & 0x00ff);
 }
 
-void allocate_conf_dynamic(machine_parameters_t *mp, char *names[MAX_STR_LEN],
+void allocate_conf_dynamic(machine_parameters_t *mp, char names[][MAX_STR_LEN],
                            uint8_t p_srvc_inst_id, uint16_t *uuid_ptr);
 
-void allocate_status_dynamic(machine_parameters_t *mp, char *names[MAX_STR_LEN],
+void allocate_status_dynamic(machine_parameters_t *mp, char names[][MAX_STR_LEN],
                              uint8_t p_srvc_inst_id, uint16_t *uuid_ptr);
 
-void allocate_main_dynamic(uint16_t UUIDs[][2], uint16_t UUIDs_len,
+void allocate_main_dynamic(machine_parameters_t *mp, uint16_t UUIDs[][2], uint16_t UUIDs_len,
                            uint8_t srvc_inst_id);
 
 void gatts_profile_conf_event_handler(esp_gatts_cb_event_t event,
@@ -104,3 +107,5 @@ void example_exec_write_event_env(prepare_type_env_t *prepare_write_env,
 void example_prepare_write_event_env(esp_gatt_if_t gatts_if,
                                      prepare_type_env_t *prepare_write_env,
                                      esp_ble_gatts_cb_param_t *param);
+
+#endif

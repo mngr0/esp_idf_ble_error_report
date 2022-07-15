@@ -168,7 +168,7 @@ void allocare_una_caratteristica_status(esp_gatts_attr_db_t *input,
       ESP_GATT_PERM_READ, MAX_STR_LEN, strlen(name), (uint8_t *)name);
 }
 
-void allocate_status_dynamic(machine_parameters_t *mp, char *names[MAX_STR_LEN],
+void allocate_status_dynamic(machine_parameters_t *mp, char names[][MAX_STR_LEN],
                              uint8_t p_srvc_inst_id, uint16_t *uuid_ptr) {
   status = mp->routine_status;
   STATUS_ENTRY_SIZE = CALC_STATUS_SIZE(mp->routine_status_size);

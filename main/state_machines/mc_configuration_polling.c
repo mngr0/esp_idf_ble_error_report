@@ -260,6 +260,7 @@ int send_data(uint8_t *data, size_t lenght) {
   return packet_manager_send_data(&pm, data, lenght);
 }
 
+
 void configurator_SERIAL_init(
     machine_parameters_t *machine_parameters,
     void (*p_manage_event)(machine_parameters_t *machine_parameters,

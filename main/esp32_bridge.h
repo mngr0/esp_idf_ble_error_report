@@ -1,3 +1,5 @@
+#ifndef _ESP32_BRIDGE_H
+#define _ESP32_BRIDGE_H
 
 
 #include "gel/abstract_state_machine/conf_generator.h"
@@ -5,14 +7,21 @@
 #include "gel/abstract_state_machine/abstract_machines/mp_configuration_polling.h"
 #include "gel/abstract_state_machine/abstract_state_machine.h"
 
+#include "ble/ble_lib/ble_utils.h"
+
 
 #define REMOTE_DECLARATION
-#include "termostatica.h"
-#undef FOREACH_R_STATUS
-#undef FOREACH_R_CONF
 #include "chiller.h"
+
 #undef FOREACH_R_STATUS
 #undef FOREACH_R_CONF
+
+#include "termostatica.h"
+static char termostatica_status_names[][MAX_STR_LEN] = {FOREACH_R_STATUS(STRINGIFY)};
+static char termostatica_conf_names[][MAX_STR_LEN] = {FOREACH_R_CONF(STRINGIFY)};
+#undef FOREACH_R_STATUS
+#undef FOREACH_R_CONF
+
 
 #undef REMOTE_DECLARATION
 
@@ -42,3 +51,4 @@ DECLARE_STATUS;
 DECLARE_CONF;
 
 
+#endif

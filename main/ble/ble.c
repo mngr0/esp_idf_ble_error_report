@@ -39,6 +39,12 @@ struct gatts_profile_inst {
 /* One gatt-based profile one app_id and one gatts_if, this array will store the
  * gatts_if returned by ESP_GATTS_REG_EVT */
 static struct gatts_profile_inst application_profiles_tab[PROFILE_SIZE] = {
+    [PROFILE_MAIN] =
+        {
+            .gatts_cb = gatts_profile_main_event_handler,
+            .gatts_if = ESP_GATT_IF_NONE, /* Not get the gatt_if, so initial is
+                                             ESP_GATT_IF_NONE */
+        },
     [PROFILE_CONF] =
         {
             .gatts_cb = gatts_profile_conf_event_handler,
@@ -51,12 +57,7 @@ static struct gatts_profile_inst application_profiles_tab[PROFILE_SIZE] = {
             .gatts_if = ESP_GATT_IF_NONE, /* Not get the gatt_if, so initial is
                                              ESP_GATT_IF_NONE */
         },
-    [PROFILE_MAIN] =
-        {
-            .gatts_cb = gatts_profile_main_event_handler,
-            .gatts_if = ESP_GATT_IF_NONE, /* Not get the gatt_if, so initial is
-                                             ESP_GATT_IF_NONE */
-        },
+
 };
 
 void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if,
@@ -87,13 +88,12 @@ void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if,
   } while (0);
 }
 
-char *nomi[MAX_STR_LEN]={"ciao", "maio", "sdfsdf"};
-char *nomi2[MAX_STR_LEN]={"ciao", "maio", "sdfsdf"};
-
-
-void BLE_init(void) {
+void BLE_init(machine_parameters_t *mp, 
+  machine_parameters_t *mp_remote,
+  char status_names[][MAX_STR_LEN],
+  char conf_names[][MAX_STR_LEN]) {
   esp_err_t ret;
-  machine_parameters_t mp;
+
 
   /* Initialize NVS. */
   ret = nvs_flash_init();
@@ -135,11 +135,11 @@ void BLE_init(void) {
     return;
   }
 
-  uint16_t UUIDs_array[1][2];
+  uint16_t UUIDs_array[1][2]={{12,14}};
 
-  allocate_conf_dynamic(&mp, nomi, PROFILE_CONF, &UUIDs_array[0][0]);
-  allocate_status_dynamic(&mp, nomi2, PROFILE_STATUS, &UUIDs_array[0][1]);
-  allocate_main_dynamic(UUIDs_array, 1, PROFILE_MAIN);
+  //allocate_conf_dynamic(mp_remote, conf_names, PROFILE_CONF, &UUIDs_array[0][0]);
+  allocate_status_dynamic(mp_remote, status_names, PROFILE_STATUS, &UUIDs_array[0][1]);
+  allocate_main_dynamic(mp, UUIDs_array, 1, PROFILE_MAIN);
 
   ESP_LOGI(TAG, "ALLOCATION DONE");
 
@@ -165,9 +165,9 @@ void BLE_init(void) {
     ESP_LOGE(GATTS_TABLE_TAG, "gatts app register error, error code = %x", ret);
     return;
   }
-    ret = esp_ble_gatts_app_register(PROFILE_CONF);
-  if (ret) {
-    ESP_LOGE(GATTS_TABLE_TAG, "gatts app register error, error code = %x", ret);
-    return;
-  }
+  //   ret = esp_ble_gatts_app_register(PROFILE_CONF);
+  // if (ret) {
+  //   ESP_LOGE(GATTS_TABLE_TAG, "gatts app register error, error code = %x", ret);
+  //   return;
+  // }
 }

@@ -188,7 +188,7 @@ void allocare_una_caratteristica_conf(esp_gatts_attr_db_t *input,
                sizeof(int32_t), sizeof(int32_t), (uint8_t *)&max_values[index]);
 }
 
-void allocate_conf_dynamic(machine_parameters_t *mp, char *names[MAX_STR_LEN],
+void allocate_conf_dynamic(machine_parameters_t *mp, char names[][MAX_STR_LEN],
                            uint8_t p_srvc_inst_id, uint16_t *uuid_ptr) {
   conf = mp->routine_conf;
   CONF_ENTRY_SIZE = CALC_CONF_SIZE(mp->routine_conf_size);
