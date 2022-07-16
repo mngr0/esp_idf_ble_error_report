@@ -16,25 +16,8 @@
 
 #include "ble_lib/ble_utils.h"
 
-#define GATTS_TABLE_TAG "GATTS_TABLE_DEMO"
-#define TAG GATTS_TABLE_TAG
+#define TAG "GATTS_TABLE_DEMO"
 
-
-
-struct gatts_profile_inst {
-  esp_gatts_cb_t gatts_cb;
-  uint16_t gatts_if;
-  uint16_t app_id;
-  uint16_t conn_id;
-  uint16_t service_handle;
-  esp_gatt_srvc_id_t service_id;
-  uint16_t char_handle;
-  esp_bt_uuid_t char_uuid;
-  esp_gatt_perm_t perm;
-  esp_gatt_char_prop_t property;
-  uint16_t descr_handle;
-  esp_bt_uuid_t descr_uuid;
-};
 
 /* One gatt-based profile one app_id and one gatts_if, this array will store the
  * gatts_if returned by ESP_GATTS_REG_EVT */
@@ -68,7 +51,7 @@ void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if,
     if (param->reg.status == ESP_GATT_OK) {
       application_profiles_tab[param->reg.app_id].gatts_if = gatts_if;
     } else {
-      ESP_LOGE(GATTS_TABLE_TAG, "reg app failed, app_id %04x, status %d",
+      ESP_LOGE(TAG, "reg app failed, app_id %04x, status %d",
                param->reg.app_id, param->reg.status);
       return;
     }
@@ -109,33 +92,33 @@ void BLE_init(machine_parameters_t *mp,
   esp_bt_controller_config_t bt_cfg = BT_CONTROLLER_INIT_CONFIG_DEFAULT();
   ret = esp_bt_controller_init(&bt_cfg);
   if (ret) {
-    ESP_LOGE(GATTS_TABLE_TAG, "%s enable controller failed: %s", __func__,
+    ESP_LOGE(TAG, "%s enable controller failed: %s", __func__,
              esp_err_to_name(ret));
     return;
   }
 
   ret = esp_bt_controller_enable(ESP_BT_MODE_BLE);
   if (ret) {
-    ESP_LOGE(GATTS_TABLE_TAG, "%s enable controller failed: %s", __func__,
+    ESP_LOGE(TAG, "%s enable controller failed: %s", __func__,
              esp_err_to_name(ret));
     return;
   }
 
   ret = esp_bluedroid_init();
   if (ret) {
-    ESP_LOGE(GATTS_TABLE_TAG, "%s init bluetooth failed: %s", __func__,
+    ESP_LOGE(TAG, "%s init bluetooth failed: %s", __func__,
              esp_err_to_name(ret));
     return;
   }
 
   ret = esp_bluedroid_enable();
   if (ret) {
-    ESP_LOGE(GATTS_TABLE_TAG, "%s enable bluetooth failed: %s", __func__,
+    ESP_LOGE(TAG, "%s enable bluetooth failed: %s", __func__,
              esp_err_to_name(ret));
     return;
   }
 
-  uint16_t UUIDs_array[1][2]={{12,14}};
+  uint16_t UUIDs_array[1][2];//={{12,14}};
 
   allocate_conf_dynamic(mp_remote, conf_names, PROFILE_CONF, &UUIDs_array[0][0]);
   allocate_status_dynamic(mp_remote, status_names, PROFILE_STATUS, &UUIDs_array[0][1]);
@@ -145,29 +128,31 @@ void BLE_init(machine_parameters_t *mp,
 
   ret = esp_ble_gatts_register_callback(gatts_event_handler);
   if (ret) {
-    ESP_LOGE(GATTS_TABLE_TAG, "gatts register error, error code = %x", ret);
+    ESP_LOGE(TAG, "gatts register error, error code = %x", ret);
     return;
   }
 
     ret = esp_ble_gap_register_callback(gap_event_handler);
   if (ret) {
-    ESP_LOGE(GATTS_TABLE_TAG, "gap register error, error code = %x", ret);
+    ESP_LOGE(TAG, "gap register error, error code = %x", ret);
     return;
   }
 
+
   ret = esp_ble_gatts_app_register(PROFILE_MAIN);
   if (ret) {
-    ESP_LOGE(GATTS_TABLE_TAG, "gatts app register error, error code = %x", ret);
+    ESP_LOGE(TAG, "gatts app register error, error code = %x", ret);
     return;
   }
-  ret = esp_ble_gatts_app_register(PROFILE_STATUS);
-  if (ret) {
-    ESP_LOGE(GATTS_TABLE_TAG, "gatts app register error, error code = %x", ret);
-    return;
-  }
+  // ret = esp_ble_gatts_app_register(PROFILE_STATUS);
+  // if (ret) {
+  //   ESP_LOGE(TAG, "gatts app register error, error code = %x", ret);
+  //   return;
+  // }
+
   ret = esp_ble_gatts_app_register(PROFILE_CONF);
   if (ret) {
-    ESP_LOGE(GATTS_TABLE_TAG, "gatts app register error, error code = %x", ret);
+    ESP_LOGE(TAG, "gatts app register error, error code = %x", ret);
     return;
   }
 }

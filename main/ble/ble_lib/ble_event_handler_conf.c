@@ -33,6 +33,7 @@ validated_field_t *conf;
 void gatts_profile_conf_event_handler(esp_gatts_cb_event_t event,
                                       esp_gatt_if_t gatts_if,
                                       esp_ble_gatts_cb_param_t *param) {
+
   switch (event) {
   case ESP_GATTS_REG_EVT: {
     esp_err_t create_attr_ret = esp_ble_gatts_create_attr_tab(
@@ -85,17 +86,17 @@ void gatts_profile_conf_event_handler(esp_gatts_cb_event_t event,
   case ESP_GATTS_CONNECT_EVT:
     ESP_LOGI(TAG, "ESP_GATTS_CONNECT_EVT, conn_id = %d",
              param->connect.conn_id);
-    esp_log_buffer_hex(TAG, param->connect.remote_bda, 6);
-    esp_ble_conn_update_params_t conn_params = {0};
-    memcpy(conn_params.bda, param->connect.remote_bda, sizeof(esp_bd_addr_t));
-    /* For the iOS system, please refer to Apple official documents about the
-     * BLE connection parameters restrictions. */
-    conn_params.latency = 0;
-    conn_params.max_int = 0x20; // max_int = 0x20*1.25ms = 40ms
-    conn_params.min_int = 0x10; // min_int = 0x10*1.25ms = 20ms
-    conn_params.timeout = 400;  // timeout = 400*10ms = 4000ms
-    // start sent the update connection parameters to the peer device.
-    esp_ble_gap_update_conn_params(&conn_params);
+    // esp_log_buffer_hex(TAG, param->connect.remote_bda, 6);
+    // esp_ble_conn_update_params_t conn_params = {0};
+    // memcpy(conn_params.bda, param->connect.remote_bda, sizeof(esp_bd_addr_t));
+    // /* For the iOS system, please refer to Apple official documents about the
+    //  * BLE connection parameters restrictions. */
+    // conn_params.latency = 0;
+    // conn_params.max_int = 0x20; // max_int = 0x20*1.25ms = 40ms
+    // conn_params.min_int = 0x10; // min_int = 0x10*1.25ms = 20ms
+    // conn_params.timeout = 400;  // timeout = 400*10ms = 4000ms
+    // // start sent the update connection parameters to the peer device.
+    // esp_ble_gap_update_conn_params(&conn_params);
     break;
   case ESP_GATTS_DISCONNECT_EVT:
     ESP_LOGI(TAG, "ESP_GATTS_DISCONNECT_EVT, reason = 0x%x",
@@ -110,7 +111,6 @@ void gatts_profile_conf_event_handler(esp_gatts_cb_event_t event,
                         doesn't equal to DYNAMIC_SIZE(%d)",
                param->add_attr_tab.num_handle, CONF_ENTRY_SIZE);
     } else {
-      //(size1=%d, size2=%d)
       ESP_LOGI(TAG,
                "create attribute table successfully, the number handle = %d \n",
                param->add_attr_tab.num_handle);

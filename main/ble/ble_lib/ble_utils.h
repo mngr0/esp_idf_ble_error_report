@@ -12,7 +12,7 @@
 #include "gel/abstract_state_machine/common.h"
 #define MAX_STR_LEN 60
 
-#define GATTS_DEMO_CHAR_VAL_LEN_MAX 1200
+#define GATTS_DEMO_CHAR_VAL_LEN_MAX 500
 #define PREPARE_BUF_MAX_SIZE 1024
 #define CHAR_DECLARATION_SIZE (sizeof(uint8_t))
 
@@ -28,6 +28,23 @@ typedef struct {
   uint8_t *prepare_buf;
   int prepare_len;
 } prepare_type_env_t;
+
+
+struct gatts_profile_inst
+{
+    esp_gatts_cb_t gatts_cb;
+    uint16_t gatts_if;
+    uint16_t app_id;
+    uint16_t conn_id;
+    uint16_t service_handle;
+    esp_gatt_srvc_id_t service_id;
+    uint16_t char_handle;
+    esp_bt_uuid_t char_uuid;
+    esp_gatt_perm_t perm;
+    esp_gatt_char_prop_t property;
+    uint16_t descr_handle;
+    esp_bt_uuid_t descr_uuid;
+};
 
 #define ASSEGNA_COSE(dove, AUTO_RSP, UUID_LEN, UUIP_P, PERM, MAX_LEN, LEN,     \
                      VAL)                                                      \

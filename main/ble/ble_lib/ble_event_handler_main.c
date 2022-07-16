@@ -52,10 +52,6 @@ static uint16_t MAIN_ENTRY_SIZE;
  * or prepare write operation, the data length must be less than
  * GATTS_DEMO_CHAR_VAL_LEN_MAX.
  */
-//#define GATTS_DEMO_CHAR_VAL_LEN_MAX 500
-#define PREPARE_BUF_MAX_SIZE 1024
-#define CHAR_DECLARATION_SIZE (sizeof(uint8_t))
-
 #define ADV_CONFIG_FLAG (1 << 0)
 #define SCAN_RSP_CONFIG_FLAG (1 << 1)
 
@@ -119,7 +115,7 @@ static esp_ble_adv_params_t adv_params = {
 
 /* Full Database Description - Used to add attributes into the database */
 static esp_gatts_attr_db_t *gatt_db;
-// static uint16_t DYNAMIC_SIZE;
+
 
 void gap_event_handler(esp_gap_ble_cb_event_t event,
                               esp_ble_gap_cb_param_t *param) {

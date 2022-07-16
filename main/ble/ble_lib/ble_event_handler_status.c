@@ -194,7 +194,6 @@ void allocate_status_dynamic(machine_parameters_t *mp, char names[][MAX_STR_LEN]
       ESP_LOGI(TAG, "STATUS MALLOC ESPLOSA");
       return;
     }
-
   }
   for (int i = 0; i < mp->routine_status_size; i++) {
     UUIDs_status[i] = generate_uuid(UUID_STATUS_BASE, i);

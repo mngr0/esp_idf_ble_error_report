@@ -96,16 +96,24 @@ uint8_t led_blink[8][3] = {{0, 0, 0}, {0, 0, 1}, {0, 1, 1},
 int32_t termostatica_status[routine_termostatica_status_parameters_size];
 validated_field_t termostatica_conf[routine_termostatica_conf_parameters_size];
 
+int32_t local_status[routine_status_parameters_size];
+validated_field_t local_conf[routine_conf_parameters_size];
 
 
 
 machine_parameters_t mp_remote={
-  .routine_conf_size=10,
+  .routine_conf_size=routine_termostatica_conf_parameters_size,
   .routine_conf=termostatica_conf,
-  .routine_status_size=10,
+  .routine_status_size=routine_termostatica_status_parameters_size,
   .routine_status=termostatica_status,
 };
 
+machine_parameters_t mp_local={
+  .routine_conf_size=routine_conf_parameters_size,
+  .routine_conf=local_conf,
+  .routine_status_size=routine_status_parameters_size,
+  .routine_status=local_status,
+};
 
 
 
