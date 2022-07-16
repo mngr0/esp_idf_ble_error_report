@@ -71,21 +71,13 @@ void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if,
   } while (0);
 }
 
+#define DEVICE_NUM 1
+
 void BLE_init(machine_parameters_t *mp, 
   machine_parameters_t *mp_remote,
   char status_names[][MAX_STR_LEN],
   char conf_names[][MAX_STR_LEN]) {
   esp_err_t ret;
-
-
-  /* Initialize NVS. */
-  ret = nvs_flash_init();
-  if (ret == ESP_ERR_NVS_NO_FREE_PAGES ||
-      ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-    ESP_ERROR_CHECK(nvs_flash_erase());
-    ret = nvs_flash_init();
-  }
-  ESP_ERROR_CHECK(ret);
 
   ESP_ERROR_CHECK(esp_bt_controller_mem_release(ESP_BT_MODE_CLASSIC_BT));
 
@@ -118,11 +110,11 @@ void BLE_init(machine_parameters_t *mp,
     return;
   }
 
-  uint16_t UUIDs_array[1][2];//={{12,14}};
+  uint16_t UUIDs_array[DEVICE_NUM][2];//={{12,14}};
 
   allocate_conf_dynamic(mp_remote, conf_names, PROFILE_CONF, &UUIDs_array[0][0]);
   allocate_status_dynamic(mp_remote, status_names, PROFILE_STATUS, &UUIDs_array[0][1]);
-  allocate_main_dynamic(mp, UUIDs_array, 1, PROFILE_MAIN);
+  allocate_main_dynamic(mp, UUIDs_array, DEVICE_NUM, PROFILE_MAIN);
 
   ESP_LOGI(TAG, "ALLOCATION DONE");
 
@@ -144,11 +136,11 @@ void BLE_init(machine_parameters_t *mp,
     ESP_LOGE(TAG, "gatts app register error, error code = %x", ret);
     return;
   }
-  // ret = esp_ble_gatts_app_register(PROFILE_STATUS);
-  // if (ret) {
-  //   ESP_LOGE(TAG, "gatts app register error, error code = %x", ret);
-  //   return;
-  // }
+  ret = esp_ble_gatts_app_register(PROFILE_STATUS);
+  if (ret) {
+    ESP_LOGE(TAG, "gatts app register error, error code = %x", ret);
+    return;
+  }
 
   ret = esp_ble_gatts_app_register(PROFILE_CONF);
   if (ret) {

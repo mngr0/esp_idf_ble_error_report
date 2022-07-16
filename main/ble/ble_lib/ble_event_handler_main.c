@@ -31,8 +31,7 @@
 
 #include "ble_utils.h"
 
-#define GATTS_TABLE_TAG "BLE_MAIN"
-#define TAG GATTS_TABLE_TAG
+#define TAG "BLE_MAIN"
 
 #define SRV_IDX 0
 
@@ -48,10 +47,7 @@ static uint16_t MAIN_ENTRY_SIZE;
 
 #define SAMPLE_DEVICE_NAME "ESP_GATTS_DEMO"
 
-/* The max length of characteristic value. When the GATT client performs a write
- * or prepare write operation, the data length must be less than
- * GATTS_DEMO_CHAR_VAL_LEN_MAX.
- */
+
 #define ADV_CONFIG_FLAG (1 << 0)
 #define SCAN_RSP_CONFIG_FLAG (1 << 1)
 
@@ -137,21 +133,21 @@ void gap_event_handler(esp_gap_ble_cb_event_t event,
     /* advertising start complete event to indicate advertising start
      * successfully or failed */
     if (param->adv_start_cmpl.status != ESP_BT_STATUS_SUCCESS) {
-      ESP_LOGE(GATTS_TABLE_TAG, "advertising start failed");
+      ESP_LOGE(TAG, "advertising start failed");
     } else {
-      ESP_LOGI(GATTS_TABLE_TAG, "advertising start successfully");
+      ESP_LOGI(TAG, "advertising start successfully");
     }
     break;
   case ESP_GAP_BLE_ADV_STOP_COMPLETE_EVT:
     if (param->adv_stop_cmpl.status != ESP_BT_STATUS_SUCCESS) {
-      ESP_LOGE(GATTS_TABLE_TAG, "Advertising stop failed");
+      ESP_LOGE(TAG, "Advertising stop failed");
     } else {
-      ESP_LOGI(GATTS_TABLE_TAG, "Stop adv successfully\n");
+      ESP_LOGI(TAG, "Stop adv successfully\n");
     }
     break;
   case ESP_GAP_BLE_UPDATE_CONN_PARAMS_EVT:
     ESP_LOGI(
-        GATTS_TABLE_TAG,
+        TAG,
         "update connection params status = %d, min_int = %d, max_int = "
         "%d,conn_int = %d,latency = %d, timeout = %d",
         param->update_conn_params.status, param->update_conn_params.min_int,
@@ -172,20 +168,20 @@ void gatts_profile_main_event_handler(esp_gatts_cb_event_t event,
     esp_err_t set_dev_name_ret =
         esp_ble_gap_set_device_name(SAMPLE_DEVICE_NAME);
     if (set_dev_name_ret) {
-      ESP_LOGE(GATTS_TABLE_TAG, "set device name failed, error code = %x",
+      ESP_LOGE(TAG, "set device name failed, error code = %x",
                set_dev_name_ret);
     }
 
     // config adv data
     esp_err_t ret = esp_ble_gap_config_adv_data(&adv_data);
     if (ret) {
-      ESP_LOGE(GATTS_TABLE_TAG, "config adv data failed, error code = %x", ret);
+      ESP_LOGE(TAG, "config adv data failed, error code = %x", ret);
     }
     adv_config_done |= ADV_CONFIG_FLAG;
     // config scan response data
     ret = esp_ble_gap_config_adv_data(&scan_rsp_data);
     if (ret) {
-      ESP_LOGE(GATTS_TABLE_TAG,
+      ESP_LOGE(TAG,
                "config scan response data failed, error code = %x", ret);
     }
     adv_config_done |= SCAN_RSP_CONFIG_FLAG;
@@ -193,21 +189,21 @@ void gatts_profile_main_event_handler(esp_gatts_cb_event_t event,
     esp_err_t create_attr_ret = esp_ble_gatts_create_attr_tab(
         gatt_db, gatts_if, MAIN_ENTRY_SIZE, srv_inst_id);
     if (create_attr_ret) {
-      ESP_LOGE(GATTS_TABLE_TAG, "create attr table failed, error code = %x",
+      ESP_LOGE(TAG, "create attr table failed, error code = %x",
                create_attr_ret);
     }
   } break;
   case ESP_GATTS_READ_EVT:
-    ESP_LOGI(GATTS_TABLE_TAG, "ESP_GATTS_READ_EVT");
+    ESP_LOGI(TAG, "ESP_GATTS_READ_EVT");
     break;
   case ESP_GATTS_WRITE_EVT:
     if (!param->write.is_prep) {
       // the data length of gattc write  must be less than
       // GATTS_DEMO_CHAR_VAL_LEN_MAX.
-      ESP_LOGI(GATTS_TABLE_TAG,
+      ESP_LOGI(TAG,
                "GATT_WRITE_EVT, handle = %d, value len = %d, value :",
                param->write.handle, param->write.len);
-      esp_log_buffer_hex(GATTS_TABLE_TAG, param->write.value, param->write.len);
+      esp_log_buffer_hex(TAG, param->write.value, param->write.len);
 
       /* send response when param->write.need_rsp is true*/
       if (param->write.need_rsp) {
@@ -222,24 +218,24 @@ void gatts_profile_main_event_handler(esp_gatts_cb_event_t event,
   case ESP_GATTS_EXEC_WRITE_EVT:
     // the length of gattc prepare write data must be less than
     // GATTS_DEMO_CHAR_VAL_LEN_MAX.
-    ESP_LOGI(GATTS_TABLE_TAG, "ESP_GATTS_EXEC_WRITE_EVT");
+    ESP_LOGI(TAG, "ESP_GATTS_EXEC_WRITE_EVT");
     example_exec_write_event_env(&prepare_write_env, param);
     break;
   case ESP_GATTS_MTU_EVT:
-    ESP_LOGI(GATTS_TABLE_TAG, "ESP_GATTS_MTU_EVT, MTU %d", param->mtu.mtu);
+    ESP_LOGI(TAG, "ESP_GATTS_MTU_EVT, MTU %d", param->mtu.mtu);
     break;
   case ESP_GATTS_CONF_EVT:
-    ESP_LOGI(GATTS_TABLE_TAG, "ESP_GATTS_CONF_EVT, status = %d, attr_handle %d",
+    ESP_LOGI(TAG, "ESP_GATTS_CONF_EVT, status = %d, attr_handle %d",
              param->conf.status, param->conf.handle);
     break;
   case ESP_GATTS_START_EVT:
-    ESP_LOGI(GATTS_TABLE_TAG, "SERVICE_START_EVT, status %d, service_handle %d",
+    ESP_LOGI(TAG, "SERVICE_START_EVT, status %d, service_handle %d",
              param->start.status, param->start.service_handle);
     break;
   case ESP_GATTS_CONNECT_EVT:
-    ESP_LOGI(GATTS_TABLE_TAG, "ESP_GATTS_CONNECT_EVT, conn_id = %d",
+    ESP_LOGI(TAG, "ESP_GATTS_CONNECT_EVT, conn_id = %d",
              param->connect.conn_id);
-    esp_log_buffer_hex(GATTS_TABLE_TAG, param->connect.remote_bda, 6);
+    esp_log_buffer_hex(TAG, param->connect.remote_bda, 6);
     esp_ble_conn_update_params_t conn_params = {0};
     memcpy(conn_params.bda, param->connect.remote_bda, sizeof(esp_bd_addr_t));
     /* For the iOS system, please refer to Apple official documents about the
@@ -252,23 +248,23 @@ void gatts_profile_main_event_handler(esp_gatts_cb_event_t event,
     esp_ble_gap_update_conn_params(&conn_params);
     break;
   case ESP_GATTS_DISCONNECT_EVT:
-    ESP_LOGI(GATTS_TABLE_TAG, "ESP_GATTS_DISCONNECT_EVT, reason = 0x%x",
+    ESP_LOGI(TAG, "ESP_GATTS_DISCONNECT_EVT, reason = 0x%x",
              param->disconnect.reason);
     esp_ble_gap_start_advertising(&adv_params);
     break;
   case ESP_GATTS_CREAT_ATTR_TAB_EVT: {
     if (param->add_attr_tab.status != ESP_GATT_OK) {
-      ESP_LOGE(GATTS_TABLE_TAG,
+      ESP_LOGE(TAG,
                "create attribute table failed, error code=0x%x",
                param->add_attr_tab.status);
     } else if (param->add_attr_tab.num_handle != MAIN_ENTRY_SIZE) {
-      ESP_LOGE(GATTS_TABLE_TAG,
+      ESP_LOGE(TAG,
                "create attribute table abnormally, num_handle (%d) \
                         doesn't equal to DYNAMIC_SIZE(%d)",
                param->add_attr_tab.num_handle, MAIN_ENTRY_SIZE);
     } else {
       //(size1=%d, size2=%d)
-      ESP_LOGI(GATTS_TABLE_TAG,
+      ESP_LOGI(TAG,
                "create attribute table successfully, the number handle = %d \n",
                param->add_attr_tab.num_handle);
 
@@ -277,7 +273,7 @@ void gatts_profile_main_event_handler(esp_gatts_cb_event_t event,
                  sizeof(uint16_t)); //(1+allocation_conf_size*DYNAMIC_SIZE)*sizeof(uint16_t));//todo
                                     //non sono affatto sicuro
                                     //sizeof(handle_table));
-      ESP_LOGI(GATTS_TABLE_TAG, "memcpy done\n");
+      ESP_LOGI(TAG, "memcpy done\n");
 
       esp_ble_gatts_start_service(handle_table[SRV_IDX]);
     }
@@ -307,31 +303,31 @@ static const uint16_t character_client_config_uuid =
 
 static const uint8_t char_value[4] = {0x11, 0x22, 0x33, 0x44};
 
-void allocare_una_caratteristica_main(esp_gatts_attr_db_t *input, uint16_t base,
+void allocare_una_caratteristica_main(esp_gatts_attr_db_t *input, uint16_t index,
                                       uint8_t *GATT_CHAR_UUID) {
 
-  ASSEGNA_COSE(input[base + allocation_main_characteristic_declaration],
+  ASSEGNA_COSE(input[CALC_MAIN_SIZE(index) + allocation_main_characteristic_declaration],
                ESP_GATT_AUTO_RSP, ESP_UUID_LEN_16,
                (uint8_t *)&character_declaration_uuid, ESP_GATT_PERM_READ,
                GATTS_DEMO_CHAR_VAL_LEN_MAX, sizeof(char_value),
                (uint8_t *)&char_prop_read_write_notify);
 
-  ASSEGNA_COSE(input[base + allocation_main_characteristic_value],
+  ASSEGNA_COSE(input[CALC_MAIN_SIZE(index) + allocation_main_characteristic_value],
                ESP_GATT_AUTO_RSP, ESP_UUID_LEN_16, GATT_CHAR_UUID,
                ESP_GATT_PERM_READ, CHAR_DECLARATION_SIZE, CHAR_DECLARATION_SIZE,
                (uint8_t *)char_value);
 
-  ASSEGNA_COSE(input[base + allocation_main_characteristic_configuration],
+  ASSEGNA_COSE(input[CALC_MAIN_SIZE(index) + allocation_main_characteristic_configuration],
                ESP_GATT_AUTO_RSP, ESP_UUID_LEN_16,
                (uint8_t *)&character_client_config_uuid, ESP_GATT_PERM_READ,
                CHAR_DECLARATION_SIZE, CHAR_DECLARATION_SIZE,
                (uint8_t *)&char_prop_read_write_notify);
 
-  ASSEGNA_COSE(input[base + allocation_main_descriptor_uuid_conf], ESP_GATT_AUTO_RSP,
+  ASSEGNA_COSE(input[CALC_MAIN_SIZE(index) + allocation_main_descriptor_uuid_conf], ESP_GATT_AUTO_RSP,
                ESP_UUID_LEN_16, (uint8_t *)&descriptor_delaration,
                ESP_GATT_PERM_READ, 40, 1, (uint8_t *)&char_prop_read_notify);
 
-  ASSEGNA_COSE(input[base + allocation_main_descriptor_uuid_status], ESP_GATT_AUTO_RSP,
+  ASSEGNA_COSE(input[CALC_MAIN_SIZE(index) + allocation_main_descriptor_uuid_status], ESP_GATT_AUTO_RSP,
                ESP_UUID_LEN_16, (uint8_t *)&descriptor_delaration,
                ESP_GATT_PERM_READ, sizeof(int32_t), sizeof(int32_t),
                (uint8_t *)&char_prop_read_notify);
@@ -365,8 +361,7 @@ void allocate_main_dynamic(machine_parameters_t *mp, uint16_t UUIDs[][UUID_INDEX
   for (int i = 0; i < UUIDs_len; i++) {
     UUIDs_main[i] = generate_uuid(UUID_MAIN_BASE, i);
     ESP_LOGI(TAG, "callin configure index %d", i);
-    allocare_una_caratteristica_main(gatt_db,
-                                       (1 + i * allocation_main_size),
+    allocare_una_caratteristica_main(gatt_db,  i ,
                                        (uint8_t *)&(UUIDs_main[i]));
   }
   ASSEGNA_COSE(gatt_db[SRV_IDX], // SERVICE

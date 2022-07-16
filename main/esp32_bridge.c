@@ -38,12 +38,10 @@
 #include "peripherals/led.h"
 #include "peripherals/spi_sd.h"
 
-
-
-
 #include "ble/ble.h"
-#define GATTS_TABLE_TAG "GATTS_TABLE_DEMO"
-#define TAG GATTS_TABLE_TAG
+
+
+#define TAG "GATTS_TABLE_DEMO"
 
 #define SENDER_TASK_STACK_SIZE (32800 / sizeof(portSTACK_TYPE))
 #define TASK_SENDER_STACK_PRIORITY (tskIDLE_PRIORITY + 1)
@@ -102,9 +100,9 @@ validated_field_t local_conf[routine_conf_parameters_size];
 
 
 machine_parameters_t mp_remote={
-  .routine_conf_size=routine_termostatica_conf_parameters_size,
+  .routine_conf_size=10,//routine_termostatica_conf_parameters_size,
   .routine_conf=termostatica_conf,
-  .routine_status_size=routine_termostatica_status_parameters_size,
+  .routine_status_size=10,//routine_termostatica_status_parameters_size,
   .routine_status=termostatica_status,
 };
 

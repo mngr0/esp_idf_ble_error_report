@@ -12,7 +12,7 @@
 #include "gel/abstract_state_machine/common.h"
 #define MAX_STR_LEN 60
 
-#define GATTS_DEMO_CHAR_VAL_LEN_MAX 500
+#define GATTS_DEMO_CHAR_VAL_LEN_MAX 0x40
 #define PREPARE_BUF_MAX_SIZE 1024
 #define CHAR_DECLARATION_SIZE (sizeof(uint8_t))
 
@@ -86,8 +86,6 @@ typedef enum {
 #define UUID_CONF_BASE 0xF100
 #define UUID_STATUS_BASE 0xF200
 #define UUID_MAIN_BASE 0xF300
-
-#define UUID_CONF_NAME_BASE 0xF400
 
 static uint16_t inline generate_uuid(uint16_t base, uint16_t index) {
   // ESP_LOGI("BLE_UTILS", "BASE:%04x \tINDEX:%04x(%d) \tRESULT:%04x",base,
