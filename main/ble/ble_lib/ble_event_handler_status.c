@@ -177,23 +177,23 @@ void allocate_status_dynamic (uint16_t size, char names[][MAX_STR_LEN],
   srv_inst_id = p_srvc_inst_id;
   handle_table = (uint16_t *)malloc(sizeof(uint16_t) * STATUS_ENTRY_SIZE);
   if (!handle_table) {
-    ESP_LOGI(TAG, "MO ESPLODE TUTTO 0");
+    ESP_LOGI(TAG, "malloc handle table failed");
   }
   gatt_db = (esp_gatts_attr_db_t *)malloc(sizeof(esp_gatts_attr_db_t) *
                                           STATUS_ENTRY_SIZE);
   if (!gatt_db) {
-    ESP_LOGI(TAG, "MO ESPLODE TUTTO 1");
+    ESP_LOGI(TAG, "malloc gatt db failed");
   }
 
   if (size > 0) {
     UUIDs_status = malloc(sizeof(uint16_t) * STATUS_ENTRY_SIZE);
     if (!UUIDs_status) {
-      ESP_LOGI(TAG, "STATUS MALLOC ESPLOSA");
+      ESP_LOGI(TAG, "malloc uuids failed");
       return;
     }
     notifications_enabled = malloc(sizeof(uint16_t) * size);
     if (!notifications_enabled) {
-      ESP_LOGI(TAG, "STATUS MALLOC ESPLOSA");
+      ESP_LOGI(TAG, "malloc notifications failed");
       return;
     }
   }

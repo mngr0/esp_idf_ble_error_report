@@ -84,17 +84,17 @@ void gatts_profile_conf_event_handler(esp_gatts_cb_event_t event,
   case ESP_GATTS_CONNECT_EVT:
     ESP_LOGI(TAG, "ESP_GATTS_CONNECT_EVT, conn_id = %d",
              param->connect.conn_id);
-    // esp_log_buffer_hex(TAG, param->connect.remote_bda, 6);
-    // esp_ble_conn_update_params_t conn_params = {0};
-    // memcpy(conn_params.bda, param->connect.remote_bda, sizeof(esp_bd_addr_t));
-    // /* For the iOS system, please refer to Apple official documents about the
-    //  * BLE connection parameters restrictions. */
-    // conn_params.latency = 0;
-    // conn_params.max_int = 0x20; // max_int = 0x20*1.25ms = 40ms
-    // conn_params.min_int = 0x10; // min_int = 0x10*1.25ms = 20ms
-    // conn_params.timeout = 400;  // timeout = 400*10ms = 4000ms
-    // // start sent the update connection parameters to the peer device.
-    // esp_ble_gap_update_conn_params(&conn_params);
+    esp_log_buffer_hex(TAG, param->connect.remote_bda, 6);
+    esp_ble_conn_update_params_t conn_params = {0};
+    memcpy(conn_params.bda, param->connect.remote_bda, sizeof(esp_bd_addr_t));
+    /* For the iOS system, please refer to Apple official documents about the
+     * BLE connection parameters restrictions. */
+    conn_params.latency = 0;
+    conn_params.max_int = 0x20; // max_int = 0x20*1.25ms = 40ms
+    conn_params.min_int = 0x10; // min_int = 0x10*1.25ms = 20ms
+    conn_params.timeout = 400;  // timeout = 400*10ms = 4000ms
+    // start sent the update connection parameters to the peer device.
+    esp_ble_gap_update_conn_params(&conn_params);
     break;
   case ESP_GATTS_DISCONNECT_EVT:
     ESP_LOGI(TAG, "ESP_GATTS_DISCONNECT_EVT, reason = 0x%x",
@@ -196,28 +196,28 @@ void allocate_conf_dynamic(uint16_t size, char names[][MAX_STR_LEN],
   ESP_LOGI(TAG, "CONF SIZE IS %d",CONF_ENTRY_SIZE);
   handle_table = (uint16_t *)malloc(sizeof(uint16_t) * CONF_ENTRY_SIZE);
   if (!handle_table) {
-    ESP_LOGI(TAG, "MO ESPLODE TUTTO 0");
+    ESP_LOGI(TAG, "malloc handle table failed");
   }
   gatt_db = (esp_gatts_attr_db_t *)malloc(sizeof(esp_gatts_attr_db_t) *
                                           CONF_ENTRY_SIZE);
   if (!gatt_db) {
-    ESP_LOGI(TAG, "MO ESPLODE TUTTO 1");
+    ESP_LOGI(TAG, "malloc gatt db failed");
   }
 
   if (size > 0) {
     UUIDs_conf = malloc(sizeof(uint16_t) * CONF_ENTRY_SIZE);
     if (!UUIDs_conf) {
-      ESP_LOGI(TAG, "CONF MALLOC ESPLOSA");
+      ESP_LOGI(TAG, "malloc  uuids failed ");
       return;
     }
     min_values = malloc(sizeof(int32_t) * size);
     if (!min_values) {
-      ESP_LOGI(TAG, "CONF MALLOC ESPLOSA");
+      ESP_LOGI(TAG, "malloc min values failed");
       return;
     }
     max_values = malloc(sizeof(int32_t) * size);
     if (!max_values) {
-      ESP_LOGI(TAG, "CONF MALLOC ESPLOSA");
+      ESP_LOGI(TAG, "malloc max values failed");
       return;
     }
   }
