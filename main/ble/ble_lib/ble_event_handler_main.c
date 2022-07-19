@@ -335,7 +335,7 @@ void allocare_una_caratteristica_main(esp_gatts_attr_db_t *input, uint16_t index
 }
 
 
-void allocate_main_dynamic(machine_parameters_t *mp, uint16_t UUIDs[][UUID_INDEX_SIZE], uint16_t UUIDs_len,
+void allocate_main_dynamic( uint16_t UUIDs[][UUID_INDEX_SIZE], uint16_t UUIDs_len,
                            uint8_t p_srvc_inst_id) {
   MAIN_ENTRY_SIZE = CALC_MAIN_SIZE(UUIDs_len);
   srv_inst_id = p_srvc_inst_id;

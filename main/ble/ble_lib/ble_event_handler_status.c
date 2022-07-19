@@ -168,10 +168,12 @@ void allocare_una_caratteristica_status(esp_gatts_attr_db_t *input,
       ESP_GATT_PERM_READ, MAX_STR_LEN, strlen(name), (uint8_t *)name);
 }
 
-void allocate_status_dynamic(machine_parameters_t *mp, char names[][MAX_STR_LEN],
+static int32_t tmp;
+
+void allocate_status_dynamic (uint16_t size, char names[][MAX_STR_LEN],
                              uint8_t p_srvc_inst_id, uint16_t *uuid_ptr) {
-  status = mp->routine_status;
-  STATUS_ENTRY_SIZE = CALC_STATUS_SIZE(mp->routine_status_size);
+
+  STATUS_ENTRY_SIZE = CALC_STATUS_SIZE(size);
   srv_inst_id = p_srvc_inst_id;
   handle_table = (uint16_t *)malloc(sizeof(uint16_t) * STATUS_ENTRY_SIZE);
   if (!handle_table) {
@@ -183,24 +185,24 @@ void allocate_status_dynamic(machine_parameters_t *mp, char names[][MAX_STR_LEN]
     ESP_LOGI(TAG, "MO ESPLODE TUTTO 1");
   }
 
-  if (mp->routine_status_size > 0) {
+  if (size > 0) {
     UUIDs_status = malloc(sizeof(uint16_t) * STATUS_ENTRY_SIZE);
     if (!UUIDs_status) {
       ESP_LOGI(TAG, "STATUS MALLOC ESPLOSA");
       return;
     }
-    notifications_enabled = malloc(sizeof(uint16_t) * mp->routine_status_size);
+    notifications_enabled = malloc(sizeof(uint16_t) * size);
     if (!notifications_enabled) {
       ESP_LOGI(TAG, "STATUS MALLOC ESPLOSA");
       return;
     }
   }
-  for (int i = 0; i < mp->routine_status_size; i++) {
+  for (int i = 0; i < size; i++) {
     UUIDs_status[i] = generate_uuid(UUID_STATUS_BASE, i);
     ESP_LOGI(TAG, "callin configure index %d", i);
     allocare_una_caratteristica_status(gatt_db, i,
                                        (uint8_t *)&(UUIDs_status[i]),
-                                       &mp->routine_status[i], names[i]);
+                                       &tmp, names[i]);
   }
   ASSEGNA_COSE(gatt_db[SRV_IDX], // SERVICE
                ESP_GATT_AUTO_RSP, ESP_UUID_LEN_16,

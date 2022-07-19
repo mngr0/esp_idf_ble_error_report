@@ -1,8 +1,6 @@
 
 #include <string.h>
 
-#include "gel/abstract_state_machine/common.h"
-
 #include "esp_bt.h"
 #include "esp_log.h"
 
@@ -28,7 +26,7 @@ static uint8_t srv_inst_id;
 static uint16_t CONF_ENTRY_SIZE;
 static prepare_type_env_t prepare_write_env;
 
-validated_field_t *conf;
+int32_t *conf;
 
 void gatts_profile_conf_event_handler(esp_gatts_cb_event_t event,
                                       esp_gatt_if_t gatts_if,
@@ -188,10 +186,12 @@ void allocare_una_caratteristica_conf(esp_gatts_attr_db_t *input,
                sizeof(int32_t), sizeof(int32_t), (uint8_t *)&max_values[index]);
 }
 
-void allocate_conf_dynamic(machine_parameters_t *mp, char names[][MAX_STR_LEN],
+
+static int32_t tmp;
+
+void allocate_conf_dynamic(uint16_t size, char names[][MAX_STR_LEN],
                            uint8_t p_srvc_inst_id, uint16_t *uuid_ptr) {
-  conf = mp->routine_conf;
-  CONF_ENTRY_SIZE = CALC_CONF_SIZE(mp->routine_conf_size);
+  CONF_ENTRY_SIZE = CALC_CONF_SIZE(size);
   srv_inst_id = p_srvc_inst_id;
   ESP_LOGI(TAG, "CONF SIZE IS %d",CONF_ENTRY_SIZE);
   handle_table = (uint16_t *)malloc(sizeof(uint16_t) * CONF_ENTRY_SIZE);
@@ -204,30 +204,30 @@ void allocate_conf_dynamic(machine_parameters_t *mp, char names[][MAX_STR_LEN],
     ESP_LOGI(TAG, "MO ESPLODE TUTTO 1");
   }
 
-  if (mp->routine_conf_size > 0) {
+  if (size > 0) {
     UUIDs_conf = malloc(sizeof(uint16_t) * CONF_ENTRY_SIZE);
     if (!UUIDs_conf) {
       ESP_LOGI(TAG, "CONF MALLOC ESPLOSA");
       return;
     }
-    min_values = malloc(sizeof(int32_t) * mp->routine_conf_size);
+    min_values = malloc(sizeof(int32_t) * size);
     if (!min_values) {
       ESP_LOGI(TAG, "CONF MALLOC ESPLOSA");
       return;
     }
-    max_values = malloc(sizeof(int32_t) * mp->routine_conf_size);
+    max_values = malloc(sizeof(int32_t) * size);
     if (!max_values) {
       ESP_LOGI(TAG, "CONF MALLOC ESPLOSA");
       return;
     }
   }
-  for (int i = 0; i < mp->routine_conf_size; i++) {
+  for (int i = 0; i < size; i++) {
     UUIDs_conf[i] = generate_uuid(UUID_CONF_BASE, i);
     ESP_LOGI(TAG, "callin configure index %d", i);
-    min_values[i] = get_limit_value(&mp->routine_conf[i].min_value);
-    max_values[i] = get_limit_value(&mp->routine_conf[i].max_value);
+    min_values[i] = 0x42;
+    max_values[i] = 0x42;
     allocare_una_caratteristica_conf(gatt_db, i, (uint8_t *)&(UUIDs_conf[i]),
-                                     &mp->routine_conf[i].value, names[i]);
+                                     &tmp, names[i]);
   }
   ASSEGNA_COSE(gatt_db[SRV_IDX], // SERVICE
                ESP_GATT_AUTO_RSP, ESP_UUID_LEN_16,

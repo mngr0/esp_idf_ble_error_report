@@ -1689,58 +1689,6 @@ CONFIG_WPA_MBEDTLS_TLS_CLIENT=y
 # CONFIG_WPA_11R_SUPPORT is not set
 # CONFIG_WPA_WPS_SOFTAP_REGISTRAR is not set
 # end of Supplicant
-
-#
-# GEL
-#
-# CONFIG_GEL_COLLECTIONS is not set
-# CONFIG_GEL_CRC_ALGORITHMS is not set
-# CONFIG_GEL_DEBOUNCE is not set
-# CONFIG_GEL_KEYPAD is not set
-# CONFIG_GEL_PAGE_MANAGER is not set
-# CONFIG_GEL_PARAMETER is not set
-# CONFIG_GEL_DATA_STRUCTURES is not set
-# CONFIG_GEL_TIMER is not set
-# CONFIG_GEL_WEARLEVELING is not set
-CONFIG_GEL_PACKET_MANAGER=y
-CONFIG_GEL_CONF_INCLUDE_PATH="main/config"
-# end of GEL
-
-#
-# I2C library
-#
-
-#
-# Temperature sensors
-#
-# CONFIG_I2C_DEVICES_SHT21 is not set
-# CONFIG_I2C_DEVICES_SHT3 is not set
-# end of Temperature sensors
-
-#
-# Eeproms
-#
-# CONFIG_I2C_DEVICES_EEPROM_24LC16 is not set
-# CONFIG_I2C_DEVICES_EEPROM_24LC1025 is not set
-# end of Eeproms
-
-#
-# Real time clocks
-#
-# CONFIG_I2C_DEVICES_RTC_PCF85063A is not set
-CONFIG_I2C_DEVICES_RTC_MCP7940=y
-# end of Real time clocks
-
-# CONFIG_I2C_DEVICES_MCP4018 is not set
-# CONFIG_I2C_DEVICES_LTR559ALS is not set
-
-#
-# Ports
-#
-# CONFIG_I2C_DEVICES_PIC_BITBANG_PORT is not set
-CONFIG_I2C_DEVICES_ESP_IDF_PORT=y
-# end of Ports
-# end of I2C library
 # end of Component config
 
 # Deprecated options for backward compatibility

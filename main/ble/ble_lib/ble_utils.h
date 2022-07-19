@@ -9,7 +9,6 @@
 #include "esp_gatt_common_api.h"
 #include "esp_gatts_api.h"
 
-#include "gel/abstract_state_machine/common.h"
 #define MAX_STR_LEN 60
 
 #define GATTS_DEMO_CHAR_VAL_LEN_MAX 0x40
@@ -93,13 +92,13 @@ static uint16_t inline generate_uuid(uint16_t base, uint16_t index) {
   return (base & 0xff00) | (index & 0x00ff);
 }
 
-void allocate_conf_dynamic(machine_parameters_t *mp, char names[][MAX_STR_LEN],
+void allocate_conf_dynamic(uint16_t size, char names[][MAX_STR_LEN],
                            uint8_t p_srvc_inst_id, uint16_t *uuid_ptr);
 
-void allocate_status_dynamic(machine_parameters_t *mp, char names[][MAX_STR_LEN],
+void allocate_status_dynamic(uint16_t size, char names[][MAX_STR_LEN],
                              uint8_t p_srvc_inst_id, uint16_t *uuid_ptr);
 
-void allocate_main_dynamic(machine_parameters_t *mp, uint16_t UUIDs[][2], uint16_t UUIDs_len,
+void allocate_main_dynamic(uint16_t UUIDs[][2], uint16_t UUIDs_len,
                            uint8_t srvc_inst_id);
 
 void gatts_profile_conf_event_handler(esp_gatts_cb_event_t event,

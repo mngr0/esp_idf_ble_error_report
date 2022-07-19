@@ -71,10 +71,9 @@ void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if,
   } while (0);
 }
 
-#define DEVICE_NUM 1
+#define SIZE_SERVICE_0 1
 
-void BLE_init(machine_parameters_t *mp, 
-  machine_parameters_t *mp_remote,
+void BLE_init(uint16_t size1, uint16_t size2, 
   char status_names[][MAX_STR_LEN],
   char conf_names[][MAX_STR_LEN]) {
   esp_err_t ret;
@@ -110,11 +109,11 @@ void BLE_init(machine_parameters_t *mp,
     return;
   }
 
-  uint16_t UUIDs_array[DEVICE_NUM][2];//={{12,14}};
+  uint16_t UUIDs_array[SIZE_SERVICE_0][2];//={{12,14}};
 
-  allocate_conf_dynamic(mp_remote, conf_names, PROFILE_CONF, &UUIDs_array[0][0]);
-  allocate_status_dynamic(mp_remote, status_names, PROFILE_STATUS, &UUIDs_array[0][1]);
-  allocate_main_dynamic(mp, UUIDs_array, DEVICE_NUM, PROFILE_MAIN);
+  allocate_conf_dynamic(size1, conf_names, PROFILE_CONF, &UUIDs_array[0][0]);
+  allocate_status_dynamic(size2, status_names, PROFILE_STATUS, &UUIDs_array[0][1]);
+  allocate_main_dynamic( UUIDs_array, SIZE_SERVICE_0, PROFILE_MAIN);
 
   ESP_LOGI(TAG, "ALLOCATION DONE");
 
